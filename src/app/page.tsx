@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <main className="flex-grow">
-        <section className="relative">
+        <section className="relative pb-20">
           <div className="relative h-[70vh] min-h-[500px] flex items-center justify-center text-center text-white">
             <Image
               src="https://placehold.co/1920x1080.png"
@@ -35,7 +35,7 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          <div className="relative container mx-auto px-4 -mt-24 z-20">
+          <div className="relative container mx-auto px-4 -mt-16 z-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
@@ -69,7 +69,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="pt-20 pb-20">
+        <section className="pt-8 pb-20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
               Your Chronic Care Journey, Simplified
