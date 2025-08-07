@@ -120,7 +120,7 @@ export default function ChronicCarePage() {
                                 </div>
                                 <h3 className="font-headline text-2xl font-semibold mb-2">{category.name}</h3>
                                 <p className="text-muted-foreground flex-grow">{category.description}</p>
-                                <span className={cn(Button.styles, "mt-4 text-primary group-hover:underline")}>
+                                <span className={cn("mt-4 text-primary group-hover:underline")}>
                                     Learn More
                                 </span>
                             </div>
