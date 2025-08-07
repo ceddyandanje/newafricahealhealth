@@ -12,16 +12,14 @@ export default function Home() {
       <main className="flex-grow">
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
-            <div className="absolute inset-0">
-                <Image
-                src="https://placehold.co/1920x1080.png"
-                alt="Healthcare professional wearing a mask"
-                fill
-                className="object-cover object-center"
-                data-ai-hint="healthcare professional mask"
-                priority
-                />
-            </div>
+            <Image
+            src="https://placehold.co/1920x1080.png"
+            alt="Healthcare professional wearing a mask"
+            fill
+            className="object-cover object-center"
+            data-ai-hint="healthcare professional mask"
+            priority
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
             <div className="absolute inset-0 flex items-center justify-center text-center text-white">
                 <div className="relative z-10 p-4">
@@ -191,11 +189,6 @@ export default function Home() {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-              <div className="relative aspect-video">
-                <div className="bg-muted rounded-2xl h-full w-full flex items-center justify-center">
-                  <PlayCircle className="w-24 h-24 text-muted-foreground/50 hover:text-muted-foreground transition-colors cursor-pointer" />
-                </div>
-              </div>
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">
                   Why We Do What We Do
@@ -204,13 +197,25 @@ export default function Home() {
                   We do this work because we want people to know that there are many tools available for them to feel better. We want people to feel accepted, supported and to guide them when needed. We support people in every state they are in and guide them at their own pace. We want to offer a place where you feel peace, love and get the attention you deserve.
                 </p>
               </div>
+              <div className="relative aspect-video">
+                <Image
+                  src="https://placehold.co/1920x1080.png"
+                  alt="Doctor with patient in a hospital setting"
+                  fill
+                  className="object-cover rounded-2xl"
+                  data-ai-hint="doctor patient hospital"
+                />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <PlayCircle className="w-24 h-24 text-white/70 hover:text-white transition-colors cursor-pointer" />
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
               <div className="space-y-6">
                 <h2 className="text-3xl md:text-4xl font-bold font-headline">Your Health Matters</h2>
                 <h3 className="text-xl text-muted-foreground">Making Quality Healthcare Accessible for All.</h3>
@@ -258,7 +263,7 @@ export default function Home() {
               </div>
               <div className="relative h-[500px]">
                 <Image src="https://placehold.co/400x600.png" alt="Doctor with patient" width={320} height={480} className="absolute top-0 left-0 rounded-2xl object-cover z-10" data-ai-hint="doctor patient" />
-                <Image src="https://placehold.co/400x300.png" alt="Stethoscope" width={240} height={180} className="absolute top-10 right-0 rounded-2xl object-cover" data-ai-hint="stethoscope medical" />
+                <Image src="https://placehold.co/600x400.png" alt="Happy doctor with patient" width={240} height={180} className="absolute top-10 right-0 rounded-2xl object-cover" data-ai-hint="doctor patient" />
                 <Image src="https://placehold.co/400x300.png" alt="Happy person" width={280} height={210} className="absolute bottom-20 left-1/4 rounded-2xl object-cover z-20" data-ai-hint="happy person" />
                 <Image src="https://placehold.co/400x400.png" alt="Yoga pose" width={200} height={200} className="absolute bottom-0 right-5 rounded-2xl object-cover z-10" data-ai-hint="yoga lifestyle" />
               </div>
