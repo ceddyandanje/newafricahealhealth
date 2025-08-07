@@ -11,6 +11,7 @@ import Notifications from "@/components/admin/notifications";
 import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 const sidebarNavItems = [
     { href: "/admin", icon: Home, label: "Dashboard" },
