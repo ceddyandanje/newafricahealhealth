@@ -4,8 +4,7 @@
 import { useState } from 'react';
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Wind, Droplets, UploadCloud, ShoppingCart, Truck, Bone, Brain, Filter, Heart } from "lucide-react";
-import Link from "next/link";
+import { ArrowRight, UploadCloud, ShoppingCart, Truck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import GetStartedButton from "@/components/health/get-started-button";
 import { chronicCareCategories, ChronicCareCategory } from '@/lib/chronicCareCategories';
@@ -21,16 +20,16 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ChronicCarePage() {
     const [selectedCategory, setSelectedCategory] = useState<ChronicCareCategory | null>(null);
-    // In a real app, this would come from a real auth hook/context
-    const [isLoggedIn, setIsLoggedIn] = useState(false); 
+    const { user } = useAuth();
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
     const router = useRouter();
 
     const handleCategoryClick = (category: ChronicCareCategory) => {
-        if (isLoggedIn) {
+        if (user) {
             setSelectedCategory(category);
         } else {
             setShowLoginPrompt(true);

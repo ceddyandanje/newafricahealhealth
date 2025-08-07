@@ -1,13 +1,15 @@
 
+
 "use client"
 
 import Link from "next/link"
-import { Menu, ShoppingCart, User } from "lucide-react"
+import { Menu, ShoppingCart, User, LogIn } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useCart } from "@/hooks/use-cart"
+import { useAuth } from "@/hooks/use-auth"
 import { Badge } from "@/components/ui/badge"
 import ClientHeaderItems from "./client-header-items"
 import ThemeToggleButton from "./theme-toggle-button"
@@ -19,6 +21,7 @@ const navLinks = [
 
 export default function Header() {
   const { items } = useCart()
+  const { user } = useAuth()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   
   return (
@@ -75,7 +78,7 @@ export default function Header() {
                     </Button>
                      <Button variant="ghost" size="icon" asChild>
                         <Link href="/profile">
-                            <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                            {user ? <User className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <LogIn className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
                         </Link>
                     </Button>
                     <ThemeToggleButton />
@@ -113,7 +116,7 @@ export default function Header() {
               </Button>
                <Button variant="ghost" size="icon" asChild>
                   <Link href="/profile">
-                      <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                     {user ? <User className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <LogIn className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
                   </Link>
               </Button>
             </div>

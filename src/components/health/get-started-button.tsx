@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -15,15 +16,15 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { ArrowRight } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function GetStartedButton() {
-  // In a real app, this would come from a real auth hook/context
-  const [isLoggedIn, setIsLoggedIn] = useState(false); 
+  const { user } = useAuth();
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
   const router = useRouter();
 
   const handleGetStartedClick = () => {
-    if (isLoggedIn) {
+    if (user) {
       router.push('/upload-prescription');
     } else {
       setShowLoginPrompt(true);
@@ -32,7 +33,7 @@ export default function GetStartedButton() {
 
   const handleLoginRedirect = () => {
     setShowLoginPrompt(false);
-    router.push('/profile'); // Assuming /profile is the login/profile page
+    router.push('/profile');
   };
 
   return (

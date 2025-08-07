@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/hooks/use-cart';
 import AiChatWidget from '@/components/health/ai-chat-widget';
 import { EmergencyRequestWidget } from '@/components/health/emergency-request-widget';
+import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
   title: 'Africa Heal Health',
@@ -32,16 +33,18 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-          <CartProvider>
-            <div className="min-h-screen flex flex-col">
-              <Header />
-              <main className="flex-grow">{children}</main>
-              <Footer />
-            </div>
-            <Toaster />
-            <AiChatWidget />
-            <EmergencyRequestWidget />
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <div className="min-h-screen flex flex-col">
+                <Header />
+                <main className="flex-grow">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+              <AiChatWidget />
+              <EmergencyRequestWidget />
+            </CartProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
