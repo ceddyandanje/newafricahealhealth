@@ -15,11 +15,14 @@ import { Badge } from "@/components/ui/badge"
 const navLinks = [
   { href: "/products", label: "Products" },
   { href: "/services", label: "Services" },
-  { href: "/medical-tourism", label: "Medical Tourism" },
-  { href: "/organ-transplants", label: "Organ Transplants" },
 ]
 
-const categories = ["Chronic Care", "Emergency Response", "Medical Tourism", "Organ Transplants"];
+const categoryLinks = [
+    { href: "/products?category=Chronic+Care", label: "Chronic Care"},
+    { href: "/products?category=Emergency+Response", label: "Emergency Response"},
+    { href: "/medical-tourism", label: "Medical Tourism" },
+    { href: "/organ-transplants", label: "Organ Transplants" },
+]
 
 
 export default function Header() {
@@ -74,9 +77,9 @@ export default function Header() {
                       Categories <ChevronDown className="h-4 w-4 ml-1" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      {categories.map((cat) => (
-                        <DropdownMenuItem key={cat} asChild>
-                          <Link href={`/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
+                      {categoryLinks.map((link) => (
+                        <DropdownMenuItem key={link.href} asChild>
+                          <Link href={link.href}>{link.label}</Link>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -128,9 +131,9 @@ export default function Header() {
                     Categories <ChevronDown className="h-4 w-4 ml-1" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    {categories.map((cat) => (
-                      <DropdownMenuItem key={cat} asChild>
-                        <Link href={`/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
+                    {categoryLinks.map((link) => (
+                      <DropdownMenuItem key={link.href} asChild>
+                        <Link href={link.href}>{link.label}</Link>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
