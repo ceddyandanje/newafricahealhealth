@@ -1,9 +1,8 @@
 
-
 "use client"
 
 import Link from "next/link"
-import { Menu, ShoppingCart, User, LogIn, ShieldCheck, LogOut } from "lucide-react"
+import { Menu, ShoppingCart, User, LogIn, ShieldCheck, LogOut, Settings } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -60,6 +59,13 @@ export default function Header() {
                             </Link>
                          </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem asChild>
+                        <Link href="/profile">
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Profile Settings</span>
+                        </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Logout</span>
@@ -125,7 +131,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2 mr-auto">
             <Avatar className="h-8 w-8">
               <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
             </Avatar>
@@ -133,7 +139,7 @@ export default function Header() {
         </Link>
         
         {/* Desktop Nav */}
-        <nav className="hidden md:flex flex-1 items-center justify-end space-x-6 text-sm font-medium">
+        <nav className="hidden md:flex items-center justify-end space-x-6 text-sm font-medium">
           {navLinks.map((link) => (
             <Link
               key={link.href}
