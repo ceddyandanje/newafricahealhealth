@@ -1,4 +1,5 @@
 
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Heart, CheckCircle2, LifeBuoy } from "lucide-react";
@@ -8,7 +9,7 @@ export default function OrganTransplantsPage() {
       <div className="bg-background">
          <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-                src="https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src="https://placehold.co/1920x800.png"
                 alt="Surgical team performing a procedure"
                 fill
                 className="object-cover"

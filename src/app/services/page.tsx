@@ -6,14 +6,25 @@ import { CheckCircle2, Stethoscope, HeartPulse, Brain, Plane, LifeBuoy } from "l
 export default function ServicesPage() {
     return (
       <div className="bg-background">
+        <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
+            <Image
+                src="https://images.unsplash.com/photo-1585421514738-01798e348b17?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                alt="Surgical team performing a procedure"
+                fill
+                className="object-cover"
+                data-ai-hint="surgery operation"
+                priority
+            />
+            <div className="absolute inset-0 bg-black/60" />
+            <div className="relative z-10 p-4">
+                <h1 className="text-4xl md:text-6xl font-bold font-headline">Our Services</h1>
+                <p className="text-lg md:text-xl max-w-3xl mx-auto mt-4">
+                  Comprehensive healthcare solutions designed to meet your needs, from chronic care to specialized medical services.
+                </p>
+            </div>
+        </section>
+
         <div className="container mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold font-headline text-primary">Our Services</h1>
-            <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-              Comprehensive healthcare solutions designed to meet your needs, from chronic care to specialized medical services.
-            </p>
-          </div>
-  
           <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
             <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                  <Image
