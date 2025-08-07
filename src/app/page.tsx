@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart } from "lucide-react"
+import Typewriter from "@/components/effects/typewriter"
 
 export default function Home() {
 
@@ -19,9 +20,12 @@ export default function Home() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
           <div className="relative z-10 p-4">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-              Reliable Chronic Care & Emergency Response
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">
+              Reliable Medical Solutions
             </h1>
+            <div className="text-2xl md:text-4xl font-semibold text-primary mb-4 h-12">
+                <Typewriter words={["Chronic Care", "Emergency Response", "Medical Tourism", "Organ Transplants"]} />
+            </div>
             <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
               Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
             </p>
@@ -31,31 +35,31 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="bg-transparent -mt-20 relative z-20">
+        <section>
           <div className="container mx-auto px-4 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="bg-blue-100/30 dark:bg-blue-900/20 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
                   <User className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-foreground">Log In or Create Account</h3>
                 <p className="text-sm text-muted-foreground mt-1">Access your information anytime, anywhere.</p>
               </div>
-              <div className="bg-green-100/30 dark:bg-green-900/20 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-green-100/30 dark:bg-green-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-green-200 text-green-700 rounded-full mb-4">
                   <HeartPulse className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-foreground">Find Health & Drug Plans</h3>
                 <p className="text-sm text-muted-foreground mt-1">Find & compare products in your area.</p>
               </div>
-              <div className="bg-red-100/30 dark:bg-red-900/20 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-red-100/30 dark:bg-red-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-red-200 text-red-700 rounded-full mb-4">
                   <Stethoscope className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-foreground">Emergency Services</h3>
                 <p className="text-sm text-muted-foreground mt-1">Medevac air and ground ambulance services in partnership with Phoenix Aviation.</p>
               </div>
-              <div className="bg-teal-100/30 dark:bg-teal-900/20 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-teal-100/30 dark:bg-teal-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-teal-200 text-teal-700 rounded-full mb-4">
                   <Phone className="h-8 w-8" />
                 </div>
@@ -105,8 +109,8 @@ export default function Home() {
                 <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-16">
                     Access world-class healthcare solutions, including medical tourism, critical organ transplants, and emergency response, coordinated by our expert team.
                 </p>
-                <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="glassmorphic p-8 rounded-2xl shadow-lg text-left flex flex-col">
+                <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="bg-green-100/20 dark:bg-green-900/30 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-left flex flex-col border border-gray-200/50 dark:border-gray-700/50">
                         <div className="flex items-center mb-4">
                             <div className="inline-block p-3 bg-green-100 text-green-700 rounded-full mr-4">
                                 <Plane className="h-6 w-6" />
@@ -120,7 +124,7 @@ export default function Home() {
                             Learn More <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </div>
-                    <div className="glassmorphic p-8 rounded-2xl shadow-lg text-left flex flex-col">
+                    <div className="bg-green-100/20 dark:bg-green-900/30 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-left flex flex-col border border-gray-200/50 dark:border-gray-700/50">
                         <div className="flex items-center mb-4">
                             <div className="inline-block p-3 bg-green-100 text-green-700 rounded-full mr-4">
                                 <Heart className="h-6 w-6" />
