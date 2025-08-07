@@ -18,10 +18,10 @@ const navLinks = [
 ]
 
 const categoryLinks = [
-    { href: "/products?category=Cardiovascular", label: "Cardiovascular"},
-    { href: "/products?category=Respiratory", label: "Respiratory"},
-    { href: "/products?category=Diabetes+Care", label: "Diabetes Care" },
-    { href: "/products?category=Emergency", label: "Emergency" },
+    { href: "/products?category=Chronic+Care", label: "Chronic Care"},
+    { href: "/products?category=Emergency+Response", label: "Emergency Response" },
+    { href: "/products?category=Medical+Tourism", label: "Medical Tourism"},
+    { href: "/products?category=Organ+Transplants", label: "Organ Transplants" },
 ]
 
 
@@ -73,10 +73,8 @@ export default function Header() {
                   </Link>
                 ))}
                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
-                        Categories <ChevronDown className="h-4 w-4 ml-1" />
-                      </button>
+                    <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                      Categories <ChevronDown className="h-4 w-4 ml-1" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       {categoryLinks.map((link) => (
@@ -129,10 +127,8 @@ export default function Header() {
                 </Link>
               ))}
               <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
-                      Categories <ChevronDown className="h-4 w-4 ml-1" />
-                    </button>
+                  <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
+                    Categories <ChevronDown className="h-4 w-4 ml-1" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     {categoryLinks.map((link) => (
