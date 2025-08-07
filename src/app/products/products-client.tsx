@@ -88,7 +88,8 @@ export default function ProductsClient({
 
   // State for filters
   const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-  const [priceRange, setPriceRange] = useState<[number]>([
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    0,
     parseInt(searchParams.get("price") || `${maxPrice}`),
   ]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
@@ -100,20 +101,23 @@ export default function ProductsClient({
   const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "featured");
   
   const debouncedSearch = useDebounce(searchTerm, 300);
+  const debouncedPrice = useDebounce(priceRange, 300);
 
   // Update URL when filters change
   useEffect(() => {
     startTransition(() => {
         const params = new URLSearchParams();
         if (debouncedSearch) params.set("search", debouncedSearch);
-        if (priceRange[0] < maxPrice) params.set("price", `${priceRange[0]}`);
+        if (debouncedPrice[0] > 0 || debouncedPrice[1] < maxPrice) {
+          params.set("price", `${debouncedPrice[0]}-${debouncedPrice[1]}`);
+        }
         selectedCategories.forEach((cat) => params.append("category", cat));
         selectedBrands.forEach((brand) => params.append("brand", brand));
         if (sortBy) params.set("sortBy", sortBy);
         
         router.replace(`${pathname}?${params.toString()}`);
     });
-  }, [debouncedSearch, priceRange, selectedCategories, selectedBrands, sortBy, router, pathname, maxPrice]);
+  }, [debouncedSearch, debouncedPrice, selectedCategories, selectedBrands, sortBy, router, pathname, maxPrice]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
@@ -131,33 +135,41 @@ export default function ProductsClient({
 
   // Filter products based on state
   const filteredProducts = useMemo(() => {
-    return initialProducts
-      .filter((p) => p.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
-      .filter((p) => p.price <= priceRange[0])
-      .filter(
-        (p) =>
-          selectedCategories.length === 0 || selectedCategories.includes(p.category)
-      )
-      .filter(
-        (p) => selectedBrands.length === 0 || selectedBrands.includes(p.brand)
-      )
-      .sort((a, b) => {
-        switch (sortBy) {
-          case "price-asc":
-            return a.price - b.price;
-          case "price-desc":
-            return b.price - a.price;
-          case "name-asc":
-            return a.name.localeCompare(b.name);
-          case "name-desc":
-            return b.name.localeCompare(a.name);
-          case "featured":
-            return (b.tags?.includes("featured") ? 1 : 0) - (a.tags?.includes("featured") ? 1 : 0);
-          default:
-            return 0;
-        }
-      });
-  }, [debouncedSearch, priceRange, selectedCategories, selectedBrands, sortBy, initialProducts]);
+    let products = initialProducts;
+    
+    const [minPrice, maxPrice] = debouncedPrice;
+  
+    if (debouncedSearch) {
+      products = products.filter((p) => p.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+    }
+  
+    products = products.filter((p) => p.price >= minPrice && p.price <= maxPrice);
+
+    if (selectedCategories.length > 0) {
+      products = products.filter((p) => selectedCategories.includes(p.category));
+    }
+  
+    if (selectedBrands.length > 0) {
+      products = products.filter((p) => selectedBrands.includes(p.brand));
+    }
+  
+    return products.sort((a, b) => {
+      switch (sortBy) {
+        case "price-asc":
+          return a.price - b.price;
+        case "price-desc":
+          return b.price - a.price;
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "featured":
+          return (b.tags?.includes("featured") ? 1 : 0) - (a.tags?.includes("featured") ? 1 : 0);
+        default:
+          return 0;
+      }
+    });
+  }, [debouncedSearch, debouncedPrice, selectedCategories, selectedBrands, sortBy, initialProducts]);
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -182,12 +194,13 @@ export default function ProductsClient({
               <h3 className="font-semibold mb-2">Price Range</h3>
               <Slider
                 value={priceRange}
-                onValueChange={(value) => setPriceRange(value as [number])}
+                onValueChange={(value) => setPriceRange(value as [number, number])}
                 max={maxPrice}
                 step={100}
+                minStepsBetweenThumbs={1}
               />
-              <p className="text-sm text-muted-foreground mt-2">
-                Up to: {formatPrice(priceRange[0])}
+              <p className="text-sm text-muted-foreground mt-2 text-center">
+                {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
               </p>
             </div>
 
@@ -261,7 +274,7 @@ export default function ProductsClient({
               </div>
             )}
             {filteredProducts.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
