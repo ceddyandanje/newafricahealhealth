@@ -2,9 +2,9 @@
 "use client"
 
 import Link from "next/link"
-import { Menu, ShoppingCart, User, LogOut, LayoutDashboard, UserCircle, Settings } from "lucide-react"
+import { Menu, ShoppingCart, User, LogOut, LayoutDashboard, UserCircle, Settings, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import ThemeToggleButton from "./theme-toggle-button"
@@ -13,11 +13,13 @@ import { useAuth } from "@/hooks/use-auth"
 import { Badge } from "../ui/badge"
 import { useEffect, useState } from "react"
 import { Skeleton } from "../ui/skeleton"
+import { chronicCareCategories } from "@/lib/chronicCareCategories"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
+import { cn } from "@/lib/utils"
 
 const navLinks = [
   { href: "/products", label: "Products" },
   { href: "/services", label: "Services" },
-  { href: "/chronic-care", label: "Chronic Care" },
   { href: "/wellness-blog", label: "Wellness Blog" },
 ]
 
@@ -85,6 +87,30 @@ function AuthButton() {
     )
 }
 
+function CategoriesDropdown() {
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium">
+                    Categories <ChevronDown className="ml-1 h-4 w-4" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+                <DropdownMenuItem asChild>
+                    <Link href="/chronic-care">All Chronic Care</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {chronicCareCategories.map(category => (
+                    <DropdownMenuItem key={category.id} asChild>
+                        <Link href={`/${category.id}`}>{category.name}</Link>
+                    </DropdownMenuItem>
+                ))}
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
+
+
 export default function Header() {
   const [isMounted, setIsMounted] = useState(false)
   const { items } = useCart()
@@ -98,24 +124,25 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
-        <Link href="/" className="flex items-center space-x-2">
+        <Link href="/" className="flex items-center space-x-2 mr-auto">
             <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
             </Avatar>
             <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
         </Link>
         
-        <div className="ml-auto flex items-center space-x-2">
-            <nav className="hidden md:flex items-center space-x-4">
+        <div className="hidden md:flex items-center space-x-2">
+            <nav className="flex items-center space-x-2">
                 {navLinks.map((link) => (
                     <Link
                     key={link.href}
                     href={link.href}
-                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium"
+                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium px-2 py-1"
                     >
                     {link.label}
                     </Link>
                 ))}
+                <CategoriesDropdown />
             </nav>
             <ThemeToggleButton />
             <Button variant="ghost" size="icon" asChild>
@@ -130,6 +157,16 @@ export default function Header() {
         </div>
             
         <div className="md:hidden flex items-center ml-2">
+            <ThemeToggleButton />
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/cart" aria-label="Open cart" className="relative">
+                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                {isMounted && totalItems > 0 && (
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+                )}
+                </Link>
+            </Button>
+            <AuthButton />
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -144,16 +181,33 @@ export default function Header() {
                         </Avatar>
                         <span className="font-bold text-gray-800 dark:text-white">Africa Heal Health</span>
                     </Link>
-                    <nav className="flex flex-col space-y-4 flex-grow">
-                    {navLinks.map((link) => (
-                        <Link
-                        key={link.href}
-                        href={link.href}
-                        className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
-                        >
-                        {link.label}
-                        </Link>
-                    ))}
+                    <nav className="flex flex-col space-y-2 flex-grow text-lg">
+                        {navLinks.map((link) => (
+                            <SheetClose asChild key={link.href}>
+                                <Link
+                                    href={link.href}
+                                    className="py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
+                                >
+                                    {link.label}
+                                </Link>
+                            </SheetClose>
+                        ))}
+                        <Collapsible>
+                            <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                                <span>Categories</span>
+                                <ChevronDown className="h-5 w-5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
+                            </CollapsibleTrigger>
+                            <CollapsibleContent className="pl-4">
+                                <SheetClose asChild>
+                                    <Link href="/chronic-care" className="block py-2 text-muted-foreground hover:text-foreground">All Chronic Care</Link>
+                                </SheetClose>
+                                {chronicCareCategories.map(category => (
+                                    <SheetClose asChild key={category.id}>
+                                        <Link href={`/${category.id}`} className="block py-2 text-muted-foreground hover:text-foreground">{category.name}</Link>
+                                    </SheetClose>
+                                ))}
+                            </CollapsibleContent>
+                        </Collapsible>
                     </nav>
                 </SheetContent>
             </Sheet>
