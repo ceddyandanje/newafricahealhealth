@@ -271,11 +271,6 @@ export default function Home() {
                   <div className="col-span-1 relative">
                     <Image src="https://placehold.co/400x300.png" alt="Happy person" width={400} height={300} className="rounded-2xl object-cover w-full h-full" data-ai-hint="happy person" />
                   </div>
-                  <div className="absolute -bottom-8 -right-8 z-10">
-                    <div className="relative w-40 h-40">
-                      <Image src="https://placehold.co/200x200.png" alt="Woman doing yoga" width={200} height={200} className="rounded-2xl object-cover w-full h-full shadow-2xl" data-ai-hint="yoga wellness"/>
-                    </div>
-                  </div>
               </div>
             </div>
           </div>
