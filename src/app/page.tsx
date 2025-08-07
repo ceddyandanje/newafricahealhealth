@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -323,7 +323,7 @@ export default function Home() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
               <Link href="/products?category=Diabetes" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Pill className="h-10 w-10" />
                   </div>
@@ -331,7 +331,7 @@ export default function Home() {
                 </div>
               </Link>
               <Link href="/products?category=Cardiovascular" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Heart className="h-10 w-10" />
                   </div>
@@ -339,7 +339,7 @@ export default function Home() {
                 </div>
               </Link>
               <Link href="/products?category=Superfoods" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <AirVent className="h-10 w-10" />
                   </div>
@@ -347,13 +347,77 @@ export default function Home() {
                 </div>
               </Link>
               <Link href="/products?category=Skincare" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Brain className="h-10 w-10" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">Skincare</h3>
                 </div>
               </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Consultation Section */}
+        <section id="consultation" className="py-20 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">Book your free consultation today</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+              {/* Left Column: Steps */}
+              <div className="space-y-8">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold">1</div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Describe your issue or query</h3>
+                    <p className="text-muted-foreground">Write to us and tell us what your question or issue is.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold">2</div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">We'll recommend</h3>
+                    <p className="text-muted-foreground">We will 'hook you up' with the right practitioner and the right therapy that you need.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold">3</div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Your contact details</h3>
+                    <p className="text-muted-foreground">Leave us your number to contact you back.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Column: Form */}
+              <div className="glassmorphic p-8">
+                <form className="space-y-6">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">Name</label>
+                    <Input type="text" id="name" name="name" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">Email</label>
+                      <Input type="email" id="email" name="email" />
+                    </div>
+                    <div>
+                      <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">Phone</label>
+                      <Input type="tel" id="phone" name="phone" />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">Message</label>
+                    <Textarea id="message" name="message" rows={4} />
+                  </div>
+                  <div>
+                    <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90">
+                      BOOK YOUR SESSION
+                    </Button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </section>
