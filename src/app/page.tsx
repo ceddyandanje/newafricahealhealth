@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 
 export default function Home() {
@@ -139,6 +139,48 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+        </section>
+        
+        <section className="py-20 bg-muted/20">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-12 text-foreground">
+              Shop by Health Condition
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+              <Link href="/products?category=diabetes-care" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <Pill className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Diabetes Care</h3>
+                </div>
+              </Link>
+              <Link href="/products?category=heart-health" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <Heart className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Heart Health</h3>
+                </div>
+              </Link>
+              <Link href="/products?category=respiratory" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <AirVent className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Respiratory</h3>
+                </div>
+              </Link>
+              <Link href="/products?category=mental-health" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <Brain className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Mental Health</h3>
+                </div>
+              </Link>
+            </div>
+          </div>
         </section>
       </main>
     </div>
