@@ -74,7 +74,6 @@ export default function Home() {
               Your health journey in three simple steps.
             </p>
             <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 items-start">
-              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 dark:bg-gray-700 hidden md:block" />
               <div className="relative flex flex-col items-center">
                 <div className="w-16 h-16 rounded-full bg-[#28a745] text-white flex items-center justify-center text-2xl font-bold mb-4 z-10">1</div>
                 <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Upload Prescription</h3>
