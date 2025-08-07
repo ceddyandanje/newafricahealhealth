@@ -1,89 +1,66 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { products } from "@/lib/products"
-import { Product } from "@/lib/types"
-import { ArrowRight, Zap, Bot } from "lucide-react"
-import AddToCartButton from "@/components/products/add-to-cart-button"
-
-const ProductCard = ({ product }: { product: Product }) => (
-  <div className="glassmorphic p-4 flex flex-col h-full group">
-    <div className="relative w-full aspect-square rounded-lg overflow-hidden mb-4">
-      <Image
-        src={product.image}
-        alt={product.name}
-        fill
-        className="object-cover group-hover:scale-105 transition-transform duration-300"
-        data-ai-hint={product.dataAiHint}
-      />
-    </div>
-    <div className="flex flex-col flex-grow">
-      <h3 className="font-headline font-semibold text-lg">{product.name}</h3>
-      <p className="text-muted-foreground text-sm flex-grow mb-4">{product.description}</p>
-      <div className="flex justify-between items-center mt-auto">
-        <p className="font-semibold text-lg">${product.price.toFixed(2)}</p>
-        <AddToCartButton product={product} />
-      </div>
-    </div>
-  </div>
-)
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight } from "lucide-react"
 
 export default function Home() {
-  const featuredProducts = products.filter(p => p.featured)
-
   return (
-    <div className="container mx-auto px-4 py-12">
-      {/* Hero Section */}
-      <section className="text-center py-16 md:py-24">
-        <div className="glassmorphic p-8 md:p-12">
-          <h1 className="font-headline text-4xl md:text-6xl font-bold tracking-tight mb-4">
-            Embrace African Wellness
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-            Discover traditional remedies and natural products to heal your body and soul.
-          </p>
-          <Button asChild size="lg">
-            <Link href="/products">Shop All Products <ArrowRight className="ml-2" /></Link>
-          </Button>
-        </div>
-      </section>
-
-      {/* Featured Products */}
-      <section className="py-16">
-        <h2 className="font-headline text-3xl font-bold text-center mb-10">Featured Products</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      </section>
-
-      {/* Special Offers & AI Assistant */}
-      <section className="py-16 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glassmorphic p-8 flex flex-col items-center text-center">
-          <div className="p-3 bg-primary/20 rounded-full mb-4">
-            <Zap className="h-8 w-8 text-primary" />
+    <div className="flex flex-col min-h-screen">
+      <main className="flex-grow">
+        <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center text-center text-white">
+          <Image
+            src="https://placehold.co/1920x1080.png"
+            alt="Doctor giving a thumbs up"
+            fill
+            className="object-cover object-top"
+            data-ai-hint="doctor thumbs up"
+          />
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative z-10 p-4">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
+              Reliable Chronic Care & Emergency Response
+            </h1>
+            <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
+              Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
+            </p>
+            <Button size="lg" className="bg-green-500 hover:bg-green-600 text-white">
+              Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
-          <h3 className="font-headline text-2xl font-bold mb-2">Subscription Benefits</h3>
-          <p className="text-muted-foreground mb-6 max-w-md">
-            Subscribe and save! Get exclusive discounts, early access to new products, and free shipping on every order.
-          </p>
-          <Button variant="secondary">Learn More</Button>
-        </div>
+        </section>
 
-        <div className="glassmorphic p-8 flex flex-col items-center text-center">
-          <div className="p-3 bg-primary/20 rounded-full mb-4">
-            <Bot className="h-8 w-8 text-primary" />
+        <section className="bg-background -mt-24 relative z-20">
+          <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div className="bg-muted p-6 rounded-lg text-center">
+                <div className="inline-block p-4 bg-blue-100 text-blue-600 rounded-full mb-4">
+                  <User className="h-8 w-8" />
+                </div>
+                <h3 className="font-semibold text-lg">Log In or Create Account</h3>
+              </div>
+              <div className="bg-muted p-6 rounded-lg text-center">
+                <div className="inline-block p-4 bg-green-100 text-green-600 rounded-full mb-4">
+                  <HeartPulse className="h-8 w-8" />
+                </div>
+                <h3 className="font-semibold text-lg">Find Health & Drug Plans</h3>
+              </div>
+              <div className="bg-muted p-6 rounded-lg text-center">
+                <div className="inline-block p-4 bg-red-100 text-red-600 rounded-full mb-4">
+                  <Stethoscope className="h-8 w-8" />
+                </div>
+                <h3 className="font-semibold text-lg">Emergency Services</h3>
+              </div>
+              <div className="bg-muted p-6 rounded-lg text-center">
+                <div className="inline-block p-4 bg-teal-100 text-teal-600 rounded-full mb-4">
+                  <Phone className="h-8 w-8" />
+                </div>
+                <h3 className="font-semibold text-lg">Talk to Someone</h3>
+              </div>
+            </div>
           </div>
-          <h3 className="font-headline text-2xl font-bold mb-2">Need Health Advice?</h3>
-          <p className="text-muted-foreground mb-6 max-w-md">
-            Our AI Health Assistant can answer your questions and suggest products tailored to your needs.
-          </p>
-          <Button asChild>
-            <Link href="/health-assistant">Ask our AI Assistant</Link>
-          </Button>
-        </div>
-      </section>
+        </section>
+
+      </main>
     </div>
   )
 }

@@ -1,12 +1,14 @@
 import Link from "next/link"
-import { HeartPulse } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function Footer() {
   return (
     <footer className="bg-muted/40">
       <div className="container py-8 flex flex-col md:flex-row items-center justify-between">
         <div className="flex items-center space-x-2 mb-4 md:mb-0">
-          <HeartPulse className="h-6 w-6 text-primary" />
+          <Avatar className="h-8 w-8">
+            <AvatarFallback>AHH</AvatarFallback>
+          </Avatar>
           <span className="font-bold font-headline">Africa Heal Health</span>
         </div>
         <p className="text-sm text-muted-foreground">
