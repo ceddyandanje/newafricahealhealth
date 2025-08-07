@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, P
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import Notifications from "@/components/admin/notifications";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 const summaryData = [
     { title: "Patients", value: "1,421", icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
@@ -65,11 +68,27 @@ const sidebarNavItems = [
 
 export default function AdminDashboardPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [isClient, setIsClient] = useState(false)
+    const [isClient, setIsClient] = useState(false);
+    const { user, isAdmin, isLoading } = useAuth();
+    const router = useRouter();
 
     useEffect(() => {
         setIsClient(true)
     }, [])
+
+    useEffect(() => {
+        if (!isLoading && !isAdmin) {
+          router.push("/login");
+        }
+    }, [user, isAdmin, isLoading, router]);
+
+    if (isLoading || !isAdmin) {
+        return (
+          <div className="flex h-screen w-full items-center justify-center bg-background">
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+          </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-background text-foreground flex">
@@ -123,12 +142,12 @@ export default function AdminDashboardPage() {
                         <Separator orientation="vertical" className="h-8"/>
                         <div className="flex items-center gap-2">
                             <Avatar>
-                                <AvatarImage src="https://i.pravatar.cc/150?u=admin" />
-                                <AvatarFallback>JD</AvatarFallback>
+                                <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} />
+                                <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div>
-                                <p className="font-semibold text-sm">John Doe</p>
-                                <p className="text-xs text-muted-foreground">ADMIN</p>
+                                <p className="font-semibold text-sm">{user.name}</p>
+                                <p className="text-xs text-muted-foreground uppercase">{user.role}</p>
                             </div>
                         </div>
                     </div>
