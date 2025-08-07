@@ -1,6 +1,6 @@
 
 import { 
-    Heart, Bandaid, Activity, ShieldQuestion, Stethoscope, Dna, Leaf, Bed, User, Brain, Syringe, Baby, Eye, Bone, Ear, Beaker, CircleUser, ShieldPlus, Cog, Star, Wind, HeartPulse 
+    Heart, Bandage, Activity, ShieldQuestion, Stethoscope, Dna, Leaf, Bed, User, Brain, Syringe, Baby, Eye, Bone, Ear, Beaker, CircleUser, ShieldPlus, Cog, Star, Wind, HeartPulse 
 } from 'lucide-react';
 
 export type ServiceCategory = {
@@ -14,7 +14,7 @@ export const serviceCategories: ServiceCategory[] = [
     { id: 'anesthesiology', name: 'Anesthesiology', icon: Syringe },
     { id: 'cardiology', name: 'Cardiology', icon: Heart },
     { id: 'colon-rectal-surgery', name: 'Colon and Rectal Surgery', icon: Stethoscope }, // Using Stethoscope as a generic surgery icon
-    { id: 'dermatology', name: 'Dermatology', icon: Bandaid },
+    { id: 'dermatology', name: 'Dermatology', icon: Bandage },
     { id: 'emergency-medicine', name: 'Emergency Medicine', icon: HeartPulse },
     { id: 'family-medicine', name: 'Family Medicine', icon: User },
     { id: 'forensic-pathology', name: 'Forensic Pathology', icon: Beaker },
@@ -38,4 +38,3 @@ export const serviceCategories: ServiceCategory[] = [
     { id: 'radiology', name: 'Radiology', icon: Wind }, // Using Wind to represent rays/scans
     { id: 'rheumatology', name: 'Rheumatology', icon: Bone },
 ];
-
