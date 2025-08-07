@@ -12,10 +12,10 @@ export default function Home() {
         <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center text-center text-white">
           <Image
             src="https://placehold.co/1920x1080.png"
-            alt="A doctor smiling"
+            alt="A doctor giving a thumbs up"
             fill
             className="object-cover object-center"
-            data-ai-hint="doctor smiling"
+            data-ai-hint="doctor thumbs-up"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
