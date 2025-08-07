@@ -1,3 +1,4 @@
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -186,17 +187,17 @@ export default function Home() {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="relative aspect-video rounded-2xl overflow-hidden glassmorphic flex items-center justify-center">
-                <Image
-                  src="https://placehold.co/1920x1080.png"
-                  alt="Company mission video placeholder"
-                  fill
-                  className="object-cover"
-                  data-ai-hint="company mission video"
-                />
-                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                  <PlayCircle className="w-24 h-24 text-white/80 hover:text-white transition-colors cursor-pointer" />
-                </div>
+              <div className="relative aspect-video rounded-2xl overflow-hidden group">
+                  <Image
+                      src="https://placehold.co/1920x1080.png"
+                      alt="healthcare professional showing compassion"
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      data-ai-hint="compassionate healthcare professional"
+                  />
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <PlayCircle className="w-24 h-24 text-white/80 hover:text-white transition-colors cursor-pointer" />
+                  </div>
               </div>
               <div>
                 <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">
@@ -213,7 +214,3 @@ export default function Home() {
     </div>
   )
 }
-
-    
-
-    
