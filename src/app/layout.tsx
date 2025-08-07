@@ -2,8 +2,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/layout/theme-provider';
-import Header from '@/components/layout/header';
-import Footer from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/hooks/use-cart';
 import { AuthProvider } from '@/hooks/use-auth';
@@ -30,16 +28,14 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="dark"
             enableSystem
             disableTransitionOnChange
         >
           <AuthProvider>
             <CartProvider>
               <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-grow">{children}</main>
-                <Footer />
+                {children}
               </div>
               <Toaster />
               <AiChatWidget />
