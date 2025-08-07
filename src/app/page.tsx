@@ -358,68 +358,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Consultation Section */}
-        <section id="consultation" className="py-12 bg-background scroll-mt-20">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">
-              Book Your Free Consultation Today
-            </h2>
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-12">
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-bold">1</div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">Describe Your Issue</h3>
-                    <p className="text-muted-foreground">Tell us about your health concern or question.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-bold">2</div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">We'll Recommend a Plan</h3>
-                    <p className="text-muted-foreground">We will connect you with the right practitioner and therapy for your needs.</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-6">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-bold">3</div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">Get Connected</h3>
-                    <p className="text-muted-foreground">Leave your details, and we'll contact you to schedule your session.</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="glassmorphic p-8">
-                <form action="#" className="space-y-6">
-                  <div className="space-y-2">
-                    <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Name</label>
-                    <input id="name" name="name" type="text" placeholder="Name" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
-                      <input id="email" name="email" type="email" placeholder="Email" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="phone" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Phone</label>
-                      <input id="phone" name="phone" type="tel" placeholder="Phone" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="message" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Message</label>
-                    <textarea id="message" name="message" placeholder="Message" rows={5} required className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"></textarea>
-                  </div>
-                  <div>
-                    <Button type="submit" size="lg" className="w-full">
-                      Book Your Session
-                    </Button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </section>
-
       </main>
     </div>
   )
