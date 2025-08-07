@@ -2,7 +2,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle, ShieldCheck, CheckCircle2 } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle, ShieldCheck, CheckCircle2, RefreshCw, Sparkles, Truck, Video, ClipboardList, BookText } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 
 export default function Home() {
@@ -189,26 +189,26 @@ export default function Home() {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-              <div className="relative aspect-video">
-                <Image
-                  src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2N0b3J8ZW58MHx8fHwxNzU0NTYyMTQwfDA&ixlib=rb-4.1.0&q=80&w=1080"
-                  alt="Doctor with patient in a hospital setting"
-                  fill
-                  className="object-cover rounded-2xl"
-                  data-ai-hint="doctor patient hospital"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <PlayCircle className="w-24 h-24 text-white/70 hover:text-white transition-colors cursor-pointer" />
+                <div className="relative aspect-video">
+                    <Image
+                    src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2N0b3J8ZW58MHx8fHwxNzU0NTYyMTQwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+                    alt="Doctor with patient in a hospital setting"
+                    fill
+                    className="object-cover rounded-2xl"
+                    data-ai-hint="doctor patient hospital"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                    <PlayCircle className="w-24 h-24 text-white/70 hover:text-white transition-colors cursor-pointer" />
+                    </div>
                 </div>
-              </div>
-              <div>
-                  <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">
-                    Why We Do What We Do
-                  </h2>
-                  <p className="text-muted-foreground leading-relaxed">
-                    We do this work because we want people to know that there are many tools available for them to feel better. We want people to feel accepted, supported and to guide them when needed. We support people in every state they are in and guide them at their own pace. We want to offer a place where you feel peace, love and get the attention you deserve.
-                  </p>
-              </div>
+                <div>
+                    <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">
+                        Why We Do What We Do
+                    </h2>
+                    <p className="text-muted-foreground leading-relaxed">
+                        We do this work because we want people to know that there are many tools available for them to feel better. We want people to feel accepted, supported and to guide them when needed. We support people in every state they are in and guide them at their own pace. We want to offer a place where you feel peace, love and get the attention you deserve.
+                    </p>
+                </div>
             </div>
           </div>
         </section>
@@ -267,6 +267,88 @@ export default function Home() {
                 <Image src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxoYXBweSUyMHBlcnNvbnxlbnwwfHx8fDE3NTQ1NjIzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Happy person" width={280} height={210} className="absolute bottom-20 left-1/4 w-[280px] h-[210px] rounded-2xl object-cover z-20" data-ai-hint="happy person" />
                 <Image src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx5b2dhJTIwbGlmZXN0eWxlfGVufDB8fHx8MTc1NDU2MjQwMXww&ixlib=rb-4.1.0&q=80&w=1080" alt="Yoga pose" width={200} height={200} className="absolute bottom-0 right-5 w-[200px] h-[200px] rounded-2xl object-cover z-10" data-ai-hint="yoga lifestyle" />
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="relative py-20 text-foreground">
+          <div className="absolute inset-0">
+            <Image 
+              src="https://images.unsplash.com/photo-1584982234161-537063a53358?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Medical background"
+              fill
+              className="object-cover"
+              data-ai-hint="medical services background"
+            />
+            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+          </div>
+          <div className="relative container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Chronic Care Management</h2>
+            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+              Everything you need for seamless health management, delivered to your doorstep.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              
+              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+                <div className="p-3 bg-primary/20 text-primary rounded-full">
+                  <RefreshCw className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Automated Refills</h3>
+                  <p className="text-sm text-muted-foreground">Never miss a dose with our smart, automated prescription refill service.</p>
+                </div>
+              </div>
+
+              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+                <div className="p-3 bg-primary/20 text-primary rounded-full">
+                  <Sparkles className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">AI Health Assistant</h3>
+                  <p className="text-sm text-muted-foreground">Get instant, personalized answers to your health questions 24/7.</p>
+                </div>
+              </div>
+              
+              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+                <div className="p-3 bg-primary/20 text-primary rounded-full">
+                  <Truck className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Nationwide Delivery</h3>
+                  <p className="text-sm text-muted-foreground">Fast, discreet, and reliable delivery of medications to your doorstep.</p>
+                </div>
+              </div>
+              
+              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+                <div className="p-3 bg-primary/20 text-primary rounded-full">
+                  <Video className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Tele-Consultations</h3>
+                  <p className="text-sm text-muted-foreground">Connect with certified pharmacists and doctors online for expert advice.</p>
+                </div>
+              </div>
+              
+              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+                <div className="p-3 bg-primary/20 text-primary rounded-full">
+                  <ClipboardList className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Chronic Care Plans</h3>
+                  <p className="text-sm text-muted-foreground">Personalized long-term plans to help you manage your chronic conditions.</p>
+                </div>
+              </div>
+              
+              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+                <div className="p-3 bg-primary/20 text-primary rounded-full">
+                  <BookText className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-lg mb-1">Wellness Content</h3>
+                  <p className="text-sm text-muted-foreground">Access a rich library of articles from trusted healthcare professionals.</p>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
