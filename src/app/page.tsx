@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 
 export default function Home() {
@@ -96,10 +97,8 @@ export default function Home() {
                         <p className="text-muted-foreground mb-6 flex-grow">
                             Travel abroad for top-quality, affordable medical care. We handle all the logistics, so you can focus on your health.
                         </p>
-                        <Link href="/medical-tourism" passHref>
-                          <Button variant="outline" className="self-start">
-                              Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
+                        <Link href="/medical-tourism" className={cn(buttonVariants({ variant: "outline" }), "self-start")}>
+                            Learn More <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                     </div>
                     <div className="glassmorphic p-8 text-left flex flex-col">
@@ -112,10 +111,8 @@ export default function Home() {
                         <p className="text-muted-foreground mb-6 flex-grow">
                             We facilitate life-saving organ transplant procedures by connecting you with leading global hospitals.
                         </p>
-                        <Link href="/organ-transplants" passHref>
-                          <Button variant="outline" className="self-start">
-                              Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                          </Button>
+                         <Link href="/organ-transplants" className={cn(buttonVariants({ variant: "outline" }), "self-start")}>
+                            Learn More <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                     </div>
                 </div>
@@ -166,7 +163,7 @@ export default function Home() {
               className="object-cover"
               data-ai-hint="pills medication"
             />
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
           </div>
           <div className="relative container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Chronic Care Management</h2>
@@ -419,5 +416,3 @@ export default function Home() {
     </div>
   )
 }
-
-    
