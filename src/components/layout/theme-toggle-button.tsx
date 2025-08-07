@@ -16,7 +16,7 @@ export default function ThemeToggleButton() {
 
   if (!isMounted) {
     // Render a placeholder or null on the server to prevent layout shift
-    return <div className="h-10 w-10" />;
+    return null;
   }
 
   return (

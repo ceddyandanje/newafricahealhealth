@@ -30,11 +30,7 @@ export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boo
   }, []);
 
   if (!isMounted) {
-    // Render a placeholder or null on the server to prevent hydration mismatch
-    if (isMobile) {
-      return <div className="h-10"></div>; // Placeholder for mobile
-    }
-    return <div className="w-24 h-10"></div>; // Placeholder for desktop
+    return null;
   }
   
   const dropdownTrigger = (
