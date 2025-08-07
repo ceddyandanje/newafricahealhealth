@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart } from "lucide-react"
 
 export default function Home() {
   return (
@@ -96,6 +96,45 @@ export default function Home() {
               </Button>
             </div>
           </div>
+        </section>
+
+        <section className="py-20">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="text-3xl md:text-4xl font-bold text-[#28a745] mb-4">Global & Emergency Services</h2>
+                <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-16">
+                    Access world-class healthcare solutions, including medical tourism, critical organ transplants, and emergency response, coordinated by our expert team.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="bg-white dark:bg-gray-800/50 p-8 rounded-2xl shadow-lg text-left flex flex-col">
+                        <div className="flex items-center mb-4">
+                            <div className="inline-block p-3 bg-green-100 text-green-700 rounded-full mr-4">
+                                <Plane className="h-6 w-6" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-white">Medical Tourism</h3>
+                        </div>
+                        <p className="text-muted-foreground mb-6 flex-grow">
+                            Travel abroad for top-quality, affordable medical care. We handle all the logistics, including hassle-free visa processing, so you can focus on your health.
+                        </p>
+                        <Button variant="outline" className="self-start">
+                            Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800/50 p-8 rounded-2xl shadow-lg text-left flex flex-col">
+                        <div className="flex items-center mb-4">
+                            <div className="inline-block p-3 bg-green-100 text-green-700 rounded-full mr-4">
+                                <Heart className="h-6 w-6" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-gray-800 dark:text-white">Organ Transplants</h3>
+                        </div>
+                        <p className="text-muted-foreground mb-6 flex-grow">
+                            We facilitate life-saving organ transplant procedures, specializing in Kidney and Heart transplants, by connecting you with leading global hospitals.
+                        </p>
+                        <Button variant="outline" className="self-start">
+                            Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            </div>
         </section>
       </main>
     </div>
