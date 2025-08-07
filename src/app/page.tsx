@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -258,6 +258,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="Amina K." data-ai-hint="smiling person" />
                                 <AvatarFallback>AK</AvatarFallback>
                             </Avatar>
                             <div>
@@ -279,6 +280,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="John M." data-ai-hint="smiling person" />
                                 <AvatarFallback>JM</AvatarFallback>
                             </Avatar>
                             <div>
@@ -300,6 +302,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="Sarah L." data-ai-hint="smiling person" />
                                 <AvatarFallback>SL</AvatarFallback>
                             </Avatar>
                             <div>
