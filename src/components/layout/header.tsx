@@ -23,8 +23,13 @@ const navLinks = [
 
 function AuthButton() {
     const { user, isAdmin, logout, isLoading } = useAuth();
+    const [isMounted, setIsMounted] = useState(false);
 
-    if (isLoading) {
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted || isLoading) {
         return <Skeleton className="h-10 w-10 rounded-full" />;
     }
 
@@ -93,24 +98,25 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
-        <Link href="/" className="flex items-center space-x-2 mr-auto">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
-            </Avatar>
-            <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
-        </Link>
-        
-        <nav className="hidden md:flex items-center space-x-4">
-            {navLinks.map((link) => (
-                <Link
-                key={link.href}
-                href={link.href}
-                className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium"
-                >
-                {link.label}
-                </Link>
-            ))}
-        </nav>
+        <div className="mr-auto flex items-center gap-4">
+            <Link href="/" className="flex items-center space-x-2">
+                <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
+                </Avatar>
+                <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
+            </Link>
+            <nav className="hidden md:flex items-center space-x-4">
+                {navLinks.map((link) => (
+                    <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium"
+                    >
+                    {link.label}
+                    </Link>
+                ))}
+            </nav>
+        </div>
         
         <div className="flex items-center space-x-2 ml-4">
             <ThemeToggleButton />
@@ -151,7 +157,6 @@ export default function Header() {
                         </Link>
                     ))}
                     </nav>
-                    {/* We can add mobile auth buttons here later */}
                 </SheetContent>
             </Sheet>
         </div>

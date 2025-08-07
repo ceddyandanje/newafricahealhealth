@@ -217,7 +217,7 @@ export default function AdminDashboardPage() {
                          <Card className="lg:col-span-2 bg-blue-600 text-white border-0">
                             <CardHeader>
                                 <CardTitle>Doctor of the Month</CardTitle>
-                            </Header>
+                            </CardHeader>
                             <CardContent className="flex items-center justify-around">
                                 <div className="text-center">
                                     <Avatar className="h-24 w-24 mx-auto mb-2 border-4 border-white">

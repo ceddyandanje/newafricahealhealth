@@ -15,7 +15,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <main className="flex-grow">
+      
         {/* Hero Section */}
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
@@ -409,7 +409,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-      </main>
     </div>
   )
 }
