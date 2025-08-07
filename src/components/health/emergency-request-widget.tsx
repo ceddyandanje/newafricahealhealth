@@ -71,7 +71,7 @@ export function EmergencyRequestWidget() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="fixed bottom-6 right-6 rounded-full w-16 h-16 shadow-lg z-50 bg-red-600 hover:bg-red-700 text-white animate-pulse">
+                <Button className="fixed top-1/2 -translate-y-1/2 right-6 rounded-full w-16 h-16 shadow-lg z-50 bg-red-600 hover:bg-red-700 text-white animate-pulse">
                     <Siren className="w-8 h-8" />
                 </Button>
             </DialogTrigger>
