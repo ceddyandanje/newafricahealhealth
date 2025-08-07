@@ -280,7 +280,7 @@ export default function Home() {
               className="object-cover"
               data-ai-hint="pills medication"
             />
-            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           </div>
           <div className="relative container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Chronic Care Management</h2>
