@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
+import { doc, setDoc, serverTimestamp } from "firebase/firestore"; 
 import { Package, Heart, LogOut, User as UserIcon } from "lucide-react";
 
 function LoginForm({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
@@ -59,7 +60,15 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
         e.preventDefault();
         setError(null);
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Create a user document in Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+                createdAt: serverTimestamp(),
+            });
+
             toast({ title: "Signup Successful", description: "Your account has been created." });
             if (onSignupSuccess) onSignupSuccess();
         } catch (err: any) {
@@ -169,7 +178,7 @@ export default function ProfilePage() {
                          </CardTitle>
                          <CardDescription className="text-center">
                            Please sign in or create an account to continue.
-                         </CardDescription>
+                         </cardDescription>
                     </CardHeader>
                     <CardContent>
                         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
