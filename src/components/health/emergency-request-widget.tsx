@@ -71,8 +71,8 @@ export function EmergencyRequestWidget() {
     return (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-                <Button className="fixed top-1/2 -translate-y-1/2 right-6 rounded-full w-16 h-16 shadow-lg z-50 bg-red-600 hover:bg-red-700 text-white animate-pulse">
-                    <Siren className="w-8 h-8" />
+                <Button className="fixed top-1/2 -translate-y-1/2 right-0 rounded-l-full rounded-r-none w-12 h-12 shadow-lg z-50 bg-red-600 hover:bg-red-700 text-white animate-pulse">
+                    <Phone className="w-6 h-6" />
                 </Button>
             </SheetTrigger>
             <SheetContent side="right">
