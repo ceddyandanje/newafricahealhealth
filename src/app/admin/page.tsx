@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell } from "recharts"
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const summaryData = [
     { title: "Patients", value: "1,421", icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
@@ -63,6 +64,11 @@ const sidebarNavItems = [
 
 export default function AdminDashboardPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [isClient, setIsClient] = useState(false)
+
+    useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     return (
         <div className="min-h-screen bg-background text-foreground flex">
@@ -152,27 +158,31 @@ export default function AdminDashboardPage() {
                             <CardTitle>Patients</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-grow flex flex-col items-center justify-center">
-                            <div className="relative">
-                                <PieChartComponent width={200} height={200}>
-                                    <Pie data={a_patientsChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
-                                        {a_patientsChartData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
-                                        ))}
-                                    </Pie>
-                                </PieChartComponent>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <p className="text-muted-foreground text-sm">Total</p>
-                                    <p className="font-bold text-2xl">145,212</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
-                                {patientsChartData.slice(1).map(item => (
-                                     <div key={item.name} className="flex items-center gap-2">
-                                        <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
-                                        <span>{item.name}: {item.value}</span>
+                            {!isClient ? <Skeleton className="w-[200px] h-[200px] rounded-full" /> :
+                            <>
+                                <div className="relative">
+                                    <PieChartComponent width={200} height={200}>
+                                        <Pie data={a_patientsChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
+                                            {a_patientsChartData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
+                                            ))}
+                                        </Pie>
+                                    </PieChartComponent>
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                        <p className="text-muted-foreground text-sm">Total</p>
+                                        <p className="font-bold text-2xl">145,212</p>
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                                <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
+                                    {patientsChartData.slice(1).map(item => (
+                                        <div key={item.name} className="flex items-center gap-2">
+                                            <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
+                                            <span>{item.name}: {item.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </>
+                            }
                         </CardContent>
                     </Card>
 
@@ -185,20 +195,24 @@ export default function AdminDashboardPage() {
                                 <p className="text-2xl font-bold text-blue-500">$32,485</p>
                                 <p className="text-sm text-muted-foreground line-through">$12,458</p>
                             </div>
-                            <ChartContainer config={{}} className="h-[250px] w-full">
-                                <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                    <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                                    <Bar dataKey="income" fill="#EF4444" radius={[4, 4, 0, 0]} barSize={10} />
-                                    <Bar dataKey="expense" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={10} />
-                                </BarChartComponent>
-                            </ChartContainer>
-                             <div className="flex justify-center items-center gap-6 mt-4 text-sm">
-                                <div className="flex items-center gap-2"><span className="h-3 w-3 bg-red-500"></span>Income</div>
-                                <div className="flex items-center gap-2"><span className="h-3 w-3 bg-blue-500"></span>Expense</div>
-                            </div>
+                            {!isClient ? <Skeleton className="h-[250px] w-full" /> :
+                            <>
+                                <ChartContainer config={{}} className="h-[250px] w-full">
+                                    <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+                                        <Bar dataKey="income" fill="#EF4444" radius={[4, 4, 0, 0]} barSize={10} />
+                                        <Bar dataKey="expense" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={10} />
+                                    </BarChartComponent>
+                                </ChartContainer>
+                                <div className="flex justify-center items-center gap-6 mt-4 text-sm">
+                                    <div className="flex items-center gap-2"><span className="h-3 w-3 bg-red-500"></span>Income</div>
+                                    <div className="flex items-center gap-2"><span className="h-3 w-3 bg-blue-500"></span>Expense</div>
+                                </div>
+                            </>
+                            }
                         </CardContent>
                     </Card>
 
@@ -255,4 +269,5 @@ export default function AdminDashboardPage() {
             </div>
         </div>
     );
-}
+
+    
