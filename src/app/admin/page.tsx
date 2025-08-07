@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut } from "lucide-react";
+import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut, Package, PenSquare } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell } from "recharts"
@@ -55,10 +55,12 @@ const availableDoctors = [
 const sidebarNavItems = [
     { href: "/admin", icon: Home, label: "Dashboard" },
     { href: "/admin/appointments", icon: Calendar, label: "Appointments" },
+    { href: "/admin/products", icon: Package, label: "Products" },
     { href: "/admin/patients", icon: Users, label: "Patients" },
     { href: "/admin/doctors", icon: HeartPulse, label: "Doctors" },
     { href: "/admin/users", icon: Shield, label: "Users" },
     { href: "/admin/services", icon: ShoppingBag, label: "Services" },
+    { href: "/admin/blog", icon: PenSquare, label: "Blog" },
     { href: "/admin/logs", icon: FileText, label: "Logs" },
 ]
 
@@ -94,7 +96,7 @@ export default function AdminDashboardPage() {
                 "bg-muted/40 text-foreground flex flex-col transition-all duration-300 ease-in-out border-r",
                 isSidebarOpen ? "w-64" : "w-20 items-center"
             )}>
-                <div className={cn("p-6 flex items-center gap-2 border-b", !isSidebarOpen && "justify-center")}>
+                <div className={cn("p-6 flex items-center gap-2 border-b h-24", !isSidebarOpen && "justify-center")}>
                     <HeartPulse className="h-8 w-8 text-primary flex-shrink-0" />
                     <h1 className={cn("text-xl font-bold transition-opacity whitespace-nowrap", !isSidebarOpen && "opacity-0 w-0 h-0")}>Africa Heal</h1>
                 </div>

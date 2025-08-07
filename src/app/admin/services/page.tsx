@@ -6,12 +6,79 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { ShoppingBag, PlusCircle, Search, Edit, Trash2 } from "lucide-react";
-import { serviceCategories as initialServices } from "@/lib/serviceCategories";
+import { ShoppingBag, PlusCircle, Search, Edit, Trash2, LucideIcon } from "lucide-react";
+import { serviceCategories as initialServices, serviceCategories } from "@/lib/serviceCategories";
 import { type ServiceCategory } from '@/lib/serviceCategories';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const serviceSchema = z.object({
+  id: z.string().min(2, 'ID is required'),
+  name: z.string().min(3, 'Name is required'),
+});
+
+function ServiceForm({ service, onSave, onOpenChange }: { service?: ServiceCategory, onSave: (data: ServiceCategory) => void, onOpenChange: (open: boolean) => void }) {
+  const form = useForm<z.infer<typeof serviceSchema>>({
+    resolver: zodResolver(serviceSchema),
+    defaultValues: service || { id: '', name: '' },
+  });
+
+  const handleSubmit = (values: z.infer<typeof serviceSchema>) => {
+    // Note: Icon selection is not implemented in this form. Defaulting to a generic icon.
+    onSave({ ...values, icon: service?.icon || ShoppingBag });
+    onOpenChange(false);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        <FormField control={form.control} name="id" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Service ID</FormLabel>
+            <FormControl><Input {...field} disabled={!!service} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+        <FormField control={form.control} name="name" render={({ field }) => (
+          <FormItem>
+            <FormLabel>Service Name</FormLabel>
+            <FormControl><Input {...field} /></FormControl>
+            <FormMessage />
+          </FormItem>
+        )} />
+        <DialogFooter>
+          <Button type="submit">Save Service</Button>
+        </DialogFooter>
+      </form>
+    </Form>
+  );
+}
 
 export default function ServicesPage() {
   const [services, setServices] = useState<ServiceCategory[]>(initialServices);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingService, setEditingService] = useState<ServiceCategory | undefined>(undefined);
+  const [deletingService, setDeletingService] = useState<ServiceCategory | undefined>(undefined);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
+
+  const handleSaveService = (service: ServiceCategory) => {
+    if (editingService) {
+      setServices(services.map(s => s.id === service.id ? service : s));
+    } else {
+      setServices([...services, service]);
+    }
+    setEditingService(undefined);
+  };
+
+  const handleDeleteService = (service: ServiceCategory) => {
+    setServices(services.filter(s => s.id !== service.id));
+    setDeletingService(undefined);
+    setIsDeleteConfirmOpen(false);
+  };
 
   return (
     <div className="p-6">
@@ -20,7 +87,15 @@ export default function ServicesPage() {
           <ShoppingBag className="w-8 h-8" />
           Services Management
         </h1>
-        <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Service</Button>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+            <DialogTrigger asChild>
+                <Button onClick={() => setEditingService(undefined)}><PlusCircle className="mr-2 h-4 w-4" /> Add Service</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>{editingService ? 'Edit Service' : 'Add New Service'}</DialogTitle></DialogHeader>
+                <ServiceForm service={editingService} onSave={handleSaveService} onOpenChange={setIsFormOpen} />
+            </DialogContent>
+        </Dialog>
       </div>
       <Card>
         <CardHeader>
@@ -53,8 +128,8 @@ export default function ServicesPage() {
                     <span className="font-mono text-sm bg-muted px-2 py-1 rounded">{service.id}</span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" onClick={() => { setEditingService(service); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingService(service); setIsDeleteConfirmOpen(true); }}><Trash2 className="h-4 w-4" /></Button>
                   </TableCell>
                 </TableRow>
               ))}
@@ -62,6 +137,21 @@ export default function ServicesPage() {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Are you sure?</DialogTitle>
+                <DialogDescription>
+                    This action cannot be undone. This will permanently delete the service: {deletingService?.name}.
+                </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => handleDeleteService(deletingService!)}>Delete</Button>
+            </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
