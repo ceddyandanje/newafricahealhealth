@@ -28,11 +28,11 @@ export default function RespiratoryPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/600x450.png"
-                        alt="Doctor explaining an inhaler to a patient"
+                        src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=499&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        alt="Person doing yoga to improve breathing"
                         fill
                         className="object-cover rounded-xl"
-                        data-ai-hint="doctor inhaler patient"
+                        data-ai-hint="yoga breathing"
                     />
                 </div>
                 <div>
