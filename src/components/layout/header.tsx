@@ -66,13 +66,7 @@ export default function Header() {
 
   const MobileAuthButton = () => {
     if (user) {
-        return (
-             <Button variant="ghost" size="icon" asChild>
-                <Link href="/profile">
-                    <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                </Link>
-            </Button>
-        )
+        return null; // No profile page, so no button for logged-in user.
     }
      return (
         <div className="flex flex-col space-y-2 pt-2 border-t">
