@@ -98,13 +98,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
-        <div className="mr-auto flex items-center gap-4">
-            <Link href="/" className="flex items-center space-x-2">
-                <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
-                </Avatar>
-                <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
-            </Link>
+        <Link href="/" className="flex items-center space-x-2">
+            <Avatar className="h-8 w-8">
+            <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
+            </Avatar>
+            <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
+        </Link>
+        
+        <div className="ml-auto flex items-center space-x-2">
             <nav className="hidden md:flex items-center space-x-4">
                 {navLinks.map((link) => (
                     <Link
@@ -116,9 +117,6 @@ export default function Header() {
                     </Link>
                 ))}
             </nav>
-        </div>
-        
-        <div className="flex items-center space-x-2 ml-4">
             <ThemeToggleButton />
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
@@ -131,7 +129,7 @@ export default function Header() {
             <AuthButton />
         </div>
             
-        <div className="md:hidden flex items-center ml-auto">
+        <div className="md:hidden flex items-center ml-2">
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
