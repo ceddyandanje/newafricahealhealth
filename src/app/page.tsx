@@ -38,24 +38,28 @@ export default function Home() {
                   <User className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Log In or Create Account</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Access your account</p>
               </div>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-green-100 text-green-600 rounded-full mb-4">
                   <HeartPulse className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Find Health & Drug Plans</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Explore our plans</p>
               </div>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-red-100 text-red-600 rounded-full mb-4">
                   <Stethoscope className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Emergency Services</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Get help immediately</p>
               </div>
               <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-teal-100 text-teal-600 rounded-full mb-4">
                   <Phone className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Talk to Someone</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Connect with us</p>
               </div>
             </div>
           </div>
