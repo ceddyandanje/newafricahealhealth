@@ -11,16 +11,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const navLinks = [
   { href: "/products", label: "Products" },
-  { href: "/emergency-services", label: "Emergency Services" },
+  { href: "/services", label: "Services" },
+  { href: "/medical-tourism", label: "Medical Tourism" },
+  { href: "/organ-transplants", label: "Organ Transplants" },
 ]
 
-const categories = ["Category 1", "Category 2", "Category 3"]
-
-const services = [
-  { href: "/chronic-care", label: "Chronic Care"},
-  { href: "/emergency", label: "Emergency"},
-  { href: "/wellness", label: "Wellness"},
-]
+const categories = ["Diabetes Care", "Heart Health", "Respiratory", "Mental Health"]
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
@@ -68,24 +64,12 @@ export default function Header() {
                 ))}
                  <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
-                      Services <ChevronDown className="h-4 w-4 ml-1" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      {services.map((cat) => (
-                        <DropdownMenuItem key={cat.href} asChild>
-                          <Link href={cat.href}>{cat.label}</Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                 <DropdownMenu>
-                    <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
                       Categories <ChevronDown className="h-4 w-4 ml-1" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       {categories.map((cat) => (
                         <DropdownMenuItem key={cat} asChild>
-                          <Link href={`/categories/${cat.toLowerCase().replace(" ", "-")}`}>{cat}</Link>
+                          <Link href={`/products?category=${cat.toLowerCase().replace(" ", "-")}`}>{cat}</Link>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -131,24 +115,12 @@ export default function Header() {
               ))}
               <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
-                    Services <ChevronDown className="h-4 w-4 ml-1" />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {services.map((cat) => (
-                      <DropdownMenuItem key={cat.href} asChild>
-                        <Link href={cat.href}>{cat.label}</Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
                     Categories <ChevronDown className="h-4 w-4 ml-1" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     {categories.map((cat) => (
                       <DropdownMenuItem key={cat} asChild>
-                        <Link href={`/categories/${cat.toLowerCase().replace(" ", "-")}`}>{cat}</Link>
+                        <Link href={`/products?category=${cat.toLowerCase().replace(" ", "-")}`}>{cat}</Link>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
@@ -182,5 +154,3 @@ export default function Header() {
     </header>
   )
 }
-
-    
