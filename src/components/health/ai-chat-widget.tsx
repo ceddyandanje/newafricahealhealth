@@ -179,7 +179,7 @@ export default function AiChatWidget() {
             isOpen ? "scale-0" : "scale-100"
         )}
       >
-        <MessageSquare className="h-8 w-8" />
+        <Sparkles className="h-8 w-8" />
       </Button>
     </div>
   );
