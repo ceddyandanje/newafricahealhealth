@@ -5,6 +5,7 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/hooks/use-cart';
+import AiChatWidget from '@/components/health/ai-chat-widget';
 
 export const metadata: Metadata = {
   title: 'Africa Heal Health',
@@ -37,6 +38,7 @@ export default function RootLayout({
               <Footer />
             </div>
             <Toaster />
+            <AiChatWidget />
           </CartProvider>
         </ThemeProvider>
       </body>

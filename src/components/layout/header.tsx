@@ -11,7 +11,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const navLinks = [
   { href: "/products", label: "Products" },
-  { href: "/health-assistant", label: "Services" },
   { href: "/medical-tourism", label: "Medical Tourism" },
   { href: "/organ-transplants", label: "Organ Transplants" },
 ]
