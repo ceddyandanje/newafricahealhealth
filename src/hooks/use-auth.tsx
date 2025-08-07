@@ -47,13 +47,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (authUser) {
         const userDocRef = doc(db, "users", authUser.uid);
         const unsubSnapshot = onSnapshot(userDocRef, (doc) => {
+          setLoading(true); // Start loading when we get new data
           if (doc.exists()) {
             const userData = { uid: doc.id, ...doc.data() } as AppUser;
             setAppUser(userData);
             const adminStatus = userData.role === 'admin';
             setIsAdmin(adminStatus);
             
-            // Redirect after login
+            // Redirect after login if on the login page
             if (pathname === '/login') {
                 if(adminStatus) {
                     router.push('/admin');
@@ -62,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }
             }
           } else {
+            // User exists in Auth, but not in Firestore. Log them out or handle as error.
             setAppUser(null);
             setIsAdmin(false);
           }
@@ -81,7 +83,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [router, pathname]);
+  }, [pathname, router]);
   
 
   const value = { user, appUser, isAdmin, loading };

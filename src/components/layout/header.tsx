@@ -25,7 +25,7 @@ const navLinks = [
 
 export default function Header() {
   const { items } = useCart()
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, loading } = useAuth()
   const { toast } = useToast()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   
@@ -39,6 +39,10 @@ export default function Header() {
   }
 
   const AuthButton = () => {
+    if (loading) {
+        return <Button variant="ghost" size="icon" disabled><User className="h-5 w-5" /></Button>
+    }
+
     if (user) {
         return (
              <DropdownMenu>
@@ -49,12 +53,12 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     {isAdmin && (
-                         <>
-                            <DropdownMenuItem asChild>
-                                <Link href="/admin">Admin Dashboard</Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                         </>
+                         <DropdownMenuItem asChild>
+                            <Link href="/admin">
+                                <ShieldCheck className="mr-2 h-4 w-4" />
+                                <span>Admin Dashboard</span>
+                            </Link>
+                         </DropdownMenuItem>
                     )}
                     <DropdownMenuItem onClick={handleLogout}>
                         <LogOut className="mr-2 h-4 w-4" />
@@ -74,10 +78,16 @@ export default function Header() {
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem asChild>
-                    <Link href="/login">Login</Link>
+                    <Link href="/login">
+                        <LogIn className="mr-2 h-4 w-4" />
+                        <span>Login</span>
+                    </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                    <Link href="/login?tab=signup">Sign up</Link>
+                    <Link href="/login?tab=signup">
+                        <User className="mr-2 h-4 w-4" />
+                        <span>Sign up</span>
+                    </Link>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -85,6 +95,8 @@ export default function Header() {
   }
 
   const MobileAuthButton = () => {
+     if (loading) return null;
+
     if (user) {
         return (
             <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
@@ -95,11 +107,15 @@ export default function Header() {
     }
      return (
         <div className="flex flex-col space-y-2 pt-2 border-t">
-             <Button variant="ghost" asChild>
-                <Link href="/login">Login</Link>
+             <Button asChild className="w-full justify-start">
+                <Link href="/login">
+                     <LogIn className="mr-2 h-4 w-4" /> Login
+                </Link>
             </Button>
-             <Button variant="ghost" asChild>
-                <Link href="/login?tab=signup">Sign up</Link>
+             <Button asChild className="w-full justify-start">
+                <Link href="/login?tab=signup">
+                    <User className="mr-2 h-4 w-4" /> Sign up
+                </Link>
             </Button>
         </div>
     )
@@ -116,89 +132,73 @@ export default function Header() {
             <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
         </Link>
         
-
-        {/* Mobile Nav */}
-        <div className="md:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-white dark:bg-gray-900">
-              <SheetHeader>
-                <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-              </SheetHeader>
-              <Link href="/" className="flex items-center space-x-2 mb-6">
-                 <Avatar className="h-8 w-8">
-                    <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
-                </Avatar>
-                <span className="font-bold text-gray-800 dark:text-white">Africa Heal Health</span>
-              </Link>
-              <nav className="flex flex-col space-y-4">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                 <ClientHeaderItems isMobile={true} />
-                 <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
-                 {isAdmin && (
-                    <Link href="/admin" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white flex items-center gap-2"><ShieldCheck />Admin</Link>
-                 )}
-                 <div className="flex items-center pt-4 border-t">
-                    <Button variant="ghost" size="icon" asChild>
-                      <Link href="/cart" aria-label="Open cart" className="relative">
-                        <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                        {totalItems > 0 && (
-                          <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
-                        )}
-                      </Link>
-                    </Button>
-                    <ThemeToggleButton />
-                 </div>
-                 <MobileAuthButton />
-              </nav>
-            </SheetContent>
-          </Sheet>
-        </div>
-        
         {/* Desktop Nav */}
-        <div className="hidden md:flex flex-1 items-center justify-end space-x-4">
-            <nav className="flex items-center space-x-6 text-sm font-medium">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <ClientHeaderItems />
-              <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
-              {isAdmin && (
-                  <Link href="/admin" className="text-primary hover:text-primary/90 transition-colors flex items-center gap-2"><ShieldCheck />Admin</Link>
-              )}
-            </nav>
+        <nav className="hidden md:flex flex-1 items-center justify-center space-x-6 text-sm font-medium">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+          <ClientHeaderItems />
+          <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
+        </nav>
           
-            <div className="flex items-center justify-end space-x-2">
-              <ThemeToggleButton />
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/cart" aria-label="Open cart" className="relative">
-                  <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                  {totalItems > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
-                  )}
-                </Link>
-              </Button>
-              <AuthButton />
+        <div className="flex items-center justify-end space-x-2">
+            {/* Mobile Nav Trigger */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle Menu</span>
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="bg-white dark:bg-gray-900 w-full max-w-xs">
+                  <SheetHeader>
+                    <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                  </SheetHeader>
+                  <Link href="/" className="flex items-center space-x-2 mb-6">
+                     <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
+                    </Avatar>
+                    <span className="font-bold text-gray-800 dark:text-white">Africa Heal Health</span>
+                  </Link>
+                  <nav className="flex flex-col space-y-4">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
+                      >
+                        {link.label}
+                      </Link>
+                    ))}
+                     <ClientHeaderItems isMobile={true} />
+                     <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
+                     {isAdmin && (
+                        <Link href="/admin" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white flex items-center gap-2"><ShieldCheck />Admin</Link>
+                     )}
+                     <MobileAuthButton />
+                  </nav>
+                </SheetContent>
+              </Sheet>
             </div>
+          <ThemeToggleButton />
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/cart" aria-label="Open cart" className="relative">
+              <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+              {totalItems > 0 && (
+                <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+              )}
+            </Link>
+          </Button>
+          <div className="hidden md:block">
+            <AuthButton />
+          </div>
         </div>
       </div>
     </header>

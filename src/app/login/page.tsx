@@ -12,25 +12,29 @@ import { useToast } from "@/hooks/use-toast";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, setDoc, serverTimestamp, getDocs, collection } from "firebase/firestore";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 function LoginForm({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setIsLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            toast({ title: "Login Successful", description: "Welcome back!" });
+            toast({ title: "Login Successful", description: "Redirecting..." });
             if (onLoginSuccess) onLoginSuccess();
         } catch (err: any) {
             setError(err.message);
+            setIsLoading(false);
         }
     };
 
@@ -45,7 +49,10 @@ function LoginForm({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
                 <Input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">Login</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Login
+            </Button>
         </form>
     );
 }
@@ -60,13 +67,16 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setIsLoading(true);
 
         if (password !== confirmPassword) {
             setError("Passwords do not match.");
+            setIsLoading(false);
             return;
         }
 
@@ -89,10 +99,12 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
                 role: isFirstUser ? 'admin' : 'user',
             });
 
-            toast({ title: "Signup Successful", description: "Your account has been created." });
+            toast({ title: "Signup Successful", description: "Your account has been created. Please log in." });
             if (onSignupSuccess) onSignupSuccess();
         } catch (err: any) {
             setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -142,49 +154,38 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
                 <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full">Create Account</Button>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Account
+            </Button>
         </form>
     );
 }
 
 export default function LoginPage() {
-    const { user, loading } = useAuth();
-    const searchParams = useSearchParams();
+    const { user, loading, isAdmin } = useAuth();
     const router = useRouter();
-    
-    // Determine the initial tab based on the 'tab' search parameter. Default to 'login'.
-    const initialTab = searchParams.get('tab') === 'signup' ? 'signup' : 'login';
-    const [currentTab, setCurrentTab] = useState(initialTab);
+    const [currentTab, setCurrentTab] = useState('login');
 
     useEffect(() => {
+        // Redirect if user is already logged in
         if (!loading && user) {
-            // Redirect logic is handled in useAuth hook, but you could add fallback logic here if needed.
+            if (isAdmin) {
+                router.replace('/admin');
+            } else {
+                router.replace('/');
+            }
         }
-    }, [user, loading, router]);
-    
-    // This effect updates the active tab if the search param changes.
-    useEffect(() => {
-        const newTab = searchParams.get('tab');
-        if (newTab && newTab !== currentTab) {
-            setCurrentTab(newTab === 'signup' ? 'signup' : 'login');
-        }
-    }, [searchParams, currentTab]);
+    }, [user, loading, isAdmin, router]);
 
-    const handleTabChange = (value: string) => {
-        setCurrentTab(value);
-        // Update URL to reflect the current tab without reloading the page
-        router.replace(`/login?tab=${value}`);
-    };
-
-
-    if (loading) {
-        return null; // or a loading spinner
+    if (loading || user) {
+        // Show a loader or nothing while checking auth state or redirecting
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        );
     }
-     if (user) {
-        // useAuth hook handles redirection, but this is a safeguard.
-        return null;
-    }
-
 
     return (
         <div className="container mx-auto px-4 py-12">
@@ -198,7 +199,7 @@ export default function LoginPage() {
                         </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
+                    <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="login">Login</TabsTrigger>
                             <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -207,7 +208,7 @@ export default function LoginPage() {
                             <LoginForm onLoginSuccess={() => { /* Redirect logic now in useAuth */ }} />
                         </TabsContent>
                         <TabsContent value="signup" className="mt-6">
-                            <SignupForm onSignupSuccess={() => handleTabChange("login")} />
+                            <SignupForm onSignupSuccess={() => setCurrentTab("login")} />
                         </TabsContent>
                     </Tabs>
                      <p className="text-center text-sm text-muted-foreground mt-6">
@@ -215,7 +216,7 @@ export default function LoginPage() {
                             ? "Don't have an account? "
                             : "Already have an account? "
                         }
-                        <Button variant="link" className="p-0 h-auto" onClick={() => handleTabChange(currentTab === 'login' ? 'signup' : 'login')}>
+                        <Button variant="link" className="p-0 h-auto" onClick={() => setCurrentTab(currentTab === 'login' ? 'signup' : 'login')}>
                              {currentTab === 'login' ? "Sign up" : "Login"}
                         </Button>
                     </p>
