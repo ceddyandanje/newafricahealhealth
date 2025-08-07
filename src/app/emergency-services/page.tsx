@@ -1,7 +1,9 @@
 
+'use client';
+
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { Phone, LifeBuoy, Ambulance } from "lucide-react";
+import DetailedEmergencyForm from "@/components/health/detailed-emergency-form";
 
 export default function EmergencyServicesPage() {
   return (
@@ -34,9 +36,7 @@ export default function EmergencyServicesPage() {
             <p className="text-muted-foreground leading-relaxed">
               Whether it's a critical medical evacuation from a remote location or swift ground ambulance transport, our joint services are designed for maximum efficiency and patient safety.
             </p>
-            <Button size="lg" className="mt-6">
-              <Phone className="mr-2 h-5 w-5" /> Contact Emergency Line
-            </Button>
+            <DetailedEmergencyForm />
           </div>
           <div className="relative h-80 rounded-2xl overflow-hidden glassmorphic p-2">
               <Image
