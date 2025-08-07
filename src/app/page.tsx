@@ -391,7 +391,7 @@ export default function Home() {
               </div>
 
               {/* Right Column: Form */}
-              <div className="glassmorphic p-8">
+              <div className="bg-card p-8 rounded-lg border">
                 <form className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">Name</label>
