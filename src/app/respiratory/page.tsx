@@ -8,7 +8,7 @@ export default function RespiratoryPage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://images.unsplash.com/photo-1737984954497-06d1615cc177?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            src="https://images.unsplash.com/photo-1685485276223-0bb0226dcca8?q=80&w=756&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Person breathing fresh air in a mountain landscape"
             fill
             className="object-cover"
