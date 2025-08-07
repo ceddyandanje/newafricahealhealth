@@ -13,12 +13,12 @@ export default function Home() {
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
             <Image
-            src="https://placehold.co/1920x1080.png"
-            alt="Healthcare professional wearing a mask"
-            fill
-            className="object-cover object-center"
-            data-ai-hint="healthcare professional mask"
-            priority
+              src="https://placehold.co/1920x1080.png"
+              alt="Healthcare professional wearing a mask"
+              fill
+              className="object-cover object-center"
+              data-ai-hint="healthcare professional mask"
+              priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
             <div className="absolute inset-0 flex items-center justify-center text-center text-white">
@@ -262,10 +262,10 @@ export default function Home() {
                 </div>
               </div>
               <div className="relative h-[500px]">
-                <Image src="https://placehold.co/400x600.png" alt="Doctor with patient" width={320} height={480} className="absolute top-0 left-0 rounded-2xl object-cover z-10" data-ai-hint="doctor patient" />
-                <Image src="https://placehold.co/600x400.png" alt="Happy doctor with patient" width={240} height={180} className="absolute top-10 right-0 rounded-2xl object-cover" data-ai-hint="doctor patient" />
-                <Image src="https://placehold.co/400x300.png" alt="Happy person" width={280} height={210} className="absolute bottom-20 left-1/4 rounded-2xl object-cover z-20" data-ai-hint="happy person" />
-                <Image src="https://placehold.co/400x400.png" alt="Yoga pose" width={200} height={200} className="absolute bottom-0 right-5 rounded-2xl object-cover z-10" data-ai-hint="yoga lifestyle" />
+                <Image src="https://images.unsplash.com/photo-1550831107-1553da8c8464?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2N0b3IlMjBwYXRpZW50fGVufDB8fHx8MTc1NDU2MjM5NHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Doctor with patient" width={320} height={480} className="absolute top-0 left-0 rounded-2xl object-cover z-10" data-ai-hint="doctor patient" />
+                <Image src="https://images.unsplash.com/photo-1624727828489-a1e03b79bba8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMXx8aGFwcHklMjBkb2N0byUyMGFuZCUyMHBhdGllbnR8ZW58MHx8fHwxNzU0NTYyMzY2fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Happy doctor with patient" width={240} height={180} className="absolute top-10 right-0 rounded-2xl object-cover" data-ai-hint="doctor patient happy" />
+                <Image src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxoYXBweSUyMHBlcnNvbnxlbnwwfHx8fDE3NTQ1NjIzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Happy person" width={280} height={210} className="absolute bottom-20 left-1/4 rounded-2xl object-cover z-20" data-ai-hint="happy person" />
+                <Image src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx5b2dhJTIwbGlmZXN0eWxlfGVufDB8fHx8MTc1NDU2MjQwMXww&ixlib=rb-4.1.0&q=80&w=1080" alt="Yoga pose" width={200} height={200} className="absolute bottom-0 right-5 rounded-2xl object-cover z-10" data-ai-hint="yoga lifestyle" />
               </div>
             </div>
           </div>
