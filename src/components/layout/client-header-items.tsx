@@ -2,7 +2,6 @@
 'use client';
 
 import Link from 'next/link';
-import { useTheme } from 'next-themes';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Moon, Sun } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const categoryLinks = [
@@ -21,7 +20,6 @@ const categoryLinks = [
 ];
 
 export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boolean }) {
-  const { theme, setTheme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -29,7 +27,11 @@ export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boo
   }, []);
 
   if (!isMounted) {
-    return null;
+    // Render a placeholder or null on the server to prevent hydration mismatch
+    if (isMobile) {
+      return <div className="h-10"></div>; // Placeholder for mobile
+    }
+    return <div className="w-24 h-10"></div>; // Placeholder for desktop
   }
   
   const dropdownTrigger = (
@@ -44,46 +46,16 @@ export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boo
     </DropdownMenuTrigger>
   );
 
-  const themeSwitcher = (
-      <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          aria-label="Toggle theme"
-        >
-        <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-gray-600" />
-        <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-gray-300" />
-      </Button>
-  );
-
-  if (isMobile) {
-    return (
-        <DropdownMenu>
-            {dropdownTrigger}
-            <DropdownMenuContent>
-                {categoryLinks.map((link) => (
-                <DropdownMenuItem key={link.href} asChild>
-                    <Link href={link.href}>{link.label}</Link>
-                </DropdownMenuItem>
-                ))}
-            </DropdownMenuContent>
-        </DropdownMenu>
-    );
-  }
-
   return (
-    <>
-      <DropdownMenu>
+    <DropdownMenu>
         {dropdownTrigger}
         <DropdownMenuContent>
-          {categoryLinks.map((link) => (
+            {categoryLinks.map((link) => (
             <DropdownMenuItem key={link.href} asChild>
-              <Link href={link.href}>{link.label}</Link>
+                <Link href={link.href}>{link.label}</Link>
             </DropdownMenuItem>
-          ))}
+            ))}
         </DropdownMenuContent>
-      </DropdownMenu>
-       {themeSwitcher}
-    </>
+    </DropdownMenu>
   );
 }

@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useCart } from "@/hooks/use-cart"
 import { Badge } from "@/components/ui/badge"
 import ClientHeaderItems from "./client-header-items"
+import ThemeToggleButton from "./theme-toggle-button"
 
 const navLinks = [
   { href: "/products", label: "Products" },
@@ -77,6 +78,7 @@ export default function Header() {
                             <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                         </Link>
                     </Button>
+                    <ThemeToggleButton />
                  </div>
               </nav>
             </SheetContent>
@@ -100,6 +102,7 @@ export default function Header() {
             </nav>
           
             <div className="flex items-center justify-end space-x-2">
+              <ThemeToggleButton />
               <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
                   <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
@@ -108,7 +111,6 @@ export default function Header() {
                   )}
                 </Link>
               </Button>
-              {/* Theme switcher moved to client component */}
                <Button variant="ghost" size="icon" asChild>
                   <Link href="/profile">
                       <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
