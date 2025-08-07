@@ -33,28 +33,28 @@ export default function Home() {
         <section className="bg-transparent -mt-20 relative z-20">
           <div className="container mx-auto px-4 py-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div className="bg-blue-100/20 dark:bg-blue-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-blue-100/50 dark:bg-blue-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
                   <User className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Log In or Create Account</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Access your information anytime, anywhere.</p>
               </div>
-              <div className="bg-green-100/20 dark:bg-green-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-green-100/50 dark:bg-green-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-green-200 text-green-700 rounded-full mb-4">
                   <HeartPulse className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Find Health & Drug Plans</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Find & compare products in your area.</p>
               </div>
-              <div className="bg-red-100/20 dark:bg-red-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-red-100/50 dark:bg-red-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-red-200 text-red-700 rounded-full mb-4">
                   <Stethoscope className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-gray-800 dark:text-white">Emergency Services</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Medevac air and ground ambulance services in partnership with Phoenix Aviations.</p>
               </div>
-              <div className="bg-teal-100/20 dark:bg-teal-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
+              <div className="bg-teal-100/50 dark:bg-teal-900/30 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-teal-200 text-teal-700 rounded-full mb-4">
                   <Phone className="h-8 w-8" />
                 </div>
@@ -104,7 +104,7 @@ export default function Home() {
                 <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-16">
                     Access world-class healthcare solutions, including medical tourism, critical organ transplants, and emergency response, coordinated by our expert team.
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="bg-green-100/20 dark:bg-green-900/30 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-left flex flex-col border border-gray-200/50 dark:border-gray-700/50">
                         <div className="flex items-center mb-4">
                             <div className="inline-block p-3 bg-green-100 text-green-700 rounded-full mr-4">
