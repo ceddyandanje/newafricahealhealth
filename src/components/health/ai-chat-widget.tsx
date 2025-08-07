@@ -1,3 +1,4 @@
+
 "use client";
 
 import { healthAssistantQuery } from "@/ai/flows/health-assistant-query";
@@ -80,7 +81,7 @@ export default function AiChatWidget() {
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
       <div
         className={cn(
-          "mb-4 w-96 h-[70vh] flex flex-col glassmorphic transition-all duration-300 ease-in-out",
+          "mb-4 w-96 h-[60vh] flex flex-col glassmorphic transition-all duration-300 ease-in-out",
           isOpen ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0 pointer-events-none"
         )}
       >
