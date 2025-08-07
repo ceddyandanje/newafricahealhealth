@@ -51,7 +51,7 @@ export default function Home() {
                   <User className="h-8 w-8" />
                 </div>
                 <h3 className="font-semibold text-lg text-foreground">Personalized Care</h3>
-                <p className="text-sm text-muted-foreground mt-1">Access your information anytime, anywhere.</p>
+                <p className="text-sm text-muted-foreground mt-1">Log in to access personalized care anytime, anywhere.</p>
               </div>
               <div className="bg-green-100/30 dark:bg-green-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-green-200 text-green-700 rounded-full mb-4">
@@ -152,51 +152,8 @@ export default function Home() {
           </div>
         </section>
         
-        {/* Shop by Condition Section */}
-        <section className="py-20">
-          <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold mb-12 text-foreground">
-              Shop by Health Condition
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-              <Link href="/products?category=Diabetes" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
-                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
-                    <Pill className="h-10 w-10" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">Diabetes Care</h3>
-                </div>
-              </Link>
-              <Link href="/products?category=Cardiovascular" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
-                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
-                    <Heart className="h-10 w-10" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">Heart Health</h3>
-                </div>
-              </Link>
-              <Link href="/products?category=Superfoods" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
-                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
-                    <AirVent className="h-10 w-10" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">Superfoods</h3>
-                </div>
-              </Link>
-              <Link href="/products?category=Skincare" className="block group">
-                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
-                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
-                    <Brain className="h-10 w-10" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground">Skincare</h3>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </section>
-
         {/* Chronic Care Management Section */}
-        <section className="relative py-20 text-foreground">
+        <section className="relative py-20 text-white">
           <div className="absolute inset-0">
             <Image 
               src="https://images.unsplash.com/photo-1655313719493-16ebe4906441?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
@@ -205,66 +162,66 @@ export default function Home() {
               className="object-cover"
               data-ai-hint="pills medication"
             />
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           </div>
           <div className="relative container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Chronic Care Management</h2>
-            <p className="text-lg text-foreground/80 mb-12 max-w-2xl mx-auto">
+            <p className="text-lg text-white/80 mb-12 max-w-2xl mx-auto">
               Everything you need for seamless health management, delivered to your doorstep.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+              <div className="bg-background/20 p-6 rounded-2xl text-left flex items-start gap-4">
                 <div className="p-3 bg-primary/20 text-primary rounded-full">
                   <RefreshCw className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Automated Refills</h3>
-                  <p className="text-sm text-muted-foreground">Never miss a dose with our smart, automated prescription refill service.</p>
+                  <p className="text-sm text-white/80">Never miss a dose with our smart, automated prescription refill service.</p>
                 </div>
               </div>
-              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+              <div className="bg-background/20 p-6 rounded-2xl text-left flex items-start gap-4">
                 <div className="p-3 bg-primary/20 text-primary rounded-full">
                   <Sparkles className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">AI Health Assistant</h3>
-                  <p className="text-sm text-muted-foreground">Get instant, personalized answers to your health questions 24/7.</p>
+                  <p className="text-sm text-white/80">Get instant, personalized answers to your health questions 24/7.</p>
                 </div>
               </div>
-              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+              <div className="bg-background/20 p-6 rounded-2xl text-left flex items-start gap-4">
                 <div className="p-3 bg-primary/20 text-primary rounded-full">
                   <Truck className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Nationwide Delivery</h3>
-                  <p className="text-sm text-muted-foreground">Fast, discreet, and reliable delivery of medications to your doorstep.</p>
+                  <p className="text-sm text-white/80">Fast, discreet, and reliable delivery of medications to your doorstep.</p>
                 </div>
               </div>
-              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+              <div className="bg-background/20 p-6 rounded-2xl text-left flex items-start gap-4">
                 <div className="p-3 bg-primary/20 text-primary rounded-full">
                   <Video className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Tele-Consultations</h3>
-                  <p className="text-sm text-muted-foreground">Connect with certified pharmacists and doctors online for expert advice.</p>
+                  <p className="text-sm text-white/80">Connect with certified pharmacists and doctors online for expert advice.</p>
                 </div>
               </div>
-              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+              <div className="bg-background/20 p-6 rounded-2xl text-left flex items-start gap-4">
                 <div className="p-3 bg-primary/20 text-primary rounded-full">
                   <ClipboardList className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Chronic Care Plans</h3>
-                  <p className="text-sm text-muted-foreground">Personalized long-term plans to help you manage your chronic conditions.</p>
+                  <p className="text-sm text-white/80">Personalized long-term plans to help you manage your chronic conditions.</p>
                 </div>
               </div>
-              <div className="bg-background/50 p-6 rounded-2xl text-left flex items-start gap-4">
+              <div className="bg-background/20 p-6 rounded-2xl text-left flex items-start gap-4">
                 <div className="p-3 bg-primary/20 text-primary rounded-full">
                   <BookText className="h-6 w-6" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg mb-1">Wellness Content</h3>
-                  <p className="text-sm text-muted-foreground">Access a rich library of articles from trusted healthcare professionals.</p>
+                  <p className="text-sm text-white/80">Access a rich library of articles from trusted healthcare professionals.</p>
                 </div>
               </div>
             </div>
@@ -272,7 +229,7 @@ export default function Home() {
         </section>
         
         {/* Testimonials Section */}
-        <section className="py-20 bg-muted/20">
+        <section className="py-12 bg-muted/20">
             <div className="container mx-auto px-4 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">What Our Patients Say</h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-12">
@@ -349,8 +306,51 @@ export default function Home() {
             </div>
         </section>
 
+        {/* Shop by Condition Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-12 text-foreground">
+              Shop by Health Condition
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+              <Link href="/products?category=Diabetes" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <Pill className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Diabetes Care</h3>
+                </div>
+              </Link>
+              <Link href="/products?category=Cardiovascular" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <Heart className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Heart Health</h3>
+                </div>
+              </Link>
+              <Link href="/products?category=Superfoods" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <AirVent className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Superfoods</h3>
+                </div>
+              </Link>
+              <Link href="/products?category=Skincare" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <Brain className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Skincare</h3>
+                </div>
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* Consultation Section */}
-        <section className="py-20 bg-background">
+        <section className="py-12 bg-background">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">
               Book Your Free Consultation Today
@@ -415,3 +415,5 @@ export default function Home() {
     </div>
   )
 }
+
+    
