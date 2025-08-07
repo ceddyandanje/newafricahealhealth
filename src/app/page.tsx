@@ -2,15 +2,8 @@ import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart } from "lucide-react"
-import Typewriter from "@/components/effects/typewriter"
 
 export default function Home() {
-  const services = [
-    "Chronic Care",
-    "Emergency Response",
-    "Medical Tourism",
-    "Organ Transplants",
-  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -27,7 +20,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
           <div className="relative z-10 p-4">
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-              Reliable <Typewriter words={services} />
+              Reliable Chronic Care & Emergency Response
             </h1>
             <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
               Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
