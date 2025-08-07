@@ -322,36 +322,36 @@ export default function Home() {
               Shop by Health Condition
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-              <Link href="/products?category=Diabetes" className="block group">
+              <Link href="/products?category=Chronic+Care" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Pill className="h-10 w-10" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground">Diabetes Care</h3>
+                  <h3 className="text-xl font-semibold text-foreground">Chronic Care</h3>
                 </div>
               </Link>
-              <Link href="/products?category=Cardiovascular" className="block group">
+              <Link href="/products?category=Emergency+Response" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Heart className="h-10 w-10" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground">Heart Health</h3>
+                  <h3 className="text-xl font-semibold text-foreground">Emergency Response</h3>
                 </div>
               </Link>
-              <Link href="/products?category=Superfoods" className="block group">
+              <Link href="/products?category=Medical+Tourism" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <AirVent className="h-10 w-10" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground">Superfoods</h3>
+                  <h3 className="text-xl font-semibold text-foreground">Medical Tourism</h3>
                 </div>
               </Link>
-              <Link href="/products?category=Skincare" className="block group">
+              <Link href="/products?category=Organ+Transplants" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Brain className="h-10 w-10" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground">Skincare</h3>
+                  <h3 className="text-xl font-semibold text-foreground">Organ Transplants</h3>
                 </div>
               </Link>
             </div>
@@ -361,12 +361,12 @@ export default function Home() {
         {/* Consultation Section */}
         <section id="consultation" className="py-20 bg-background">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">Book your free consultation today</h2>
-            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
               {/* Left Column: Steps */}
               <div className="space-y-8">
+                <div className="text-center md:text-left mb-12">
+                  <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">Book your free consultation today</h2>
+                </div>
                 <div className="flex items-start gap-4">
                   <div className="flex-shrink-0 w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-2xl font-bold">1</div>
                   <div>
@@ -391,7 +391,7 @@ export default function Home() {
               </div>
 
               {/* Right Column: Button to open form */}
-              <div className="flex justify-center items-center p-8 rounded-lg border">
+              <div className="flex justify-center items-center">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button size="lg" className="w-full max-w-sm bg-primary hover:bg-primary/90">

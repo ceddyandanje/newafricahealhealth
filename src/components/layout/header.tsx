@@ -19,7 +19,8 @@ const navLinks = [
   { href: "/organ-transplants", label: "Organ Transplants" },
 ]
 
-const categories = ["Diabetes", "Hypertension", "Cardiovascular", "Superfoods", "Skincare", "Beverages"]
+const categories = ["Chronic Care", "Emergency Response", "Medical Tourism", "Organ Transplants"];
+
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
