@@ -75,16 +75,14 @@ const Typewriter: React.FC<TypewriterProps> = ({
       }
     };
   }, [text, isDeleting, wordIndex, words, isPaused, currentCycle, cycles, pauseDuration]);
-  
-  const fullSentence = `We offer: ${isPaused ? text : ''}`;
 
   return (
     <span className={cn("inline-block", className)}>
         {isPaused ? (
-            fullSentence
+            `We offer: ${text}`
         ) : (
             <>
-                {text}
+                We offer: {text}
                 <span className="animate-ping">|</span>
             </>
         )}
