@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, Ambulance, LifeBuoy, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -315,7 +315,7 @@ export default function Home() {
             </div>
         </section>
 
-        {/* Shop by Condition Section */}
+        {/* Shop by Health Condition Section */}
         <section className="py-20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-12 text-foreground">
@@ -333,7 +333,7 @@ export default function Home() {
               <Link href="/products?category=Emergency+Response" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
-                    <Heart className="h-10 w-10" />
+                    <Ambulance className="h-10 w-10" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">Emergency Response</h3>
                 </div>
@@ -341,7 +341,7 @@ export default function Home() {
               <Link href="/products?category=Medical+Tourism" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
-                    <AirVent className="h-10 w-10" />
+                    <Plane className="h-10 w-10" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">Medical Tourism</h3>
                 </div>
@@ -349,7 +349,7 @@ export default function Home() {
               <Link href="/products?category=Organ+Transplants" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
-                    <Brain className="h-10 w-10" />
+                    <Heart className="h-10 w-10" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">Organ Transplants</h3>
                 </div>
@@ -409,7 +409,6 @@ export default function Home() {
             </div>
           </div>
         </section>
-
       </main>
     </div>
   )

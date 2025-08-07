@@ -1,6 +1,7 @@
 
+
 import Image from "next/image";
-import { CheckCircle2, Stethoscope, HeartPulse, Brain } from "lucide-react";
+import { CheckCircle2, Stethoscope, HeartPulse, Brain, Plane, LifeBuoy } from "lucide-react";
 
 export default function ServicesPage() {
     return (
@@ -41,13 +42,17 @@ export default function ServicesPage() {
                     <CheckCircle2 className="w-5 h-5 mt-1 text-primary flex-shrink-0"/>
                     <span className="text-muted-foreground">Rapid and reliable emergency medical response.</span>
                 </li>
+                 <li className="flex items-start gap-3">
+                    <CheckCircle2 className="w-5 h-5 mt-1 text-primary flex-shrink-0"/>
+                    <span className="text-muted-foreground">Compassionate coordination for organ transplant services.</span>
+                </li>
               </ul>
             </div>
           </div>
   
           <div>
             <h2 className="text-3xl font-bold text-center font-headline mb-10">Explore Our Core Offerings</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="glassmorphic p-8 text-center flex flex-col items-center">
                 <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
                     <HeartPulse className="h-10 w-10 text-primary" />
@@ -57,17 +62,24 @@ export default function ServicesPage() {
               </div>
               <div className="glassmorphic p-8 text-center flex flex-col items-center">
                 <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
-                    <Stethoscope className="h-10 w-10 text-primary" />
+                    <LifeBuoy className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-headline text-xl font-semibold mb-2">Global Health Access</h3>
-                <p className="text-sm text-muted-foreground">We facilitate seamless medical tourism and organ transplants with world-renowned hospitals for specialized treatments.</p>
+                <h3 className="font-headline text-xl font-semibold mb-2">Emergency Response</h3>
+                <p className="text-sm text-muted-foreground">Fast and reliable medical evacuation and ground ambulance services when every second counts.</p>
               </div>
               <div className="glassmorphic p-8 text-center flex flex-col items-center">
                 <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
+                    <Plane className="h-10 w-10 text-primary" />
+                </div>
+                <h3 className="font-headline text-xl font-semibold mb-2">Medical Tourism</h3>
+                <p className="text-sm text-muted-foreground">We facilitate seamless medical tourism with world-renowned hospitals for specialized treatments.</p>
+              </div>
+               <div className="glassmorphic p-8 text-center flex flex-col items-center">
+                <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
                     <Brain className="h-10 w-10 text-primary" />
                 </div>
-                <h3 className="font-headline text-xl font-semibold mb-2">Wellness & Mental Health</h3>
-                <p className="text-sm text-muted-foreground">Access resources, products, and professional support for your mental and emotional well-being.</p>
+                <h3 className="font-headline text-xl font-semibold mb-2">Organ Transplants</h3>
+                <p className="text-sm text-muted-foreground">Coordinating life-saving organ transplants, specializing in kidney and heart procedures.</p>
               </div>
             </div>
           </div>
