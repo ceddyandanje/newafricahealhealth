@@ -20,8 +20,8 @@ const navLinks = [
 const categoryLinks = [
     { href: "/products?category=Chronic+Care", label: "Chronic Care"},
     { href: "/products?category=Emergency+Response", label: "Emergency Response"},
-    { href: "/medical-tourism", label: "Medical Tourism" },
-    { href: "/organ-transplants", label: "Organ Transplants" },
+    { href: "/products?category=Medical+Tourism", label: "Medical Tourism" },
+    { href: "/products?category=Organ+Transplants", label: "Organ Transplants" },
 ]
 
 
