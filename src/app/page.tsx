@@ -285,7 +285,7 @@ export default function Home() {
           </div>
           <div className="relative container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Chronic Care Management</h2>
-            <p className="text-lg text-muted-foreground mb-12 max-w-2xl mx-auto">
+            <p className="text-lg text-foreground/80 mb-12 max-w-2xl mx-auto">
               Everything you need for seamless health management, delivered to your doorstep.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -431,7 +431,3 @@ export default function Home() {
     </div>
   )
 }
-
-    
-
-
