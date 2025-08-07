@@ -6,9 +6,9 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import ConsultationForm from "@/components/forms/consultation-form"
 
 
 export default function Home() {
@@ -390,33 +390,21 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Right Column: Form */}
-              <div className="p-8 rounded-lg border">
-                <form className="space-y-6">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">Name</label>
-                    <Input type="text" id="name" name="name" />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">Email</label>
-                      <Input type="email" id="email" name="email" />
-                    </div>
-                    <div>
-                      <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1">Phone</label>
-                      <Input type="tel" id="phone" name="phone" />
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">Message</label>
-                    <Textarea id="message" name="message" rows={4} />
-                  </div>
-                  <div>
-                    <Button type="submit" size="lg" className="w-full bg-primary hover:bg-primary/90">
-                      BOOK YOUR SESSION
-                    </Button>
-                  </div>
-                </form>
+              {/* Right Column: Button to open form */}
+              <div className="p-8 rounded-lg border flex justify-center items-center">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button size="lg" className="w-full max-w-sm bg-primary hover:bg-primary/90">
+                        BOOK YOUR SESSION
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle>Book Free Consultation</DialogTitle>
+                      </DialogHeader>
+                      <ConsultationForm />
+                    </DialogContent>
+                  </Dialog>
               </div>
             </div>
           </div>
