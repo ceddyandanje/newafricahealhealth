@@ -9,14 +9,14 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <main className="flex-grow">
-        <section className="relative pb-20">
+        <section className="relative pb-16">
           <div className="relative h-[70vh] min-h-[500px] flex items-center justify-center text-center text-white">
             <Image
               src="https://placehold.co/1920x1080.png"
-              alt="A diverse group of healthcare professionals smiling"
+              alt="Healthcare professional wearing a mask"
               fill
               className="object-cover object-center"
-              data-ai-hint="diverse healthcare professionals"
+              data-ai-hint="healthcare professional"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
@@ -35,7 +35,7 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          <div className="relative container mx-auto px-4 -mt-16 z-20">
+          <div className="relative container mx-auto px-4 -mt-20 z-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
@@ -213,5 +213,7 @@ export default function Home() {
     </div>
   )
 }
+
+    
 
     
