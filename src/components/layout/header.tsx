@@ -46,7 +46,7 @@ export default function Header() {
 
   const AuthButton = () => {
     if (loading) {
-        return <Button variant="ghost" size="icon" className="h-10 w-10" disabled />
+        return <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" disabled />
     }
 
     if (user && appUser) {
@@ -143,13 +143,17 @@ export default function Header() {
     if (user) {
         return (
           <>
-            {isAdmin && (
+            {isAdmin ? (
               <Button asChild variant="ghost" className="w-full justify-start">
                   <Link href="/admin"><ShieldCheck className="mr-2 h-4 w-4" /> Admin</Link>
               </Button>
+            ) : (
+              <Button asChild variant="ghost" className="w-full justify-start">
+                <Link href="/profile"><LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard</Link>
+              </Button>
             )}
              <Button asChild variant="ghost" className="w-full justify-start">
-                  <Link href="/profile"><Settings className="mr-2 h-4 w-4" /> Profile</Link>
+                  <Link href="/profile"><Settings className="mr-2 h-4 w-4" /> Settings</Link>
               </Button>
             <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
@@ -200,7 +204,7 @@ export default function Header() {
           <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
         </nav>
           
-        <div className="flex items-center justify-end space-x-2">
+        <div className="flex items-center justify-end md:justify-start md:flex-1 space-x-2">
            <ThemeToggleButton />
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
