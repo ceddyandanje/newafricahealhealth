@@ -4,8 +4,7 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
-import { Loader2 } from 'lucide-react';
+import { doc, onSnapshot } from "firebase/firestore";
 import { useRouter, usePathname } from 'next/navigation';
 
 export interface AppUser {
@@ -54,13 +53,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const adminStatus = userData.role === 'admin';
             setIsAdmin(adminStatus);
             
-            // Redirect after login if on the login page
             if (pathname === '/login') {
-                if(adminStatus) {
-                    router.replace('/admin');
-                } else {
-                    router.replace('/');
-                }
+                router.replace(adminStatus ? '/admin' : '/');
             }
           } else {
             setAppUser(null);

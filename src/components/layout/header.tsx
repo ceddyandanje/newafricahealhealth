@@ -45,6 +45,10 @@ export default function Header() {
   }
 
   const AuthButton = () => {
+    if (!isMounted) {
+      return null;
+    }
+    
     if (loading) {
         return <Button variant="ghost" size="icon" className="h-10 w-10" disabled />;
     }
@@ -138,7 +142,7 @@ export default function Header() {
   }
 
   const MobileAuthButton = () => {
-     if (loading) return null;
+     if (!isMounted || loading) return null;
 
     if (user) {
         return (
@@ -211,7 +215,7 @@ export default function Header() {
                 )}
                 </Link>
             </Button>
-            {isMounted && <AuthButton />}
+            <AuthButton />
         </nav>
             
         {/* Mobile Nav Trigger */}
