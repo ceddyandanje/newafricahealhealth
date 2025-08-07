@@ -6,12 +6,21 @@ import { cn } from '@/lib/utils';
 interface TypewriterProps {
   words: string[];
   className?: string;
+  cycles?: number;
+  pauseDuration?: number;
 }
 
-const Typewriter: React.FC<TypewriterProps> = ({ words, className }) => {
+const Typewriter: React.FC<TypewriterProps> = ({ 
+  words, 
+  className, 
+  cycles = 3, 
+  pauseDuration = 120000 // 2 minutes
+}) => {
   const [wordIndex, setWordIndex] = useState(0);
   const [text, setText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [currentCycle, setCurrentCycle] = useState(0);
   
   const typingSpeed = 150;
   const deletingSpeed = 75;
@@ -21,6 +30,8 @@ const Typewriter: React.FC<TypewriterProps> = ({ words, className }) => {
 
   useEffect(() => {
     const handleTyping = () => {
+      if (isPaused) return;
+
       const currentWord = words[wordIndex];
       
       if (isDeleting) {
@@ -30,28 +41,53 @@ const Typewriter: React.FC<TypewriterProps> = ({ words, className }) => {
       }
 
       if (!isDeleting && text === currentWord) {
-        // Word fully typed, pause before deleting
         timeoutRef.current = setTimeout(() => setIsDeleting(true), delaySpeed);
       } else if (isDeleting && text === '') {
-        // Word fully deleted
         setIsDeleting(false);
-        setWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+        const nextWordIndex = (wordIndex + 1);
+
+        if (nextWordIndex === words.length) {
+            const nextCycle = currentCycle + 1;
+            setCurrentCycle(nextCycle);
+
+            if (nextCycle >= cycles) {
+                setIsPaused(true);
+                setText(words.join(', '));
+                timeoutRef.current = setTimeout(() => {
+                    setCurrentCycle(0);
+                    setWordIndex(0);
+                    setIsPaused(false);
+                }, pauseDuration);
+                return;
+            }
+        }
+        setWordIndex(nextWordIndex % words.length);
       }
     };
 
-    timeoutRef.current = setTimeout(handleTyping, isDeleting ? deletingSpeed : typingSpeed);
+    if (!isPaused) {
+        timeoutRef.current = setTimeout(handleTyping, isDeleting ? deletingSpeed : typingSpeed);
+    }
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [text, isDeleting, wordIndex, words]);
+  }, [text, isDeleting, wordIndex, words, isPaused, currentCycle, cycles, pauseDuration]);
+  
+  const fullSentence = `We offer: ${isPaused ? text : ''}`;
 
   return (
     <span className={cn("inline-block", className)}>
-      {text}
-      <span className="animate-ping">|</span>
+        {isPaused ? (
+            fullSentence
+        ) : (
+            <>
+                {text}
+                <span className="animate-ping">|</span>
+            </>
+        )}
     </span>
   );
 };

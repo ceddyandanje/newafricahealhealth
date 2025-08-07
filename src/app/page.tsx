@@ -110,9 +110,9 @@ export default function Home() {
                     Access world-class healthcare solutions, including medical tourism, critical organ transplants, and emergency response, coordinated by our expert team.
                 </p>
                 <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="bg-green-100/20 dark:bg-green-900/30 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-left flex flex-col border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="glassmorphic p-8 text-left flex flex-col">
                         <div className="flex items-center mb-4">
-                            <div className="inline-block p-3 bg-green-100 text-green-700 rounded-full mr-4">
+                            <div className="inline-block p-3 bg-primary/20 text-primary rounded-full mr-4">
                                 <Plane className="h-6 w-6" />
                             </div>
                             <h3 className="text-2xl font-bold text-foreground">Medical Tourism</h3>
@@ -124,9 +124,9 @@ export default function Home() {
                             Learn More <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>
                     </div>
-                    <div className="bg-green-100/20 dark:bg-green-900/30 backdrop-blur-sm p-8 rounded-2xl shadow-lg text-left flex flex-col border border-gray-200/50 dark:border-gray-700/50">
+                    <div className="glassmorphic p-8 text-left flex flex-col">
                         <div className="flex items-center mb-4">
-                            <div className="inline-block p-3 bg-green-100 text-green-700 rounded-full mr-4">
+                            <div className="inline-block p-3 bg-primary/20 text-primary rounded-full mr-4">
                                 <Heart className="h-6 w-6" />
                             </div>
                             <h3 className="text-2xl font-bold text-foreground">Organ Transplants</h3>
