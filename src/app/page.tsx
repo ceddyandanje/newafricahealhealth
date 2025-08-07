@@ -390,24 +390,24 @@ export default function Home() {
               </div>
               
               <div className="glassmorphic p-8">
-                <form className="space-y-6">
+                <form action="#" className="space-y-6">
                   <div>
                     <label htmlFor="name" className="sr-only">Name</label>
-                    <Input id="name" type="text" placeholder="Name" />
+                    <Input id="name" name="name" type="text" placeholder="Name" required />
                   </div>
                   <div className="grid sm:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="email" className="sr-only">Email</label>
-                      <Input id="email" type="email" placeholder="Email" />
+                      <Input id="email" name="email" type="email" placeholder="Email" required />
                     </div>
                     <div>
                       <label htmlFor="phone" className="sr-only">Phone</label>
-                      <Input id="phone" type="tel" placeholder="Phone" />
+                      <Input id="phone" name="phone" type="tel" placeholder="Phone" />
                     </div>
                   </div>
                   <div>
                     <label htmlFor="message" className="sr-only">Message</label>
-                    <Textarea id="message" placeholder="Message" rows={5} />
+                    <Textarea id="message" name="message" placeholder="Message" rows={5} required />
                   </div>
                   <div>
                     <Button type="submit" size="lg" className="w-full">
