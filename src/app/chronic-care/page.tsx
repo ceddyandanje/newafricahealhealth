@@ -38,7 +38,7 @@ export default function ChronicCarePage() {
     
     const handleLoginRedirect = () => {
         setShowLoginPrompt(false);
-        router.push('/profile');
+        router.push('/login');
     };
 
     return (

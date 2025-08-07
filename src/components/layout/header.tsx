@@ -77,7 +77,7 @@ export default function Header() {
                       </Link>
                     </Button>
                      <Button variant="ghost" size="icon" asChild>
-                        <Link href="/profile">
+                        <Link href={user ? "/profile" : "/login"}>
                             {user ? <User className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <LogIn className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
                         </Link>
                     </Button>
@@ -115,7 +115,7 @@ export default function Header() {
                 </Link>
               </Button>
                <Button variant="ghost" size="icon" asChild>
-                  <Link href="/profile">
+                  <Link href={user ? "/profile" : "/login"}>
                      {user ? <User className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <LogIn className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
                   </Link>
               </Button>

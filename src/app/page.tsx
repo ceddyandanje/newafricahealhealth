@@ -47,7 +47,7 @@ export default function Home() {
           </div>
           <div className="relative container mx-auto px-4 -mt-20 z-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Link href="/profile" className="block group h-full">
+              <Link href="/login" className="block group h-full">
                 <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
                   <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
                     <User className="h-8 w-8" />

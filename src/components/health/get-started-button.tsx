@@ -33,7 +33,7 @@ export default function GetStartedButton() {
 
   const handleLoginRedirect = () => {
     setShowLoginPrompt(false);
-    router.push('/profile');
+    router.push('/login');
   };
 
   return (
