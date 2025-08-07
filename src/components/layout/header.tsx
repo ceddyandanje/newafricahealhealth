@@ -134,16 +134,25 @@ export default function Header() {
         
         <div className="hidden md:flex items-center space-x-2">
             <nav className="flex items-center space-x-2">
-                {navLinks.map((link) => (
-                    <Link
-                    key={link.href}
-                    href={link.href}
+                <Link
+                    href="/products"
                     className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium px-2 py-1"
-                    >
-                    {link.label}
-                    </Link>
-                ))}
+                >
+                    Products
+                </Link>
+                <Link
+                    href="/services"
+                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium px-2 py-1"
+                >
+                    Services
+                </Link>
                 <CategoriesDropdown />
+                <Link
+                    href="/wellness-blog"
+                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium px-2 py-1"
+                >
+                    Wellness Blog
+                </Link>
             </nav>
             {isMounted && (
                 <>
@@ -191,16 +200,15 @@ export default function Header() {
                         <span className="font-bold text-gray-800 dark:text-white">Africa Heal Health</span>
                     </Link>
                     <nav className="flex flex-col space-y-2 flex-grow text-lg">
-                        {navLinks.map((link) => (
-                            <SheetClose asChild key={link.href}>
-                                <Link
-                                    href={link.href}
-                                    className="py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
-                                >
-                                    {link.label}
-                                </Link>
-                            </SheetClose>
-                        ))}
+                        <SheetClose asChild>
+                            <Link href="/products" className="py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Products</Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                            <Link href="/services" className="py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Services</Link>
+                        </SheetClose>
+                        <SheetClose asChild>
+                            <Link href="/wellness-blog" className="py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
+                        </SheetClose>
                         <Collapsible>
                             <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white group">
                                 <span>Categories</span>
