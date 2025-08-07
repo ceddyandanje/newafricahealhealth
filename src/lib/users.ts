@@ -3,7 +3,7 @@ import { User } from './types';
 
 // Let's create a default admin user and a regular user for testing.
 // In a real app, NEVER store passwords in plain text. This is for prototype purposes only.
-export const users: User[] = [
+export let users: User[] = [
   {
     id: '1',
     name: 'Admin User',
@@ -18,6 +18,13 @@ export const users: User[] = [
     password: 'password123', // Unsafe, for demo only
     role: 'user',
   },
+  {
+    id: '3',
+    name: 'Admin Root',
+    email: 'rootaccessdenied4312@gmail.com',
+    password: 'password123', // Unsafe, for demo only
+    role: 'admin',
+  }
 ];
 
 export const findUserByEmail = (email: string): User | undefined => {
