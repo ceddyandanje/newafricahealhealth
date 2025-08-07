@@ -177,7 +177,7 @@ export default function ProfilePage() {
                          </CardTitle>
                          <CardDescription className="text-center">
                            Please sign in or create an account to continue.
-                         </cardDescription>
+                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
