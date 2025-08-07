@@ -4,6 +4,7 @@
 import Link from "next/link"
 import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User } from "lucide-react"
 import { useTheme } from "next-themes"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -29,6 +30,11 @@ export default function Header() {
   const { theme, setTheme } = useTheme()
   const { items } = useCart()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
 
   return (
@@ -72,11 +78,12 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
+                {isMounted && (
                  <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <span className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                      <button className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
                         Categories <ChevronDown className="h-4 w-4 ml-1" />
-                      </span>
+                      </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       {categoryLinks.map((link) => (
@@ -86,6 +93,7 @@ export default function Header() {
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
+                )}
                 <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
                  <div className="flex items-center pt-4 border-t">
                     <Button variant="ghost" size="icon" asChild>
@@ -128,11 +136,12 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
-              <DropdownMenu>
+              {isMounted && (
+                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <span className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer">
+                    <button className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer">
                       Categories <ChevronDown className="h-4 w-4 ml-1" />
-                    </span>
+                    </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     {categoryLinks.map((link) => (
@@ -142,6 +151,7 @@ export default function Header() {
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
+              )}
               <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
             </nav>
           
