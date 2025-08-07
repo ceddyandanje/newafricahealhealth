@@ -190,20 +190,18 @@ export default function Header() {
         </Link>
         
         {/* Desktop Nav and actions */}
-        <div className="hidden md:flex items-center space-x-2">
-            <nav className="flex items-center space-x-6 text-sm font-medium">
-                {navLinks.map((link) => (
-                    <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
-                    >
-                    {link.label}
-                    </Link>
-                ))}
-                <ClientHeaderItems />
-                <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
-            </nav>
+        <nav className="hidden md:flex items-center space-x-2">
+            {navLinks.map((link) => (
+                <Link
+                key={link.href}
+                href={link.href}
+                className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium"
+                >
+                {link.label}
+                </Link>
+            ))}
+            <ClientHeaderItems />
+            <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium">Wellness Blog</Link>
             <ThemeToggleButton />
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
@@ -214,7 +212,7 @@ export default function Header() {
                 </Link>
             </Button>
             {isMounted && <AuthButton />}
-        </div>
+        </nav>
             
         {/* Mobile Nav Trigger */}
         <div className="md:hidden flex items-center">
