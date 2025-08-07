@@ -6,7 +6,7 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 export interface AppUser {
     uid: string;
@@ -39,20 +39,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setLoading(true);
-      if (user) {
-        setUser(user);
-        const userDocRef = doc(db, "users", user.uid);
+    const unsubscribe = onAuthStateChanged(auth, (authUser) => {
+      setUser(authUser);
+      if (authUser) {
+        const userDocRef = doc(db, "users", authUser.uid);
         const unsubSnapshot = onSnapshot(userDocRef, (doc) => {
           if (doc.exists()) {
             const userData = { uid: doc.id, ...doc.data() } as AppUser;
             setAppUser(userData);
-            setIsAdmin(userData.role === 'admin');
+            const adminStatus = userData.role === 'admin';
+            setIsAdmin(adminStatus);
+            
+            // Redirect after login
+            if (pathname === '/login') {
+                if(adminStatus) {
+                    router.push('/admin');
+                } else {
+                    router.push('/');
+                }
+            }
           } else {
-            // This case might happen if user exists in Auth but not Firestore
             setAppUser(null);
             setIsAdmin(false);
           }
@@ -65,7 +74,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         return () => unsubSnapshot();
       } else {
-        setUser(null);
         setAppUser(null);
         setIsAdmin(false);
         setLoading(false);
@@ -73,36 +81,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router, pathname]);
   
-  useEffect(() => {
-      if (!loading && user && appUser) {
-          if(isAdmin) {
-            if(window.location.pathname !== '/admin') router.push('/admin');
-          } else {
-            if(window.location.pathname !== '/profile') router.push('/profile');
-          }
-      }
-      
-      if (!loading && !user) {
-          if(window.location.pathname === '/profile' || window.location.pathname === '/admin'){
-            router.push('/login');
-          }
-      }
-
-  }, [user, appUser, isAdmin, loading, router])
 
   const value = { user, appUser, isAdmin, loading };
 
   return (
     <AuthContext.Provider value={value}>
-      {loading ? (
-        <div className="flex justify-center items-center h-screen">
-          <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        </div>
-      ) : (
-        children
-      )}
+        {children}
     </AuthContext.Provider>
   );
 };

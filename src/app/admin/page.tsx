@@ -15,17 +15,15 @@ import { AppUser } from '@/hooks/use-auth';
 
 
 export default function AdminPage() {
-    const { user, appUser, isAdmin, loading: authLoading } = useAuth();
+    const { user, isAdmin, loading: authLoading } = useAuth();
     const router = useRouter();
     const [users, setUsers] = useState<AppUser[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!authLoading) {
-            if (!user) {
+            if (!user || !isAdmin) {
                 router.push('/login');
-            } else if (!isAdmin) {
-                router.push('/profile');
             } else {
                 const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
                     const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppUser));
@@ -40,7 +38,7 @@ export default function AdminPage() {
         }
     }, [user, isAdmin, authLoading, router]);
 
-    if (authLoading || loading || !isAdmin) {
+    if (authLoading || loading) {
         return (
             <div className="flex justify-center items-center h-screen">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -48,6 +46,10 @@ export default function AdminPage() {
         );
     }
     
+    if (!isAdmin) {
+        return null; // or a redirection message
+    }
+
     return (
         <div className="container mx-auto px-4 py-12">
             <Card>

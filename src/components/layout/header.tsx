@@ -35,9 +35,6 @@ export default function Header() {
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                     <DropdownMenuItem asChild>
-                        <Link href="/profile">Profile</Link>
-                    </DropdownMenuItem>
                     {isAdmin && (
                          <DropdownMenuItem asChild>
                             <Link href="/admin">Admin Dashboard</Link>
