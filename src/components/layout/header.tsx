@@ -15,8 +15,6 @@ import { Badge } from "@/components/ui/badge"
 const navLinks = [
   { href: "/products", label: "Products" },
   { href: "/services", label: "Services" },
-  { href: "/medical-tourism", label: "Medical Tourism" },
-  { href: "/organ-transplants", label: "Organ Transplants" },
 ]
 
 const categoryLinks = [
