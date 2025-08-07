@@ -96,9 +96,11 @@ export default function Home() {
                         <p className="text-muted-foreground mb-6 flex-grow">
                             Travel abroad for top-quality, affordable medical care. We handle all the logistics, so you can focus on your health.
                         </p>
-                        <Button variant="outline" className="self-start" asChild>
-                            <Link href="/medical-tourism">Learn More <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                        </Button>
+                        <Link href="/medical-tourism" passHref>
+                          <Button variant="outline" className="self-start">
+                              Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
                     </div>
                     <div className="glassmorphic p-8 text-left flex flex-col">
                         <div className="flex items-center mb-4">
@@ -110,9 +112,11 @@ export default function Home() {
                         <p className="text-muted-foreground mb-6 flex-grow">
                             We facilitate life-saving organ transplant procedures by connecting you with leading global hospitals.
                         </p>
-                        <Button variant="outline" className="self-start" asChild>
-                            <Link href="/organ-transplants">Learn More <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                        </Button>
+                        <Link href="/organ-transplants" passHref>
+                          <Button variant="outline" className="self-start">
+                              Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                          </Button>
+                        </Link>
                     </div>
                 </div>
             </div>
