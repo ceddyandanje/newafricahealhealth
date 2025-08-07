@@ -391,7 +391,7 @@ export default function Home() {
               </div>
 
               {/* Right Column: Button to open form */}
-              <div className="p-8 rounded-lg border flex justify-center items-center">
+              <div className="flex justify-center items-center p-8 rounded-lg border">
                   <Dialog>
                     <DialogTrigger asChild>
                       <Button size="lg" className="w-full max-w-sm bg-primary hover:bg-primary/90">
