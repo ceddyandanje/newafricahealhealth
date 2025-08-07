@@ -3,6 +3,7 @@
 
 import Link from "next/link"
 import { Menu, ShoppingCart, User, LogIn, ShieldCheck, LogOut, Settings } from "lucide-react"
+import { useState, useEffect } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -26,6 +27,12 @@ export default function Header() {
   const { items } = useCart()
   const { user, isAdmin, loading } = useAuth()
   const { toast } = useToast()
+  const [isMounted, setIsMounted] = useState(false)
+  
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   
   const handleLogout = async () => {
@@ -165,7 +172,7 @@ export default function Header() {
           <Button variant="ghost" size="icon" asChild>
             <Link href="/cart" aria-label="Open cart" className="relative">
               <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-              {totalItems > 0 && (
+              {isMounted && totalItems > 0 && (
                 <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
               )}
             </Link>
@@ -178,7 +185,7 @@ export default function Header() {
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
                 <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                {totalItems > 0 && (
+                {isMounted && totalItems > 0 && (
                     <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
                 )}
                 </Link>
