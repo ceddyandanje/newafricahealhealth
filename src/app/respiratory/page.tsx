@@ -1,7 +1,7 @@
 
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Wind, Lungs, ShieldPlus } from "lucide-react";
+import { Wind, AirVent, ShieldPlus } from "lucide-react";
 
 export default function RespiratoryPage() {
     return (
@@ -54,7 +54,7 @@ export default function RespiratoryPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
                     <div className="glassmorphic p-6 text-center">
                         <div className="mx-auto bg-primary/20 p-4 rounded-full w-fit mb-4">
-                            <Lungs className="h-8 w-8 text-primary"/>
+                            <AirVent className="h-8 w-8 text-primary"/>
                         </div>
                         <h3 className="font-headline text-xl font-semibold mb-2">Treatment Devices</h3>
                         <p className="text-sm text-muted-foreground">Access modern and portable nebulizers, spacers, and peak flow meters to effectively manage your condition.</p>
