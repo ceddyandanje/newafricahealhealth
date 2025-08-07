@@ -1,3 +1,4 @@
+
 "use client"
 
 import Link from "next/link"
@@ -16,7 +17,7 @@ const navLinks = [
   { href: "/organ-transplants", label: "Organ Transplants" },
 ]
 
-const categories = ["Diabetes Care", "Heart Health", "Respiratory", "Mental Health"]
+const categories = ["Diabetes", "Hypertension", "Cardiovascular", "Superfoods", "Skincare", "Beverages"]
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
@@ -69,7 +70,7 @@ export default function Header() {
                     <DropdownMenuContent>
                       {categories.map((cat) => (
                         <DropdownMenuItem key={cat} asChild>
-                          <Link href={`/products?category=${cat.toLowerCase().replace(" ", "-")}`}>{cat}</Link>
+                          <Link href={`/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
@@ -120,7 +121,7 @@ export default function Header() {
                   <DropdownMenuContent>
                     {categories.map((cat) => (
                       <DropdownMenuItem key={cat} asChild>
-                        <Link href={`/products?category=${cat.toLowerCase().replace(" ", "-")}`}>{cat}</Link>
+                        <Link href={`/products?category=${encodeURIComponent(cat)}`}>{cat}</Link>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
