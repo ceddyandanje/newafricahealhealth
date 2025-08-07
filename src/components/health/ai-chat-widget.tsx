@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const formSchema = z.object({
   query: z.string().min(10, "Please enter a more detailed question."),
@@ -22,9 +23,15 @@ type Message = {
   products?: string[];
 };
 
+const initialMessage: Message = {
+    role: 'assistant',
+    content: "Hello! I'm your friendly AI health assistant. How can I help you today? You can ask me about health conditions, wellness tips, or product information.",
+};
+
+
 export default function AiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([initialMessage]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -78,7 +85,13 @@ export default function AiChatWidget() {
         )}
       >
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="font-headline text-lg font-bold">AI Assistant</h2>
+            <div className="flex items-center gap-2">
+                <Avatar className="h-8 w-8">
+                    <AvatarImage src="https://placehold.co/100x100.png" alt="AI Assistant" data-ai-hint="friendly robot" />
+                    <AvatarFallback>AI</AvatarFallback>
+                </Avatar>
+                <h2 className="font-headline text-lg font-bold">AI Assistant</h2>
+            </div>
           <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
             <X className="h-4 w-4" />
           </Button>
@@ -166,7 +179,7 @@ export default function AiChatWidget() {
             isOpen ? "scale-0" : "scale-100"
         )}
       >
-        <Sparkles className="h-8 w-8" />
+        <MessageSquare className="h-8 w-8" />
       </Button>
     </div>
   );
