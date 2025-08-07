@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { ServiceCategoryDialog } from "@/components/health/service-category-dialog";
 import { serviceCategories, ServiceCategory } from '@/lib/serviceCategories';
+import { EmergencyRequestWidget } from '@/components/health/emergency-request-widget';
 
 export default function ServicesPage() {
     const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
@@ -62,6 +63,7 @@ export default function ServicesPage() {
                     onClose={() => setSelectedCategory(null)}
                 />
             )}
+            <EmergencyRequestWidget />
         </div>
     );
 }
