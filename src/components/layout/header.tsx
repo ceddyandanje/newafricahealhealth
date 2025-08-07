@@ -46,7 +46,7 @@ export default function Header() {
                 <span className="sr-only">Toggle Menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="bg-white dark:bg-gray-900">
+            <SheetContent side="right" className="bg-white dark:bg-gray-900">
               <Link href="/" className="flex items-center space-x-2 mb-6">
                  <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
