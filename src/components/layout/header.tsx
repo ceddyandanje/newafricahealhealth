@@ -46,7 +46,7 @@ export default function Header() {
 
   const AuthButton = () => {
     if (loading) {
-        return <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full" disabled />
+        return <Button variant="ghost" size="icon" className="h-10 w-10" disabled />;
     }
 
     if (user && appUser) {
@@ -189,23 +189,22 @@ export default function Header() {
             <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
         </Link>
         
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <ClientHeaderItems />
-          <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
-        </nav>
-          
-        <div className="flex items-center justify-end md:justify-start md:flex-1 space-x-2">
-           <ThemeToggleButton />
+        {/* Desktop Nav and actions */}
+        <div className="hidden md:flex items-center space-x-2">
+            <nav className="flex items-center space-x-6 text-sm font-medium">
+                {navLinks.map((link) => (
+                    <Link
+                    key={link.href}
+                    href={link.href}
+                    className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors"
+                    >
+                    {link.label}
+                    </Link>
+                ))}
+                <ClientHeaderItems />
+                <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
+            </nav>
+            <ThemeToggleButton />
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
                 <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
@@ -214,9 +213,20 @@ export default function Header() {
                 )}
                 </Link>
             </Button>
-             {isMounted && <AuthButton />}
-            {/* Mobile Nav Trigger */}
-            <div className="md:hidden">
+            {isMounted && <AuthButton />}
+        </div>
+            
+        {/* Mobile Nav Trigger */}
+        <div className="md:hidden flex items-center">
+             <ThemeToggleButton />
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/cart" aria-label="Open cart" className="relative">
+                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                {isMounted && totalItems > 0 && (
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+                )}
+                </Link>
+            </Button>
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -247,11 +257,10 @@ export default function Header() {
                     <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
                     </nav>
                     <div className="mt-auto">
-                    <MobileAuthButton />
+                        <MobileAuthButton />
                     </div>
                 </SheetContent>
             </Sheet>
-            </div>
         </div>
       </div>
     </header>
