@@ -13,7 +13,7 @@ export default function Home() {
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
             <Image
-              src="https://placehold.co/1920x1080.png"
+              src="https://images.unsplash.com/photo-1588776793433-d8db5e985935?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Healthcare professional wearing a mask"
               fill
               className="object-cover object-center"
@@ -189,30 +189,30 @@ export default function Home() {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">
-                  Why We Do What We Do
-                </h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  We do this work because we want people to know that there are many tools available for them to feel better. We want people to feel accepted, supported and to guide them when needed. We support people in every state they are in and guide them at their own pace. We want to offer a place where you feel peace, love and get the attention you deserve.
-                </p>
-              </div>
-              <div className="relative aspect-video">
-                <Image
-                  src="https://placehold.co/1920x1080.png"
-                  alt="Doctor with patient in a hospital setting"
-                  fill
-                  className="object-cover rounded-2xl"
-                  data-ai-hint="doctor patient hospital"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <PlayCircle className="w-24 h-24 text-white/70 hover:text-white transition-colors cursor-pointer" />
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">
+                    Why We Do What We Do
+                  </h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    We do this work because we want people to know that there are many tools available for them to feel better. We want people to feel accepted, supported and to guide them when needed. We support people in every state they are in and guide them at their own pace. We want to offer a place where you feel peace, love and get the attention you deserve.
+                  </p>
                 </div>
-              </div>
+                <div className="relative aspect-video">
+                  <Image
+                    src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2N0b3J8ZW58MHx8fHwxNzU0NTYyMTQwfDA&ixlib=rb-4.1.0&q=80&w=1080"
+                    alt="Doctor with patient in a hospital setting"
+                    fill
+                    className="object-cover rounded-2xl"
+                    data-ai-hint="doctor patient hospital"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <PlayCircle className="w-24 h-24 text-white/70 hover:text-white transition-colors cursor-pointer" />
+                  </div>
+                </div>
             </div>
           </div>
         </section>
-
+        
         <section className="py-20 bg-background">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -262,10 +262,10 @@ export default function Home() {
                 </div>
               </div>
               <div className="relative h-[500px]">
-                <Image src="https://images.unsplash.com/photo-1550831107-1553da8c8464?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2N0b3IlMjBwYXRpZW50fGVufDB8fHx8MTc1NDU2MjM5NHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Doctor with patient" width={320} height={480} className="absolute top-0 left-0 rounded-2xl object-cover z-10" data-ai-hint="doctor patient" />
-                <Image src="https://images.unsplash.com/photo-1624727828489-a1e03b79bba8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMXx8aGFwcHklMjBkb2N0byUyMGFuZCUyMHBhdGllbnR8ZW58MHx8fHwxNzU0NTYyMzY2fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Happy doctor with patient" width={240} height={180} className="absolute top-10 right-0 rounded-2xl object-cover" data-ai-hint="doctor patient happy" />
-                <Image src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxoYXBweSUyMHBlcnNvbnxlbnwwfHx8fDE3NTQ1NjIzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Happy person" width={280} height={210} className="absolute bottom-20 left-1/4 rounded-2xl object-cover z-20" data-ai-hint="happy person" />
-                <Image src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx5b2dhJTIwbGlmZXN0eWxlfGVufDB8fHx8MTc1NDU2MjQwMXww&ixlib=rb-4.1.0&q=80&w=1080" alt="Yoga pose" width={200} height={200} className="absolute bottom-0 right-5 rounded-2xl object-cover z-10" data-ai-hint="yoga lifestyle" />
+                <Image src="https://images.unsplash.com/photo-1550831107-1553da8c8464?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxkb2N0b3IlMjBwYXRpZW50fGVufDB8fHx8MTc1NDU2MjM5NHww&ixlib=rb-4.1.0&q=80&w=1080" alt="Doctor with patient" width={320} height={480} className="absolute top-0 left-0 w-[320px] h-[480px] rounded-2xl object-cover z-10" data-ai-hint="doctor patient" />
+                <Image src="https://images.unsplash.com/photo-1624727828489-a1e03b79bba8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMXx8aGFwcHklMjBkb2N0byUyMGFuZCUyMHBhdGllbnR8ZW58MHx8fHwxNzU0NTYyMzY2fDA&ixlib=rb-4.1.0&q=80&w=1080" alt="Happy doctor with patient" width={240} height={180} className="absolute top-10 right-0 w-[240px] h-[180px] rounded-2xl object-cover" data-ai-hint="doctor patient happy" />
+                <Image src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxoYXBweSUyMHBlcnNvbnxlbnwwfHx8fDE3NTQ1NjIzMTJ8MA&ixlib=rb-4.1.0&q=80&w=1080" alt="Happy person" width={280} height={210} className="absolute bottom-20 left-1/4 w-[280px] h-[210px] rounded-2xl object-cover z-20" data-ai-hint="happy person" />
+                <Image src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx5b2dhJTIwbGlmZXN0eWxlfGVufDB8fHx8MTc1NDU2MjQwMXww&ixlib=rb-4.1.0&q=80&w=1080" alt="Yoga pose" width={200} height={200} className="absolute bottom-0 right-5 w-[200px] h-[200px] rounded-2xl object-cover z-10" data-ai-hint="yoga lifestyle" />
               </div>
             </div>
           </div>
