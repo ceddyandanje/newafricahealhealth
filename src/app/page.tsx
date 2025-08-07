@@ -1,7 +1,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 
 export default function Home() {
@@ -182,7 +182,36 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="grid md:grid-cols-2 gap-16 items-center">
+              <div className="relative aspect-video rounded-2xl overflow-hidden glassmorphic flex items-center justify-center">
+                <Image
+                  src="https://placehold.co/1920x1080.png"
+                  alt="Company mission video placeholder"
+                  fill
+                  className="object-cover"
+                  data-ai-hint="company mission video"
+                />
+                <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                  <PlayCircle className="w-24 h-24 text-white/80 hover:text-white transition-colors cursor-pointer" />
+                </div>
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">
+                  Why We Do What We Do
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  We do this work because we want people to know that there are many tools available for them to feel better. We want people to feel accepted, supported and to guide them when needed. We support people in every state they are in and guide them at their own pace. We want to offer a place where you feel peace, love and get the attention you deserve.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
 }
+
+    

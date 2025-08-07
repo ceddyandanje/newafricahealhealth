@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User, Plane } from "lucide-react"
+import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User, Plane, X } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,12 @@ const navLinks = [
 ]
 
 const categories = ["Category 1", "Category 2", "Category 3"]
+
+const services = [
+  { href: "/chronic-care", label: "Chronic Care"},
+  { href: "/emergency", label: "Emergency"},
+  { href: "/wellness", label: "Wellness"},
+]
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
@@ -112,6 +118,18 @@ export default function Header() {
               ))}
               <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
+                    Services <ChevronDown className="h-4 w-4 ml-1" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    {services.map((cat) => (
+                      <DropdownMenuItem key={cat.href} asChild>
+                        <Link href={cat.href}>{cat.label}</Link>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
                     Categories <ChevronDown className="h-4 w-4 ml-1" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
@@ -151,3 +169,5 @@ export default function Header() {
     </header>
   )
 }
+
+    
