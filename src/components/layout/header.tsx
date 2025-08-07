@@ -12,8 +12,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 const navLinks = [
   { href: "/products", label: "Products" },
   { href: "/emergency-services", label: "Emergency Services" },
-  { href: "/medical-tourism", label: "Medical Tourism" },
-  { href: "/organ-transplants", label: "Organ Transplants" },
 ]
 
 const categories = ["Category 1", "Category 2", "Category 3"]
@@ -65,6 +63,18 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
+                 <DropdownMenu>
+                    <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                      Services <ChevronDown className="h-4 w-4 ml-1" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {services.map((cat) => (
+                        <DropdownMenuItem key={cat.href} asChild>
+                          <Link href={cat.href}>{cat.label}</Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                  <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
                       Categories <ChevronDown className="h-4 w-4 ml-1" />

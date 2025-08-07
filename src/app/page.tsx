@@ -2,7 +2,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle, ShieldCheck, CheckCircle2 } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 
 export default function Home() {
@@ -10,8 +10,8 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <main className="flex-grow">
-        <section className="relative pb-16">
-          <div className="relative h-[70vh] min-h-[500px] flex items-center justify-center text-center text-white">
+        <section className="relative">
+          <div className="relative h-[70vh] min-h-[500px]">
             <Image
               src="https://placehold.co/1920x1080.png"
               alt="Healthcare professional wearing a mask"
@@ -21,19 +21,21 @@ export default function Home() {
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
-            <div className="relative z-10 p-4">
-              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">
-                Reliable Medical Solutions
-              </h1>
-              <div className="text-2xl md:text-4xl font-semibold text-primary mb-4 h-12">
-                  <Typewriter words={["Chronic Care", "Emergency Response", "Medical Tourism", "Organ Transplants"]} />
-              </div>
-              <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
-                Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
-              </p>
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 py-3">
-                Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+            <div className="absolute inset-0 flex items-center justify-center text-center text-white">
+                <div className="relative z-10 p-4">
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">
+                        Reliable Medical Solutions
+                    </h1>
+                    <div className="text-2xl md:text-4xl font-semibold text-primary mb-4 h-12">
+                        <Typewriter words={["Chronic Care", "Emergency Response", "Medical Tourism", "Organ Transplants"]} />
+                    </div>
+                    <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
+                        Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
+                    </p>
+                    <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 py-3">
+                        Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                </div>
             </div>
           </div>
           <div className="relative container mx-auto px-4 -mt-20 z-20">
@@ -187,15 +189,15 @@ export default function Home() {
         <section className="py-20">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="relative aspect-video rounded-2xl overflow-hidden group">
+              <div className="relative aspect-video">
                   <Image
                       src="https://placehold.co/1920x1080.png"
                       alt="healthcare professional showing compassion"
                       fill
-                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="object-cover rounded-2xl transition-transform duration-300 group-hover:scale-105"
                       data-ai-hint="compassionate healthcare"
                   />
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-2xl">
                     <PlayCircle className="w-24 h-24 text-white/80 hover:text-white transition-colors cursor-pointer" />
                   </div>
               </div>
@@ -206,6 +208,74 @@ export default function Home() {
                 <p className="text-muted-foreground leading-relaxed">
                   We do this work because we want people to know that there are many tools available for them to feel better. We want people to feel accepted, supported and to guide them when needed. We support people in every state they are in and guide them at their own pace. We want to offer a place where you feel peace, love and get the attention you deserve.
                 </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="py-20 bg-background">
+          <div className="container mx-auto px-4">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+              <div className="space-y-6">
+                <h2 className="text-3xl md:text-4xl font-bold font-headline">Your Health Matters</h2>
+                <h3 className="text-xl text-muted-foreground">Making Quality Healthcare Accessible for All.</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  As a global healthcare facilitator, we are dedicated to offering our patients top-notch, safe, and affordable medical services. Our team of seasoned medical experts, combined with an extensive network of hospitals and clinics worldwide, ensures that you receive the highest standard of care, no matter where you are.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/20 rounded-full text-primary">
+                        <ShieldCheck className="w-6 h-6" />
+                      </div>
+                      <h4 className="font-headline text-xl font-semibold">Why Choose Us</h4>
+                    </div>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 mt-1 text-primary flex-shrink-0"/>
+                        <span className="text-muted-foreground">We cater to local and international medical needs</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 mt-1 text-primary flex-shrink-0"/>
+                        <span className="text-muted-foreground">24/7 patient support</span>
+                      </li>
+                    </ul>
+                  </div>
+                  <div className="space-y-4">
+                     <div className="flex items-center gap-3">
+                      <div className="p-2 bg-primary/20 rounded-full text-primary">
+                        <ShieldCheck className="w-6 h-6" />
+                      </div>
+                      <h4 className="font-headline text-xl font-semibold">How We Do It</h4>
+                    </div>
+                    <ul className="space-y-3">
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 mt-1 text-primary flex-shrink-0"/>
+                        <span className="text-muted-foreground">We get you a free customized treatment plan</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 mt-1 text-primary flex-shrink-0"/>
+                        <span className="text-muted-foreground">We connect you with the leading hospitals and specialists</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                  <div className="col-span-1 row-span-2 relative">
+                    <Image src="https://placehold.co/400x600.png" alt="Doctor with patient" width={400} height={600} className="rounded-2xl object-cover w-full h-full" data-ai-hint="doctor patient" />
+                  </div>
+                  <div className="col-span-1 relative">
+                    <Image src="https://placehold.co/400x300.png" alt="Stethoscope" width={400} height={300} className="rounded-2xl object-cover w-full h-full" data-ai-hint="stethoscope medical" />
+                  </div>
+                  <div className="col-span-1 relative">
+                    <Image src="https://placehold.co/400x300.png" alt="Happy person" width={400} height={300} className="rounded-2xl object-cover w-full h-full" data-ai-hint="happy person" />
+                  </div>
+                  <div className="absolute -bottom-8 -right-8 z-10">
+                    <div className="relative w-40 h-40">
+                      <Image src="https://placehold.co/200x200.png" alt="Woman doing yoga" width={200} height={200} className="rounded-2xl object-cover w-full h-full shadow-2xl" data-ai-hint="yoga wellness"/>
+                    </div>
+                  </div>
               </div>
             </div>
           </div>
