@@ -19,6 +19,9 @@ const categoryLinks = [
     { href: "/diabetes-care", label: "Diabetes Care"},
     { href: "/medical-tourism", label: "Medical Tourism"},
     { href: "/organ-transplants", label: "Organ Transplants"},
+    { href: "/products?category=Dermatology", label: "Dermatology"},
+    { href: "/products?category=Pediatrics", label: "Pediatrics"},
+    { href: "/products?category=Ophthalmology", label: "Ophthalmology"},
 ];
 
 export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boolean }) {
