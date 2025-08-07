@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -69,21 +69,21 @@ export function EmergencyRequestWidget() {
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
                 <Button className="fixed top-1/2 -translate-y-1/2 right-6 rounded-full w-16 h-16 shadow-lg z-50 bg-red-600 hover:bg-red-700 text-white animate-pulse">
                     <Siren className="w-8 h-8" />
                 </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle className="font-headline text-2xl flex items-center gap-2">
+            </SheetTrigger>
+            <SheetContent side="right">
+                <SheetHeader>
+                    <SheetTitle className="font-headline text-2xl flex items-center gap-2">
                         <Siren className="text-red-500" /> Emergency Services
-                    </DialogTitle>
-                    <DialogDescription>
+                    </SheetTitle>
+                    <SheetDescription>
                         Please select the service you require. This service is for urgent medical situations only.
-                    </DialogDescription>
-                </DialogHeader>
+                    </SheetDescription>
+                </SheetHeader>
 
                 <div className="space-y-4 py-4">
                     <div>
@@ -128,10 +128,10 @@ export function EmergencyRequestWidget() {
                     </div>
                 </div>
 
-                <DialogFooter>
+                <SheetFooter>
                     <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" onClick={handleSubmit}>Request Help Now</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+                </SheetFooter>
+            </SheetContent>
+        </Sheet>
     );
 }
