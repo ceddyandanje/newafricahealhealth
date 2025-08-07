@@ -1,9 +1,10 @@
 
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ArrowRight, Heart, Wind, Droplets, UploadCloud, ShoppingCart, Truck, Bone, Brain, Filter } from "lucide-react";
+import { ArrowRight, Wind, Droplets, UploadCloud, ShoppingCart, Truck, Bone, Brain, Filter } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import GetStartedButton from "@/components/health/get-started-button";
 
 export default function ChronicCarePage() {
     return (
@@ -63,9 +64,7 @@ export default function ChronicCarePage() {
                         </div>
                     </div>
                      <div className="mt-16">
-                        <Button size="lg" asChild>
-                            <Link href="/products?category=Chronic+Care">Shop Chronic Care Products <ArrowRight className="ml-2 h-5 w-5" /></Link>
-                        </Button>
+                        <GetStartedButton />
                     </div>
                 </div>
             </section>
