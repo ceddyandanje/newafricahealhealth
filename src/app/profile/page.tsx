@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, AppUser } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 function UserDashboard() {
-    const { user } = useAuth();
+    const { user, appUser } = useAuth();
     const { toast } = useToast();
 
     const handleLogout = async () => {
@@ -27,7 +27,7 @@ function UserDashboard() {
         { id: "ORD124", date: "2023-09-20", total: "Ksh 2,500", status: "Delivered" },
     ];
     
-    if (!user) return null;
+    if (!user || !appUser) return null;
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -35,11 +35,11 @@ function UserDashboard() {
                 <Card className="glassmorphic">
                     <CardHeader className="items-center text-center">
                         <Avatar className="w-24 h-24 mb-4 border-2 border-primary">
-                             <AvatarImage src={user.photoURL || "https://placehold.co/100x100.png"} alt={user.displayName || 'User'} data-ai-hint="smiling person"/>
-                            <AvatarFallback>{user.email?.[0].toUpperCase()}</AvatarFallback>
+                             <AvatarImage src={"https://placehold.co/100x100.png"} alt={appUser.firstName || 'User'} data-ai-hint="smiling person"/>
+                            <AvatarFallback>{appUser.firstName?.[0]}{appUser.lastName?.[0]}</AvatarFallback>
                         </Avatar>
-                        <CardTitle>{user.displayName || "User"}</CardTitle>
-                        <CardDescription>{user.email}</CardDescription>
+                        <CardTitle>{appUser.firstName} {appUser.lastName}</CardTitle>
+                        <CardDescription>{appUser.email}</CardDescription>
                     </CardHeader>
                     <CardContent className="p-4">
                         <nav className="flex flex-col space-y-1">

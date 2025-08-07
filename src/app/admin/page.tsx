@@ -4,27 +4,18 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
+import { AppUser } from '@/hooks/use-auth';
 
-interface AppUser {
-    id: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phoneNumber?: string;
-    ageRange?: string;
-    role?: 'admin' | 'user';
-    createdAt?: any;
-}
 
 export default function AdminPage() {
-    const { user, isAdmin, loading: authLoading } = useAuth();
+    const { user, appUser, isAdmin, loading: authLoading } = useAuth();
     const router = useRouter();
     const [users, setUsers] = useState<AppUser[]>([]);
     const [loading, setLoading] = useState(true);
@@ -39,6 +30,9 @@ export default function AdminPage() {
                 const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
                     const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppUser));
                     setUsers(usersData);
+                    setLoading(false);
+                }, (error) => {
+                    console.error("Error fetching users:", error);
                     setLoading(false);
                 });
                 return () => unsubscribe();
@@ -73,28 +67,28 @@ export default function AdminPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {users.map((appUser) => (
-                                <TableRow key={appUser.id}>
+                            {users.map((appUserItem) => (
+                                <TableRow key={appUserItem.uid}>
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar>
-                                                <AvatarFallback>{appUser.firstName?.[0]}{appUser.lastName?.[0]}</AvatarFallback>
+                                                <AvatarFallback>{appUserItem.firstName?.[0]}{appUserItem.lastName?.[0]}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <p className="font-medium">{appUser.firstName} {appUser.lastName}</p>
-                                                <p className="text-sm text-muted-foreground">{appUser.ageRange}</p>
+                                                <p className="font-medium">{appUserItem.firstName} {appUserItem.lastName}</p>
+                                                <p className="text-sm text-muted-foreground">{appUserItem.ageRange}</p>
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>{appUser.email}</TableCell>
-                                    <TableCell>{appUser.phoneNumber}</TableCell>
+                                    <TableCell>{appUserItem.email}</TableCell>
+                                    <TableCell>{appUserItem.phoneNumber}</TableCell>
                                     <TableCell>
-                                        <Badge variant={appUser.role === 'admin' ? 'default' : 'secondary'}>
-                                            {appUser.role}
+                                        <Badge variant={appUserItem.role === 'admin' ? 'default' : 'secondary'}>
+                                            {appUserItem.role}
                                         </Badge>
                                     </TableCell>
                                     <TableCell>
-                                        {appUser.createdAt?.toDate().toLocaleDateString()}
+                                        {appUserItem.createdAt?.toDate().toLocaleDateString()}
                                     </TableCell>
                                 </TableRow>
                             ))}
