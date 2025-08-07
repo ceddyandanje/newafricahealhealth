@@ -3,7 +3,7 @@
 "use client"
 
 import Link from "next/link"
-import { Menu, ShoppingCart, User, LogIn, ShieldCheck } from "lucide-react"
+import { Menu, ShoppingCart, User, LogIn, ShieldCheck, LogOut } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -13,7 +13,10 @@ import { useAuth } from "@/hooks/use-auth"
 import { Badge } from "@/components/ui/badge"
 import ClientHeaderItems from "./client-header-items"
 import ThemeToggleButton from "./theme-toggle-button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import { auth } from "@/lib/firebase"
+import { signOut } from "firebase/auth"
+import { useToast } from "@/hooks/use-toast"
 
 const navLinks = [
   { href: "/products", label: "Products" },
@@ -23,8 +26,18 @@ const navLinks = [
 export default function Header() {
   const { items } = useCart()
   const { user, isAdmin } = useAuth()
+  const { toast } = useToast()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   
+  const handleLogout = async () => {
+    try {
+        await signOut(auth);
+        toast({ title: "Logged Out", description: "You have been successfully logged out." });
+    } catch (error) {
+        toast({ variant: "destructive", title: "Logout Failed", description: "Could not log you out. Please try again." });
+    }
+  }
+
   const AuthButton = () => {
     if (user) {
         return (
@@ -36,10 +49,17 @@ export default function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     {isAdmin && (
-                         <DropdownMenuItem asChild>
-                            <Link href="/admin">Admin Dashboard</Link>
-                        </DropdownMenuItem>
+                         <>
+                            <DropdownMenuItem asChild>
+                                <Link href="/admin">Admin Dashboard</Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                         </>
                     )}
+                    <DropdownMenuItem onClick={handleLogout}>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Logout</span>
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         )
@@ -66,7 +86,12 @@ export default function Header() {
 
   const MobileAuthButton = () => {
     if (user) {
-        return null; // No profile page, so no button for logged-in user.
+        return (
+            <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+            </Button>
+        );
     }
      return (
         <div className="flex flex-col space-y-2 pt-2 border-t">
@@ -135,9 +160,9 @@ export default function Header() {
                         )}
                       </Link>
                     </Button>
-                    <MobileAuthButton />
                     <ThemeToggleButton />
                  </div>
+                 <MobileAuthButton />
               </nav>
             </SheetContent>
           </Sheet>
