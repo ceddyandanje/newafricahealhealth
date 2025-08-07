@@ -139,17 +139,6 @@ export default function AdminDashboardPage() {
                         <button className="p-2 rounded-md hover:bg-accent"><Expand /></button>
                         <Notifications />
                         <button className="p-2 rounded-md hover:bg-accent"><Settings /></button>
-                        <Separator orientation="vertical" className="h-8"/>
-                        <div className="flex items-center gap-2">
-                            <Avatar>
-                                <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} />
-                                <AvatarFallback>{user.name?.charAt(0).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                                <p className="font-semibold text-sm">{user.name}</p>
-                                <p className="text-xs text-muted-foreground uppercase">{user.role}</p>
-                            </div>
-                        </div>
                     </div>
                 </header>
 
