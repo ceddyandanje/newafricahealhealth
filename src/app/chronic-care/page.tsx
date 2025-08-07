@@ -1,46 +1,14 @@
 
 'use client';
 
-import { useState } from 'react';
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, UploadCloud, ShoppingCart, Truck } from "lucide-react";
-import { cn } from "@/lib/utils";
 import GetStartedButton from "@/components/health/get-started-button";
-import { chronicCareCategories, ChronicCareCategory } from '@/lib/chronicCareCategories';
-import { ServiceCategoryDialog } from '@/components/health/service-category-dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/use-auth';
+import Link from "next/link";
+
 
 export default function ChronicCarePage() {
-    const [selectedCategory, setSelectedCategory] = useState<ChronicCareCategory | null>(null);
-    const { user } = useAuth();
-    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-    const router = useRouter();
-
-    const handleCategoryClick = (category: ChronicCareCategory) => {
-        if (user) {
-            setSelectedCategory(category);
-        } else {
-            setShowLoginPrompt(true);
-        }
-    };
-    
-    const handleLoginRedirect = () => {
-        setShowLoginPrompt(false);
-        router.push('/login');
-    };
-
     return (
         <div className="bg-background">
             {/* Hero Section */}
@@ -107,51 +75,31 @@ export default function ChronicCarePage() {
             <section className="py-20">
                 <div className="container mx-auto px-4">
                     <h2 className="text-3xl font-bold text-center font-headline mb-12">Care for Your Condition</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                       {chronicCareCategories.map((category) => (
-                         <div 
-                            key={category.id}
-                            onClick={() => handleCategoryClick(category)}
-                            className="block group cursor-pointer"
-                        >
+                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+                       <Link href="/cardiovascular" className="block group">
                             <div className="glassmorphic p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
-                                <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
-                                    <category.icon className="h-10 w-10 text-primary"/>
-                                </div>
-                                <h3 className="font-headline text-2xl font-semibold mb-2">{category.name}</h3>
-                                <p className="text-muted-foreground flex-grow">{category.description}</p>
-                                <span className={cn("mt-4 text-primary group-hover:underline")}>
-                                    Learn More
-                                </span>
+                                <h3 className="font-headline text-2xl font-semibold mb-2">Cardiovascular Health</h3>
+                                <p className="text-muted-foreground flex-grow">Support for hypertension, high cholesterol, and other heart-related conditions.</p>
+                                <span className="mt-4 text-primary group-hover:underline">Learn More</span>
                             </div>
-                        </div>
-                       ))}
+                        </Link>
+                         <Link href="/diabetes-care" className="block group">
+                            <div className="glassmorphic p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                                <h3 className="font-headline text-2xl font-semibold mb-2">Diabetes Care</h3>
+                                <p className="text-muted-foreground flex-grow">A full range of supplies, from monitoring devices to insulin and medication.</p>
+                               <span className="mt-4 text-primary group-hover:underline">Learn More</span>
+                            </div>
+                        </Link>
+                         <Link href="/respiratory" className="block group">
+                            <div className="glassmorphic p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                                <h3 className="font-headline text-2xl font-semibold mb-2">Respiratory Conditions</h3>
+                                <p className="text-muted-foreground flex-grow">Management for asthma, COPD, and other respiratory ailments with medication and devices.</p>
+                                <span className="mt-4 text-primary group-hover:underline">Learn More</span>
+                            </div>
+                        </Link>
                     </div>
                 </div>
             </section>
-
-            {selectedCategory && (
-                <ServiceCategoryDialog
-                    category={selectedCategory}
-                    isOpen={!!selectedCategory}
-                    onClose={() => setSelectedCategory(null)}
-                />
-            )}
-
-            <AlertDialog open={showLoginPrompt} onOpenChange={setShowLoginPrompt}>
-                <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Authentication Required</AlertDialogTitle>
-                    <AlertDialogDescription>
-                    Please log in to your account to view details about our chronic care services.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleLoginRedirect}>Login</AlertDialogAction>
-                </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
         </div>
     );
 }

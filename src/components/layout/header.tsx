@@ -2,13 +2,15 @@
 "use client"
 
 import Link from "next/link"
-import { Menu } from "lucide-react"
+import { Menu, ShoppingCart, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import ClientHeaderItems from "./client-header-items"
 import ThemeToggleButton from "./theme-toggle-button"
+import { useCart } from "@/hooks/use-cart"
+import { Badge } from "../ui/badge"
+import { useEffect, useState } from "react"
 
 const navLinks = [
   { href: "/products", label: "Products" },
@@ -18,6 +20,15 @@ const navLinks = [
 ]
 
 export default function Header() {
+  const [isMounted, setIsMounted] = useState(false)
+  const { items } = useCart()
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
@@ -42,13 +53,25 @@ export default function Header() {
             ))}
         </nav>
         
-        <div className="flex items-center space-x-2 ml-auto">
+        <div className="flex items-center space-x-2 ml-4">
             <ThemeToggleButton />
-            <ClientHeaderItems />
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/cart" aria-label="Open cart" className="relative">
+                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                {isMounted && totalItems > 0 && (
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+                )}
+                </Link>
+            </Button>
+             <Button variant="ghost" size="icon" asChild>
+                <Link href="/login" aria-label="Login">
+                    <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                </Link>
+            </Button>
         </div>
             
         {/* Mobile Nav Trigger */}
-        <div className="md:hidden flex items-center">
+        <div className="md:hidden flex items-center ml-auto">
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -74,8 +97,9 @@ export default function Header() {
                         </Link>
                     ))}
                     </nav>
-                    <div className="mt-auto">
-                        <ClientHeaderItems isMobile={true}/>
+                    <div className="mt-auto border-t pt-4 flex justify-around">
+                        <Button asChild variant="ghost"><Link href="/login">Login</Link></Button>
+                        <Button asChild><Link href="/login?tab=signup">Sign Up</Link></Button>
                     </div>
                 </SheetContent>
             </Sheet>
