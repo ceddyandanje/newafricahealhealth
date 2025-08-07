@@ -275,7 +275,7 @@ export default function Home() {
         <section className="relative py-20 text-foreground">
           <div className="absolute inset-0">
             <Image 
-              src="https://images.unsplash.com/photo-1606206873764-fd15e242df52?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="https://images.unsplash.com/photo-1655313719493-16ebe4906441?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Medical background"
               fill
               className="object-cover"
@@ -433,4 +433,5 @@ export default function Home() {
 }
 
     
+
 
