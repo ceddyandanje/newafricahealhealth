@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 function LoginForm({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
@@ -92,7 +92,9 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
 
 export default function LoginPage() {
     const { user } = useAuth();
-    const [currentTab, setCurrentTab] = useState("login");
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get('tab');
+    const [currentTab, setCurrentTab] = useState(tabParam === 'signup' ? 'signup' : 'login');
     const router = useRouter();
 
     useEffect(() => {
@@ -100,6 +102,13 @@ export default function LoginPage() {
             router.push('/profile');
         }
     }, [user, router]);
+    
+    useEffect(() => {
+        const newTab = searchParams.get('tab');
+        if (newTab && newTab !== currentTab) {
+            setCurrentTab(newTab === 'signup' ? 'signup' : 'login');
+        }
+    }, [searchParams, currentTab]);
 
     if (user) {
         return null; // or a loading spinner

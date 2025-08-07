@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { Badge } from "@/components/ui/badge"
 import ClientHeaderItems from "./client-header-items"
 import ThemeToggleButton from "./theme-toggle-button"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 const navLinks = [
   { href: "/products", label: "Products" },
@@ -24,6 +25,58 @@ export default function Header() {
   const { user } = useAuth()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   
+  const AuthButton = () => {
+    if (user) {
+        return (
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/profile">
+                    <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                </Link>
+            </Button>
+        )
+    }
+
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                     <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuItem asChild>
+                    <Link href="/login">Login</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                    <Link href="/login?tab=signup">Sign up</Link>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+  }
+
+  const MobileAuthButton = () => {
+    if (user) {
+        return (
+             <Button variant="ghost" size="icon" asChild>
+                <Link href="/profile">
+                    <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                </Link>
+            </Button>
+        )
+    }
+     return (
+        <div className="flex flex-col space-y-2 pt-2 border-t">
+             <Button variant="ghost" asChild>
+                <Link href="/login">Login</Link>
+            </Button>
+             <Button variant="ghost" asChild>
+                <Link href="/login?tab=signup">Sign up</Link>
+            </Button>
+        </div>
+    )
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
@@ -76,11 +129,7 @@ export default function Header() {
                         )}
                       </Link>
                     </Button>
-                     <Button variant="ghost" size="icon" asChild>
-                        <Link href={user ? "/profile" : "/login"}>
-                            {user ? <User className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <LogIn className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
-                        </Link>
-                    </Button>
+                    <MobileAuthButton />
                     <ThemeToggleButton />
                  </div>
               </nav>
@@ -114,11 +163,7 @@ export default function Header() {
                   )}
                 </Link>
               </Button>
-               <Button variant="ghost" size="icon" asChild>
-                  <Link href={user ? "/profile" : "/login"}>
-                     {user ? <User className="h-5 w-5 text-gray-600 dark:text-gray-300" /> : <LogIn className="h-5 w-5 text-gray-600 dark:text-gray-300" />}
-                  </Link>
-              </Button>
+              <AuthButton />
             </div>
         </div>
       </div>
