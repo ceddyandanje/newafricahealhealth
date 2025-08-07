@@ -2,41 +2,24 @@
 "use client"
 
 import Link from "next/link"
-import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User } from "lucide-react"
-import { useTheme } from "next-themes"
-import { useState, useEffect } from "react"
+import { Menu, ShoppingCart, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useCart } from "@/hooks/use-cart"
 import { Badge } from "@/components/ui/badge"
+import ClientHeaderItems from "./client-header-items"
 
 const navLinks = [
   { href: "/products", label: "Products" },
   { href: "/services", label: "Services" },
 ]
 
-const categoryLinks = [
-    { href: "/products?category=Chronic+Care", label: "Chronic Care"},
-    { href: "/products?category=Emergency+Response", label: "Emergency Response" },
-    { href: "/products?category=Medical+Tourism", label: "Medical Tourism"},
-    { href: "/products?category=Organ+Transplants", label: "Organ Transplants" },
-]
-
-
 export default function Header() {
-  const { theme, setTheme } = useTheme()
   const { items } = useCart()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
@@ -78,23 +61,8 @@ export default function Header() {
                     {link.label}
                   </Link>
                 ))}
-                {isMounted && (
-                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
-                        Categories <ChevronDown className="h-4 w-4 ml-1" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      {categoryLinks.map((link) => (
-                        <DropdownMenuItem key={link.href} asChild>
-                          <Link href={link.href}>{link.label}</Link>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-                <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
+                 <ClientHeaderItems isMobile={true} />
+                 <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
                  <div className="flex items-center pt-4 border-t">
                     <Button variant="ghost" size="icon" asChild>
                       <Link href="/cart" aria-label="Open cart" className="relative">
@@ -103,15 +71,6 @@ export default function Header() {
                           <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
                         )}
                       </Link>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                      aria-label="Toggle theme"
-                    >
-                      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-gray-600" />
-                      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-gray-300" />
                     </Button>
                      <Button variant="ghost" size="icon" asChild>
                         <Link href="/profile">
@@ -136,22 +95,7 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
-              {isMounted && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer">
-                      Categories <ChevronDown className="h-4 w-4 ml-1" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {categoryLinks.map((link) => (
-                      <DropdownMenuItem key={link.href} asChild>
-                        <Link href={link.href}>{link.label}</Link>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
+              <ClientHeaderItems />
               <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
             </nav>
           
@@ -164,15 +108,7 @@ export default function Header() {
                   )}
                 </Link>
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                aria-label="Toggle theme"
-              >
-                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-gray-600" />
-                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-gray-300" />
-              </Button>
+              {/* Theme switcher moved to client component */}
                <Button variant="ghost" size="icon" asChild>
                   <Link href="/profile">
                       <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
