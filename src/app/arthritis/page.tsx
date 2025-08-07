@@ -35,7 +35,7 @@ export default function ArthritisPage() {
                         Our goal is to help you find the right combination of treatments to reduce pain, protect your joints, and enhance your overall well-being.
                     </p>
                     <Button size="lg" className="mt-6" asChild>
-                         <a href="/products?category=Chronic+Care">Browse Joint Care Products</a>
+                         <a href="/products?category=Arthritis">Browse Joint Care Products</a>
                     </Button>
                 </div>
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
