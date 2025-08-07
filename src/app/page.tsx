@@ -16,7 +16,7 @@ export default function Home() {
               alt="Healthcare professional wearing a mask"
               fill
               className="object-cover object-center"
-              data-ai-hint="healthcare professional"
+              data-ai-hint="healthcare professional mask"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
