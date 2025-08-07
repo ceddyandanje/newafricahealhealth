@@ -2,85 +2,17 @@
 "use client"
 
 import Link from "next/link"
-import { Menu, ShoppingCart, User, LogOut, LayoutDashboard, UserCircle, Settings, ChevronDown } from "lucide-react"
+import { Menu, ShoppingCart, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import ThemeToggleButton from "./theme-toggle-button"
-import { useCart } from "@/hooks/use-cart"
-import { useAuth } from "@/hooks/use-auth"
-import { Badge } from "../ui/badge"
-import { useEffect, useState } from "react"
-import { Skeleton } from "../ui/skeleton"
-import { chronicCareCategories } from "@/lib/chronicCareCategories"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
-import { cn } from "@/lib/utils"
-
-const navLinks = [
-  { href: "/products", label: "Products" },
-  { href: "/services", label: "Services" },
-  { href: "/wellness-blog", label: "Wellness Blog" },
-]
-
-function AuthButton() {
-    const { user, isAdmin, logout, isLoading } = useAuth();
-    
-    if (isLoading) {
-        return <Skeleton className="h-10 w-10 rounded-full" />;
-    }
-
-    if (!user) {
-        return (
-             <Button asChild>
-                <Link href="/login">Login / Sign Up</Link>
-            </Button>
-        )
-    }
-
-    return (
-        <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar className="h-8 w-8">
-                         <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
-                        <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-                <DropdownMenuLabel>
-                    <p className="font-bold">{user.name}</p>
-                    <p className="text-xs text-muted-foreground font-normal">{user.email}</p>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {isAdmin ? (
-                    <DropdownMenuItem asChild>
-                        <Link href="/admin"><LayoutDashboard className="mr-2 h-4 w-4" />Admin Dashboard</Link>
-                    </DropdownMenuItem>
-                ) : (
-                    <DropdownMenuItem asChild>
-                        <Link href="/profile"><LayoutDashboard className="mr-2 h-4 w-4" />Dashboard</Link>
-                    </DropdownMenuItem>
-                )}
-                <DropdownMenuItem asChild>
-                    <Link href="/profile"><UserCircle className="mr-2 h-4 w-4" />Profile Settings</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                    <Link href="/my-orders"><ShoppingCart className="mr-2 h-4 w-4" />My Orders</Link>
-                </DropdownMenuItem>
-                 <DropdownMenuItem asChild>
-                    <Link href="/my-subscriptions"><Settings className="mr-2 h-4 w-4" />My Subscriptions</Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={logout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Logout
-                </DropdownMenuItem>
-            </DropdownMenuContent>
-        </DropdownMenu>
-    )
-}
+import { useCart } from "@/hooks/use-cart"
+import { useEffect, useState } from "react"
+import ThemeToggleButton from "./theme-toggle-button"
+import AuthButton from "./auth-button"
+import { chronicCareCategories } from "@/lib/chronicCareCategories"
 
 const dropdownCategories = [
     ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory'].includes(c.id)),
@@ -111,17 +43,44 @@ function CategoriesDropdown() {
     )
 }
 
+function CartButton() {
+    const { items } = useCart()
+    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+    return (
+        <Button variant="ghost" size="icon" asChild>
+            <Link href="/cart" aria-label="Open cart" className="relative">
+            <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+            {totalItems > 0 && (
+                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">{totalItems}</span>
+            )}
+            </Link>
+        </Button>
+    )
+}
+
+
+function ClientHeaderItems() {
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) {
+        return null;
+    }
+
+    return (
+        <div className="flex items-center gap-2">
+            <ThemeToggleButton />
+            <CartButton />
+            <AuthButton />
+        </div>
+    )
+}
+
 
 export default function Header() {
-  const [isMounted, setIsMounted] = useState(false)
-  const { items } = useCart()
-
-  useEffect(() => {
-    setIsMounted(true)
-  }, [])
-
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
@@ -154,37 +113,11 @@ export default function Header() {
                     Wellness Blog
                 </Link>
             </nav>
-            {isMounted && (
-                <>
-                    <ThemeToggleButton />
-                    <Button variant="ghost" size="icon" asChild>
-                        <Link href="/cart" aria-label="Open cart" className="relative">
-                        <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                        {totalItems > 0 && (
-                            <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
-                        )}
-                        </Link>
-                    </Button>
-                    <AuthButton />
-                </>
-            )}
+            <ClientHeaderItems />
         </div>
             
         <div className="md:hidden flex items-center ml-auto">
-             {isMounted && (
-                <>
-                    <ThemeToggleButton />
-                    <Button variant="ghost" size="icon" asChild>
-                        <Link href="/cart" aria-label="Open cart" className="relative">
-                        <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                        {totalItems > 0 && (
-                            <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
-                        )}
-                        </Link>
-                    </Button>
-                    <AuthButton />
-                </>
-            )}
+            <ClientHeaderItems />
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
