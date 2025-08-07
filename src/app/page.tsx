@@ -193,7 +193,7 @@ export default function Home() {
                       alt="healthcare professional showing compassion"
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-105"
-                      data-ai-hint="compassionate healthcare professional"
+                      data-ai-hint="compassionate healthcare"
                   />
                   <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                     <PlayCircle className="w-24 h-24 text-white/80 hover:text-white transition-colors cursor-pointer" />
