@@ -9,34 +9,33 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <main className="flex-grow">
-        <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center text-center text-white">
-          <Image
-            src="https://placehold.co/1920x1080.png"
-            alt="A diverse group of healthcare professionals smiling"
-            fill
-            className="object-cover object-center"
-            data-ai-hint="diverse healthcare professionals"
-            priority
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
-          <div className="relative z-10 p-4">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">
-              Reliable Medical Solutions
-            </h1>
-            <div className="text-2xl md:text-4xl font-semibold text-primary mb-4 h-12">
-                <Typewriter words={["Chronic Care", "Emergency Response", "Medical Tourism", "Organ Transplants"]} />
+        <section className="relative">
+          <div className="relative h-[70vh] min-h-[500px] flex items-center justify-center text-center text-white">
+            <Image
+              src="https://placehold.co/1920x1080.png"
+              alt="A diverse group of healthcare professionals smiling"
+              fill
+              className="object-cover object-center"
+              data-ai-hint="diverse healthcare professionals"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
+            <div className="relative z-10 p-4">
+              <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">
+                Reliable Medical Solutions
+              </h1>
+              <div className="text-2xl md:text-4xl font-semibold text-primary mb-4 h-12">
+                  <Typewriter words={["Chronic Care", "Emergency Response", "Medical Tourism", "Organ Transplants"]} />
+              </div>
+              <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
+                Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
+              </p>
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 py-3">
+                Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
-            <p className="text-lg md:text-xl max-w-3xl mx-auto mb-8">
-              Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
-            </p>
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 py-3">
-              Get Started for Free <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
           </div>
-        </section>
-
-        <section>
-          <div className="container mx-auto px-4 py-12">
+          <div className="relative container mx-auto px-4 -mt-24 z-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50">
                 <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
@@ -70,7 +69,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-20">
+        <section className="pt-20 pb-20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
               Your Chronic Care Journey, Simplified
