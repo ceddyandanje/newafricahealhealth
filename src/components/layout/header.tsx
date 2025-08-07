@@ -45,12 +45,8 @@ export default function Header() {
   }
 
   const AuthButton = () => {
-    if (!isMounted) {
-      return null;
-    }
-    
-    if (loading) {
-        return <Button variant="ghost" size="icon" className="h-10 w-10" disabled />;
+    if (!isMounted || loading) {
+      return <div className="h-10 w-10" />;
     }
 
     if (user && appUser) {
@@ -73,37 +69,22 @@ export default function Header() {
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                     {isAdmin ? (
-                         <DropdownMenuItem asChild>
-                            <Link href="/admin">
-                                <LayoutDashboard className="mr-2 h-4 w-4" />
-                                <span>Admin Dashboard</span>
-                            </Link>
-                         </DropdownMenuItem>
-                    ) : (
-                         <DropdownMenuItem asChild>
-                            <Link href="/profile">
-                                <LayoutDashboard className="mr-2 h-4 w-4" />
-                                <span>Patient Dashboard</span>
-                            </Link>
-                         </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem asChild>
-                        <Link href="/my-orders">
-                            <ListOrdered className="mr-2 h-4 w-4" />
-                            <span>My Orders</span>
+                     <DropdownMenuItem asChild>
+                        <Link href={isAdmin ? "/admin" : "/profile"}>
+                            <LayoutDashboard className="mr-2 h-4 w-4" />
+                            <span>Dashboard</span>
                         </Link>
-                    </DropdownMenuItem>
+                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                        <Link href="/my-subscriptions">
-                            <Repeat className="mr-2 h-4 w-4" />
-                            <span>My Subscriptions</span>
+                        <Link href="/profile">
+                            <User className="mr-2 h-4 w-4" />
+                            <span>User Profile</span>
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                         <Link href="/profile">
                             <Settings className="mr-2 h-4 w-4" />
-                            <span>Profile Settings</span>
+                            <span>Settings</span>
                         </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
@@ -206,6 +187,9 @@ export default function Header() {
             ))}
             <ClientHeaderItems />
             <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors text-sm font-medium">Wellness Blog</Link>
+        </nav>
+        
+        <div className="flex items-center space-x-2 ml-auto md:ml-4">
             <ThemeToggleButton />
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
@@ -216,19 +200,10 @@ export default function Header() {
                 </Link>
             </Button>
             <AuthButton />
-        </nav>
+        </div>
             
         {/* Mobile Nav Trigger */}
         <div className="md:hidden flex items-center">
-             <ThemeToggleButton />
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="/cart" aria-label="Open cart" className="relative">
-                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                {isMounted && totalItems > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
-                )}
-                </Link>
-            </Button>
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
@@ -268,3 +243,5 @@ export default function Header() {
     </header>
   )
 }
+
+    
