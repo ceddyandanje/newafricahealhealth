@@ -87,6 +87,13 @@ function AuthButton() {
     )
 }
 
+const dropdownCategories = [
+    ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory-conditions'].includes(c.id)),
+    { id: 'medical-tourism', name: 'Medical Tourism' },
+    { id: 'organ-transplants', name: 'Organ Transplants' }
+];
+
+
 function CategoriesDropdown() {
     return (
         <DropdownMenu>
@@ -100,7 +107,7 @@ function CategoriesDropdown() {
                     <Link href="/chronic-care">All Chronic Care</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                {chronicCareCategories.map(category => (
+                {dropdownCategories.map(category => (
                     <DropdownMenuItem key={category.id} asChild>
                         <Link href={`/${category.id}`}>{category.name}</Link>
                     </DropdownMenuItem>
@@ -156,7 +163,7 @@ export default function Header() {
             <AuthButton />
         </div>
             
-        <div className="md:hidden flex items-center ml-2">
+        <div className="md:hidden flex items-center ml-auto">
             <ThemeToggleButton />
             <Button variant="ghost" size="icon" asChild>
                 <Link href="/cart" aria-label="Open cart" className="relative">
@@ -193,7 +200,7 @@ export default function Header() {
                             </SheetClose>
                         ))}
                         <Collapsible>
-                            <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                            <CollapsibleTrigger className="flex items-center justify-between w-full py-2 text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white group">
                                 <span>Categories</span>
                                 <ChevronDown className="h-5 w-5 transition-transform duration-300 group-data-[state=open]:rotate-180" />
                             </CollapsibleTrigger>
@@ -201,7 +208,7 @@ export default function Header() {
                                 <SheetClose asChild>
                                     <Link href="/chronic-care" className="block py-2 text-muted-foreground hover:text-foreground">All Chronic Care</Link>
                                 </SheetClose>
-                                {chronicCareCategories.map(category => (
+                                {dropdownCategories.map(category => (
                                     <SheetClose asChild key={category.id}>
                                         <Link href={`/${category.id}`} className="block py-2 text-muted-foreground hover:text-foreground">{category.name}</Link>
                                     </SheetClose>
