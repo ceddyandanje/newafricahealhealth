@@ -8,7 +8,7 @@ export default function Footer() {
   return (
     <footer className="bg-muted/40 dark:bg-black/20 text-foreground">
       <div className="container py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Column 1: AHH Info & Socials */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
