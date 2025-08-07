@@ -1,7 +1,7 @@
 
 import Image from "next/image";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { ArrowRight, Heart, Wind, Droplets, UploadCloud, ShoppingCart, Truck } from "lucide-react";
+import { ArrowRight, Heart, Wind, Droplets, UploadCloud, ShoppingCart, Truck, Bone, Brain, Filter } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -105,6 +105,39 @@ export default function ChronicCarePage() {
                                 </div>
                                 <h3 className="font-headline text-2xl font-semibold mb-2">Respiratory Conditions</h3>
                                 <p className="text-muted-foreground flex-grow">Management for asthma, COPD, and other respiratory ailments with medication and devices.</p>
+                                <span className={cn(buttonVariants({ variant: "link" }), "mt-4")}>Learn More</span>
+                            </div>
+                        </Link>
+                         {/* Kidney Disease Card */}
+                        <Link href="/kidney-disease" className="block group">
+                            <div className="glassmorphic p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                                <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
+                                    <Filter className="h-10 w-10 text-primary"/>
+                                </div>
+                                <h3 className="font-headline text-2xl font-semibold mb-2">Kidney Disease</h3>
+                                <p className="text-muted-foreground flex-grow">Support for chronic kidney disease (CKD) including medication and monitoring supplies.</p>
+                                <span className={cn(buttonVariants({ variant: "link" }), "mt-4")}>Learn More</span>
+                            </div>
+                        </Link>
+                        {/* Arthritis Card */}
+                        <Link href="/arthritis" className="block group">
+                            <div className="glassmorphic p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                                <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
+                                    <Bone className="h-10 w-10 text-primary"/>
+                                </div>
+                                <h3 className="font-headline text-2xl font-semibold mb-2">Arthritis</h3>
+                                <p className="text-muted-foreground flex-grow">Pain management solutions and support for various forms of arthritis.</p>
+                                <span className={cn(buttonVariants({ variant: "link" }), "mt-4")}>Learn More</span>
+                            </div>
+                        </Link>
+                        {/* Neurological Disorders Card */}
+                        <Link href="/neurological-disorders" className="block group">
+                            <div className="glassmorphic p-8 h-full flex flex-col items-center text-center transition-all duration-300 group-hover:shadow-2xl group-hover:-translate-y-1">
+                                <div className="p-4 bg-primary/20 rounded-full w-fit mb-4">
+                                    <Brain className="h-10 w-10 text-primary"/>
+                                </div>
+                                <h3 className="font-headline text-2xl font-semibold mb-2">Neurological Disorders</h3>
+                                <p className="text-muted-foreground flex-grow">Medication and support for conditions like epilepsy, Parkinson's, and multiple sclerosis.</p>
                                 <span className={cn(buttonVariants({ variant: "link" }), "mt-4")}>Learn More</span>
                             </div>
                         </Link>

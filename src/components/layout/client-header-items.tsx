@@ -39,6 +39,7 @@ export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boo
   const dropdownTrigger = (
     <DropdownMenuTrigger
       asChild
+      className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
     >
        <Button variant="ghost" className="flex items-center gap-1 px-1">
         Categories
