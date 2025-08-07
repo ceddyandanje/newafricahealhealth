@@ -10,10 +10,10 @@ export default function Home() {
         <section className="relative h-[80vh] min-h-[600px] flex items-center justify-center text-center text-white">
           <Image
             src="https://placehold.co/1920x1080.png"
-            alt="Doctor giving a thumbs up"
+            alt="A doctor smiling"
             fill
             className="object-cover object-top"
-            data-ai-hint="doctor thumbs up"
+            data-ai-hint="doctor smiling"
           />
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative z-10 p-4">
