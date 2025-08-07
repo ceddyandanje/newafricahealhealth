@@ -5,6 +5,9 @@ import { Button } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle, ShieldCheck, CheckCircle2, RefreshCw, Sparkles, Truck, Video, ClipboardList, BookText, Star } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+
 
 export default function Home() {
 
@@ -281,7 +284,7 @@ export default function Home() {
               className="object-cover"
               data-ai-hint="pills medication"
             />
-            <div className="absolute inset-0 bg-black/20 backdrop-blur-sm" />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           </div>
           <div className="relative container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Chronic Care Management</h2>
@@ -427,6 +430,68 @@ export default function Home() {
                 </div>
             </div>
         </section>
+
+        <section className="py-20 bg-background">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">
+              Book your free consultation today
+            </h2>
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-12">
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-bold">1</div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Describe your issue or query</h3>
+                    <p className="text-muted-foreground">Write to us and tell us what your question or issue is.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-bold">2</div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">We'll recommend</h3>
+                    <p className="text-muted-foreground">We will 'hook you up' with the right practitioner and the right therapy that you need.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-6">
+                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/20 text-primary flex items-center justify-center text-xl font-bold">3</div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Your contact details</h3>
+                    <p className="text-muted-foreground">Leave us your number to contact you back.</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="glassmorphic p-8">
+                <form className="space-y-6">
+                  <div>
+                    <label htmlFor="name" className="sr-only">Name</label>
+                    <Input id="name" type="text" placeholder="Name" />
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="email" className="sr-only">Email</label>
+                      <Input id="email" type="email" placeholder="Email" />
+                    </div>
+                    <div>
+                      <label htmlFor="phone" className="sr-only">Phone</label>
+                      <Input id="phone" type="tel" placeholder="Phone" />
+                    </div>
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="sr-only">Message</label>
+                    <Textarea id="message" placeholder="Message" rows={5} />
+                  </div>
+                  <div>
+                    <Button type="submit" size="lg" className="w-full bg-green-500 hover:bg-green-600">
+                      BOOK YOUR SESSION
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
       </main>
     </div>
   )
