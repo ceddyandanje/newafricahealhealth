@@ -79,6 +79,7 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
             const user = userCredential.user;
 
             await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
                 firstName,
                 lastName,
                 email: user.email,
@@ -149,16 +150,19 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
 export default function LoginPage() {
     const { user, loading } = useAuth();
     const searchParams = useSearchParams();
-    const tabParam = searchParams.get('tab');
-    const [currentTab, setCurrentTab] = useState(tabParam === 'signup' ? 'signup' : 'login');
     const router = useRouter();
+    
+    // Determine the initial tab based on the 'tab' search parameter. Default to 'login'.
+    const initialTab = searchParams.get('tab') === 'signup' ? 'signup' : 'login';
+    const [currentTab, setCurrentTab] = useState(initialTab);
 
     useEffect(() => {
         if (!loading && user) {
-             // Redirect logic is now in useAuth hook
+            // Redirect logic is handled in useAuth hook, but you could add fallback logic here if needed.
         }
     }, [user, loading, router]);
     
+    // This effect updates the active tab if the search param changes.
     useEffect(() => {
         const newTab = searchParams.get('tab');
         if (newTab && newTab !== currentTab) {
@@ -166,9 +170,21 @@ export default function LoginPage() {
         }
     }, [searchParams, currentTab]);
 
-    if (user || loading) {
+    const handleTabChange = (value: string) => {
+        setCurrentTab(value);
+        // Update URL to reflect the current tab without reloading the page
+        router.replace(`/login?tab=${value}`);
+    };
+
+
+    if (loading) {
         return null; // or a loading spinner
     }
+     if (user) {
+        // useAuth hook handles redirection, but this is a safeguard.
+        return null;
+    }
+
 
     return (
         <div className="container mx-auto px-4 py-12">
@@ -182,7 +198,7 @@ export default function LoginPage() {
                         </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
+                    <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="login">Login</TabsTrigger>
                             <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -191,7 +207,7 @@ export default function LoginPage() {
                             <LoginForm onLoginSuccess={() => { /* Redirect logic now in useAuth */ }} />
                         </TabsContent>
                         <TabsContent value="signup" className="mt-6">
-                            <SignupForm onSignupSuccess={() => setCurrentTab("login")} />
+                            <SignupForm onSignupSuccess={() => handleTabChange("login")} />
                         </TabsContent>
                     </Tabs>
                      <p className="text-center text-sm text-muted-foreground mt-6">
@@ -199,7 +215,7 @@ export default function LoginPage() {
                             ? "Don't have an account? "
                             : "Already have an account? "
                         }
-                        <Button variant="link" className="p-0 h-auto" onClick={() => setCurrentTab(currentTab === 'login' ? 'signup' : 'login')}>
+                        <Button variant="link" className="p-0 h-auto" onClick={() => handleTabChange(currentTab === 'login' ? 'signup' : 'login')}>
                              {currentTab === 'login' ? "Sign up" : "Login"}
                         </Button>
                     </p>
