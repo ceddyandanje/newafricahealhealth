@@ -1,3 +1,4 @@
+
 import type {Metadata} from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/layout/theme-provider';
@@ -5,6 +6,7 @@ import Header from '@/components/layout/header';
 import Footer from '@/components/layout/footer';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/hooks/use-cart';
+import { AuthProvider } from '@/hooks/use-auth';
 import AiChatWidget from '@/components/health/ai-chat-widget';
 import { EmergencyRequestWidget } from '@/components/health/emergency-request-widget';
 
@@ -32,6 +34,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+          <AuthProvider>
             <CartProvider>
               <div className="min-h-screen flex flex-col">
                 <Header />
@@ -42,6 +45,7 @@ export default function RootLayout({
               <AiChatWidget />
               <EmergencyRequestWidget />
             </CartProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
