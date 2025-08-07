@@ -13,11 +13,11 @@ export default function Home() {
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
             <Image
-              src="https://images.unsplash.com/photo-1588776793433-d8db5e985935?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-              alt="Healthcare professional wearing a mask"
+              src="https://images.unsplash.com/photo-1618498082410-b4aa22193b38?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              alt="Healthcare professional smiling"
               fill
               className="object-cover object-center"
-              data-ai-hint="healthcare professional mask"
+              data-ai-hint="doctor smiling"
               priority
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
