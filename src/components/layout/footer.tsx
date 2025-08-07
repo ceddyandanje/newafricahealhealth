@@ -6,9 +6,9 @@ import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail } from "luc
 
 export default function Footer() {
   return (
-    <footer className="bg-muted/40 dark:bg-black/20 text-foreground">
-      <div className="container py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-muted/40 dark:bg-black/20 text-foreground border-t border-black/20">
+      <div className="container py-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {/* Column 1: AHH Info & Socials */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
@@ -68,7 +68,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-border/50 text-center text-sm text-muted-foreground">
+        <div className="mt-6 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} AHH. All Rights Reserved.</p>
         </div>
       </div>
