@@ -47,7 +47,7 @@ export default function Home() {
           </div>
           <div className="relative container mx-auto px-4 -mt-20 z-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Link href="/profile" className="block group">
+              <Link href="/profile" className="block group h-full">
                 <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
                   <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
                     <User className="h-8 w-8" />
@@ -56,7 +56,7 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground mt-1">Log in to access personalized care anytime, anywhere.</p>
                 </div>
               </Link>
-              <Link href="/products" className="block group">
+              <Link href="/products" className="block group h-full">
                 <div className="bg-green-100/30 dark:bg-green-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
                   <div className="inline-block p-4 bg-green-200 text-green-700 rounded-full mb-4">
                     <HeartPulse className="h-8 w-8" />
@@ -65,7 +65,7 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground mt-1">Find & compare products in your area.</p>
                 </div>
               </Link>
-              <Link href="/emergency-services" className="block group">
+              <Link href="/emergency-services" className="block group h-full">
                 <div className="bg-red-100/30 dark:bg-red-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
                   <div className="inline-block p-4 bg-red-200 text-red-700 rounded-full mb-4">
                     <Stethoscope className="h-8 w-8" />
@@ -74,7 +74,7 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground mt-1">Medevac and ground ambulance services.</p>
                 </div>
               </Link>
-              <Link href="/#consultation" className="block group">
+              <Link href="/#consultation" className="block group h-full">
                 <div className="bg-teal-100/30 dark:bg-teal-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
                   <div className="inline-block p-4 bg-teal-200 text-teal-700 rounded-full mb-4">
                     <Phone className="h-8 w-8" />
@@ -391,7 +391,7 @@ export default function Home() {
               </div>
 
               {/* Right Column: Form */}
-              <div className="bg-card p-8 rounded-lg border">
+              <div className="p-8 rounded-lg border">
                 <form className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">Name</label>
