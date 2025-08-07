@@ -25,13 +25,8 @@ const navLinks = [
 
 function AuthButton() {
     const { user, isAdmin, logout, isLoading } = useAuth();
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    if (!isMounted || isLoading) {
+    
+    if (isLoading) {
         return <Skeleton className="h-10 w-10 rounded-full" />;
     }
 
@@ -88,11 +83,10 @@ function AuthButton() {
 }
 
 const dropdownCategories = [
-    ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory-conditions'].includes(c.id)),
+    ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory'].includes(c.id)),
     { id: 'medical-tourism', name: 'Medical Tourism' },
     { id: 'organ-transplants', name: 'Organ Transplants' }
 ];
-
 
 function CategoriesDropdown() {
     return (
@@ -151,29 +145,37 @@ export default function Header() {
                 ))}
                 <CategoriesDropdown />
             </nav>
-            <ThemeToggleButton />
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="/cart" aria-label="Open cart" className="relative">
-                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                {isMounted && totalItems > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
-                )}
-                </Link>
-            </Button>
-            <AuthButton />
+            {isMounted && (
+                <>
+                    <ThemeToggleButton />
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href="/cart" aria-label="Open cart" className="relative">
+                        <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                        {totalItems > 0 && (
+                            <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+                        )}
+                        </Link>
+                    </Button>
+                    <AuthButton />
+                </>
+            )}
         </div>
             
         <div className="md:hidden flex items-center ml-auto">
-            <ThemeToggleButton />
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="/cart" aria-label="Open cart" className="relative">
-                <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                {isMounted && totalItems > 0 && (
-                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
-                )}
-                </Link>
-            </Button>
-            <AuthButton />
+             {isMounted && (
+                <>
+                    <ThemeToggleButton />
+                    <Button variant="ghost" size="icon" asChild>
+                        <Link href="/cart" aria-label="Open cart" className="relative">
+                        <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                        {totalItems > 0 && (
+                            <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+                        )}
+                        </Link>
+                    </Button>
+                    <AuthButton />
+                </>
+            )}
             <Sheet>
                 <SheetTrigger asChild>
                     <Button variant="ghost" size="icon">
