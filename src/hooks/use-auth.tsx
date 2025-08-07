@@ -17,6 +17,7 @@ export interface AppUser {
     ageRange?: string;
     role?: 'admin' | 'user';
     createdAt?: any;
+    id?: string;
 }
 
 interface AuthContextType {
@@ -47,7 +48,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (authUser) {
         const userDocRef = doc(db, "users", authUser.uid);
         const unsubSnapshot = onSnapshot(userDocRef, (doc) => {
-          setLoading(true); // Start loading when we get new data
           if (doc.exists()) {
             const userData = { uid: doc.id, ...doc.data() } as AppUser;
             setAppUser(userData);
@@ -57,13 +57,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Redirect after login if on the login page
             if (pathname === '/login') {
                 if(adminStatus) {
-                    router.push('/admin');
+                    router.replace('/admin');
                 } else {
-                    router.push('/');
+                    router.replace('/');
                 }
             }
           } else {
-            // User exists in Auth, but not in Firestore. Log them out or handle as error.
             setAppUser(null);
             setIsAdmin(false);
           }
