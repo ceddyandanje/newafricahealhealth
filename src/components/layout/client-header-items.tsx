@@ -13,10 +13,12 @@ import { ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const categoryLinks = [
-    { href: "/products?category=Chronic+Care", label: "Chronic Care"},
-    { href: "/products?category=Cardiovascular", label: "Cardiovascular"},
-    { href: "/products?category=Respiratory", label: "Respiratory"},
-    { href: "/products?category=Diabetes+Care", label: "Diabetes Care"},
+    { href: "/chronic-care", label: "Chronic Care"},
+    { href: "/cardiovascular", label: "Cardiovascular"},
+    { href: "/respiratory", label: "Respiratory"},
+    { href: "/diabetes-care", label: "Diabetes Care"},
+    { href: "/medical-tourism", label: "Medical Tourism"},
+    { href: "/organ-transplants", label: "Organ Transplants"},
 ];
 
 export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boolean }) {
@@ -37,9 +39,8 @@ export default function ClientHeaderItems({ isMobile = false }: { isMobile?: boo
   const dropdownTrigger = (
     <DropdownMenuTrigger
       asChild
-      className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white"
     >
-      <Button variant="ghost" className="flex items-center gap-1 px-1">
+       <Button variant="ghost" className="flex items-center gap-1 px-1">
         Categories
         <ChevronDown className="h-4 w-4" />
       </Button>
