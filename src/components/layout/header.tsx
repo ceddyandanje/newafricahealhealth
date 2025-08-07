@@ -2,13 +2,15 @@
 "use client"
 
 import Link from "next/link"
-import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User, Plane, X } from "lucide-react"
+import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useCart } from "@/hooks/use-cart"
+import { Badge } from "@/components/ui/badge"
 
 const navLinks = [
   { href: "/products", label: "Products" },
@@ -21,6 +23,9 @@ const categories = ["Diabetes", "Hypertension", "Cardiovascular", "Superfoods", 
 
 export default function Header() {
   const { theme, setTheme } = useTheme()
+  const { items } = useCart()
+  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
+
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
@@ -78,8 +83,11 @@ export default function Header() {
                 <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
                  <div className="flex items-center pt-4 border-t">
                     <Button variant="ghost" size="icon" asChild>
-                      <Link href="/cart" aria-label="Open cart">
+                      <Link href="/cart" aria-label="Open cart" className="relative">
                         <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                        {totalItems > 0 && (
+                          <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+                        )}
                       </Link>
                     </Button>
                     <Button
@@ -131,8 +139,11 @@ export default function Header() {
           
             <div className="flex items-center justify-end space-x-2">
               <Button variant="ghost" size="icon" asChild>
-                <Link href="/cart" aria-label="Open cart">
+                <Link href="/cart" aria-label="Open cart" className="relative">
                   <ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                  {totalItems > 0 && (
+                    <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center rounded-full p-0">{totalItems}</Badge>
+                  )}
                 </Link>
               </Button>
               <Button
