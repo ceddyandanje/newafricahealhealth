@@ -2,8 +2,9 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle, ShieldCheck, CheckCircle2, RefreshCw, Sparkles, Truck, Video, ClipboardList, BookText } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, PlayCircle, ShieldCheck, CheckCircle2, RefreshCw, Sparkles, Truck, Video, ClipboardList, BookText, Star } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function Home() {
 
@@ -352,7 +353,83 @@ export default function Home() {
             </div>
           </div>
         </section>
+        
+        <section className="py-12 bg-muted/20">
+            <div className="container mx-auto px-4 text-center">
+                <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">What Our Patients Say</h2>
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-12">
+                    Real stories from people we've helped on their health journey.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div className="bg-background p-8 rounded-2xl shadow-lg flex flex-col text-left">
+                        <div className="flex text-yellow-400 mb-4">
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                        </div>
+                        <p className="text-muted-foreground mb-6 flex-grow">
+                            "Managing my diabetes used to be a constant worry. The automated refills are a lifesaver, and the delivery is always on time. I feel so much more in control of my health now."
+                        </p>
+                        <div className="flex items-center">
+                            <Avatar className="h-12 w-12 mr-4">
+                                <AvatarFallback>AK</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold">Amina K.</p>
+                                <p className="text-sm text-muted-foreground">Diabetes Patient</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-background p-8 rounded-2xl shadow-lg flex flex-col text-left">
+                         <div className="flex text-yellow-400 mb-4">
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                        </div>
+                        <p className="text-muted-foreground mb-6 flex-grow">
+                            "The AI assistant is surprisingly helpful for quick questions about my medication. It's like having a pharmacist available 24/7. This service has truly simplified my life."
+                        </p>
+                        <div className="flex items-center">
+                            <Avatar className="h-12 w-12 mr-4">
+                                <AvatarFallback>JM</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold">John M.</p>
+                                <p className="text-sm text-muted-foreground">Heart Condition Patient</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-background p-8 rounded-2xl shadow-lg flex flex-col text-left">
+                         <div className="flex text-yellow-400 mb-4">
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                           <Star className="w-5 h-5 fill-current" />
+                        </div>
+                        <p className="text-muted-foreground mb-6 flex-grow">
+                            "I manage medications for my elderly mother, and this platform has made it incredibly easy. Uploading prescriptions is simple, and I can track everything from my account. Highly recommended!"
+                        </p>
+                        <div className="flex items-center">
+                            <Avatar className="h-12 w-12 mr-4">
+                                <AvatarFallback>SL</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold">Sarah L.</p>
+                                <p className="text-sm text-muted-foreground">Caregiver</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
       </main>
     </div>
   )
 }
+
+    
