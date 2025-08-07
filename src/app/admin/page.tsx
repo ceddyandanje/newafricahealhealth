@@ -6,12 +6,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Bell, Calendar, Expand, FileText, Folder, HeartPulse, Home, Hospital, Inbox, Menu, Search, Settings, Shield, ShoppingBag, Truck, Users, Video } from "lucide-react";
+import { Calendar, Expand, FileText, Folder, HeartPulse, Home, Hospital, Inbox, Menu, Search, Settings, Shield, ShoppingBag, Truck, Users, Video } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell } from "recharts"
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import Notifications from "@/components/admin/notifications";
 
 const summaryData = [
     { title: "Patients", value: "1,421", icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
@@ -117,7 +118,7 @@ export default function AdminDashboardPage() {
                     </div>
                     <div className="flex items-center gap-4">
                         <button className="p-2 rounded-md hover:bg-accent"><Expand /></button>
-                        <button className="p-2 rounded-md hover:bg-accent"><Bell /></button>
+                        <Notifications />
                         <button className="p-2 rounded-md hover:bg-accent"><Settings /></button>
                         <Separator orientation="vertical" className="h-8"/>
                         <div className="flex items-center gap-2">
@@ -269,5 +270,4 @@ export default function AdminDashboardPage() {
             </div>
         </div>
     );
-
-    
+}
