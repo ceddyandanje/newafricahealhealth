@@ -73,8 +73,10 @@ export default function Header() {
                   </Link>
                 ))}
                  <DropdownMenu>
-                    <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
-                      Categories <ChevronDown className="h-4 w-4 ml-1" />
+                    <DropdownMenuTrigger asChild>
+                      <span className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                        Categories <ChevronDown className="h-4 w-4 ml-1" />
+                      </span>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
                       {categoryLinks.map((link) => (
@@ -127,8 +129,10 @@ export default function Header() {
                 </Link>
               ))}
               <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">
-                    Categories <ChevronDown className="h-4 w-4 ml-1" />
+                  <DropdownMenuTrigger asChild>
+                    <span className="flex items-center text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors cursor-pointer">
+                      Categories <ChevronDown className="h-4 w-4 ml-1" />
+                    </span>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     {categoryLinks.map((link) => (
