@@ -1,8 +1,16 @@
+
 import { products } from "@/lib/products"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 import AddToCartButton from "@/components/products/add-to-cart-button"
 import { Badge } from "@/components/ui/badge"
+
+const formatPrice = (priceInCents: number) => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(priceInCents / 100);
+};
 
 export default function ProductDetailPage({ params }: { params: { id: string } }) {
   const product = products.find(p => p.id === params.id)
@@ -27,9 +35,15 @@ export default function ProductDetailPage({ params }: { params: { id: string } }
         </div>
 
         <div>
-          <Badge variant="secondary" className="mb-2">{product.category}</Badge>
+          <div className="flex gap-2 items-center mb-2">
+            <Badge variant="secondary">{product.category}</Badge>
+            {product.tags?.map(tag => (
+                <Badge key={tag} variant={tag === "featured" ? "default" : "outline"}>{tag}</Badge>
+            ))}
+          </div>
+
           <h1 className="font-headline text-4xl font-bold mb-4">{product.name}</h1>
-          <p className="text-2xl font-semibold text-primary mb-6">${product.price.toFixed(2)}</p>
+          <p className="text-2xl font-semibold text-primary mb-6">{formatPrice(product.price)}</p>
           <p className="text-muted-foreground leading-relaxed mb-8">{product.description}</p>
           <div className="w-full md:w-1/2">
             <AddToCartButton product={product} />

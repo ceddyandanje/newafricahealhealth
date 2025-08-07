@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useForm } from "react-hook-form"
@@ -23,6 +24,13 @@ const checkoutSchema = z.object({
   expiryDate: z.string().regex(/^(0[1-9]|1[0-2])\/\d{2}$/, "Invalid expiry date (MM/YY)"),
   cvc: z.string().regex(/^[0-9]{3}$/, "CVC must be 3 digits"),
 })
+
+const formatPrice = (priceInCents: number) => {
+    return new Intl.NumberFormat("en-KE", {
+      style: "currency",
+      currency: "KES",
+    }).format(priceInCents / 100);
+};
 
 export default function CheckoutPage() {
   const { items, totalPrice, clearCart } = useCart()
@@ -117,14 +125,14 @@ export default function CheckoutPage() {
                         <div className="flex-grow">
                         <p className="font-semibold">{item.product.name}</p>
                         </div>
-                        <p className="font-semibold">${(item.product.price * item.quantity).toFixed(2)}</p>
+                        <p className="font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
                     </div>
                 ))}
                 </div>
                 <div className="border-t border-border my-4"></div>
                 <div className="flex justify-between font-bold text-lg">
                 <p>Total</p>
-                <p>${totalPrice.toFixed(2)}</p>
+                <p>{formatPrice(totalPrice)}</p>
                 </div>
             </div>
         </div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useCart } from "@/hooks/use-cart"
@@ -6,6 +7,13 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { X, Minus, Plus } from "lucide-react"
+
+const formatPrice = (priceInCents: number) => {
+    return new Intl.NumberFormat("en-KE", {
+      style: "currency",
+      currency: "KES",
+    }).format(priceInCents / 100);
+};
 
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, totalPrice } = useCart()
@@ -36,7 +44,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex-grow">
                   <Link href={`/products/${item.product.id}`} className="font-headline font-semibold hover:text-primary">{item.product.name}</Link>
-                  <p className="text-muted-foreground text-sm">${item.product.price.toFixed(2)}</p>
+                  <p className="text-muted-foreground text-sm">{formatPrice(item.product.price)}</p>
                 </div>
                 <div className="flex items-center gap-2">
                    <Button variant="outline" size="icon" onClick={() => updateQuantity(item.product.id, item.quantity - 1)}>
@@ -53,7 +61,7 @@ export default function CartPage() {
                     <Plus className="h-4 w-4" />
                    </Button>
                 </div>
-                <p className="font-semibold w-20 text-right">${(item.product.price * item.quantity).toFixed(2)}</p>
+                <p className="font-semibold w-24 text-right">{formatPrice(item.product.price * item.quantity)}</p>
                 <Button variant="ghost" size="icon" onClick={() => removeFromCart(item.product.id)}>
                   <X className="h-4 w-4 text-muted-foreground" />
                 </Button>
@@ -65,7 +73,7 @@ export default function CartPage() {
               <h2 className="font-headline text-2xl font-bold mb-4">Order Summary</h2>
               <div className="flex justify-between mb-2">
                 <p>Subtotal</p>
-                <p>${totalPrice.toFixed(2)}</p>
+                <p>{formatPrice(totalPrice)}</p>
               </div>
               <div className="flex justify-between mb-4">
                 <p>Shipping</p>
@@ -74,7 +82,7 @@ export default function CartPage() {
               <div className="border-t border-border my-4"></div>
               <div className="flex justify-between font-bold text-lg mb-6">
                 <p>Total</p>
-                <p>${totalPrice.toFixed(2)}</p>
+                <p>{formatPrice(totalPrice)}</p>
               </div>
               <Button className="w-full" size="lg" asChild>
                 <Link href="/checkout">Proceed to Checkout</Link>
