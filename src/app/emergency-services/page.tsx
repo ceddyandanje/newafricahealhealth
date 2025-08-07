@@ -1,3 +1,4 @@
+
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Phone, LifeBuoy, Ambulance } from "lucide-react";
@@ -7,7 +8,7 @@ export default function EmergencyServicesPage() {
     <div className="bg-background">
       <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
         <Image
-          src="https://placehold.co/1920x800.png"
+          src="https://images.unsplash.com/photo-1554734867-bf3c00a49371?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Ambulance speeding down a city street"
           fill
           className="object-cover"
