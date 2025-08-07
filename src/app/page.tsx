@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -27,7 +27,7 @@ export default function Home() {
               data-ai-hint="doctor smiling"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-black/30" />
             <div className="absolute inset-0 flex items-center justify-center text-center text-white">
                 <div className="relative z-10 p-4">
                     <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-2">
@@ -258,7 +258,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://placehold.co/100x100.png" alt="Amina K." data-ai-hint="smiling person" />
+                                <Image src="https://placehold.co/100x100.png" alt="Amina K." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>AK</AvatarFallback>
                             </Avatar>
                             <div>
@@ -280,7 +280,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://placehold.co/100x100.png" alt="John M." data-ai-hint="smiling person" />
+                                <Image src="https://placehold.co/100x100.png" alt="John M." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>JM</AvatarFallback>
                             </Avatar>
                             <div>
@@ -302,7 +302,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://placehold.co/100x100.png" alt="Sarah L." data-ai-hint="smiling person" />
+                                <Image src="https://placehold.co/100x100.png" alt="Sarah L." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>SL</AvatarFallback>
                             </Avatar>
                             <div>
