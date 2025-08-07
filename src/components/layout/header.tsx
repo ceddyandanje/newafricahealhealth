@@ -3,7 +3,7 @@
 "use client"
 
 import Link from "next/link"
-import { Menu, ShoppingCart, User, LogIn } from "lucide-react"
+import { Menu, ShoppingCart, User, LogIn, ShieldCheck } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -22,17 +22,29 @@ const navLinks = [
 
 export default function Header() {
   const { items } = useCart()
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0)
   
   const AuthButton = () => {
     if (user) {
         return (
-            <Button variant="ghost" size="icon" asChild>
-                <Link href="/profile">
-                    <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                </Link>
-            </Button>
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <User className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                     <DropdownMenuItem asChild>
+                        <Link href="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                         <DropdownMenuItem asChild>
+                            <Link href="/admin">Admin Dashboard</Link>
+                        </DropdownMenuItem>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
         )
     }
 
@@ -120,6 +132,9 @@ export default function Header() {
                 ))}
                  <ClientHeaderItems isMobile={true} />
                  <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white">Wellness Blog</Link>
+                 {isAdmin && (
+                    <Link href="/admin" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white flex items-center gap-2"><ShieldCheck />Admin</Link>
+                 )}
                  <div className="flex items-center pt-4 border-t">
                     <Button variant="ghost" size="icon" asChild>
                       <Link href="/cart" aria-label="Open cart" className="relative">
@@ -151,6 +166,9 @@ export default function Header() {
               ))}
               <ClientHeaderItems />
               <Link href="/wellness-blog" className="text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors">Wellness Blog</Link>
+              {isAdmin && (
+                  <Link href="/admin" className="text-primary hover:text-primary/90 transition-colors flex items-center gap-2"><ShieldCheck />Admin</Link>
+              )}
             </nav>
           
             <div className="flex items-center justify-end space-x-2">

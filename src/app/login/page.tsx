@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDocs, collection } from "firebase/firestore";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -71,6 +71,10 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
         }
 
         try {
+            const usersCollection = collection(db, "users");
+            const usersSnapshot = await getDocs(usersCollection);
+            const isFirstUser = usersSnapshot.empty;
+
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
@@ -81,6 +85,7 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
                 phoneNumber,
                 ageRange,
                 createdAt: serverTimestamp(),
+                role: isFirstUser ? 'admin' : 'user',
             });
 
             toast({ title: "Signup Successful", description: "Your account has been created." });
@@ -142,17 +147,17 @@ function SignupForm({ onSignupSuccess }: { onSignupSuccess?: () => void }) {
 }
 
 export default function LoginPage() {
-    const { user } = useAuth();
+    const { user, loading } = useAuth();
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
     const [currentTab, setCurrentTab] = useState(tabParam === 'signup' ? 'signup' : 'login');
     const router = useRouter();
 
     useEffect(() => {
-        if (user) {
-            router.push('/profile');
+        if (!loading && user) {
+             // Redirect logic is now in useAuth hook
         }
-    }, [user, router]);
+    }, [user, loading, router]);
     
     useEffect(() => {
         const newTab = searchParams.get('tab');
@@ -161,7 +166,7 @@ export default function LoginPage() {
         }
     }, [searchParams, currentTab]);
 
-    if (user) {
+    if (user || loading) {
         return null; // or a loading spinner
     }
 
@@ -183,7 +188,7 @@ export default function LoginPage() {
                             <TabsTrigger value="signup">Sign Up</TabsTrigger>
                         </TabsList>
                         <TabsContent value="login" className="mt-6">
-                            <LoginForm onLoginSuccess={() => router.push('/profile')} />
+                            <LoginForm onLoginSuccess={() => { /* Redirect logic now in useAuth */ }} />
                         </TabsContent>
                         <TabsContent value="signup" className="mt-6">
                             <SignupForm onSignupSuccess={() => setCurrentTab("login")} />
