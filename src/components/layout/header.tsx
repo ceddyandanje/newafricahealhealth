@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User } from "lucide-react"
+import { Moon, ShoppingCart, Sun, Menu, ChevronDown, User, Plane } from "lucide-react"
 import { useTheme } from "next-themes"
 
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const navLinks = [
   { href: "/products", label: "Products" },
+  { href: "/emergency-services", label: "Emergency Services" },
   { href: "/medical-tourism", label: "Medical Tourism" },
   { href: "/organ-transplants", label: "Organ Transplants" },
 ]
