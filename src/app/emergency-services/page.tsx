@@ -8,11 +8,11 @@ export default function EmergencyServicesPage() {
     <div className="bg-background">
       <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
         <Image
-          src="https://images.unsplash.com/photo-1588543385566-413e13a51a24?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          src="https://images.unsplash.com/photo-1554734867-bf3c00a49371?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
           alt="Ambulance speeding down a city street"
           fill
           className="object-cover"
-          data-ai-hint="ambulance emergency"
+          data-ai-hint="first aid kit beach"
           priority
         />
         <div className="absolute inset-0 bg-black/50" />
@@ -40,11 +40,11 @@ export default function EmergencyServicesPage() {
           </div>
           <div className="relative h-80 rounded-2xl overflow-hidden glassmorphic p-2">
               <Image
-                  src="https://placehold.co/600x400.png"
+                  src="https://images.unsplash.com/photo-1588543385566-413e13a51a24?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt="Helicopter ambulance flying over a landscape"
                   fill
                   className="object-cover rounded-xl"
-                  data-ai-hint="helicopter ambulance"
+                  data-ai-hint="ambulance emergency"
               />
           </div>
         </div>
