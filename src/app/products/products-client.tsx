@@ -161,9 +161,9 @@ export default function ProductsClient({
 
   return (
     <div className="container mx-auto px-4 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-4 gap-8">
         {/* Left Column: Filters */}
-        <aside className="lg:col-span-1 lg:sticky top-24 h-fit">
+        <aside className="col-span-1 sticky top-24 h-fit">
           <Card className="p-6 glass-card">
             <h2 className="font-headline text-2xl font-bold mb-2">Filters</h2>
             <p className="text-muted-foreground mb-6">Refine your search.</p>
@@ -235,7 +235,7 @@ export default function ProductsClient({
         </aside>
 
         {/* Right Column: Product Display */}
-        <main className="lg:col-span-3">
+        <main className="col-span-3">
           <div className="flex justify-between items-center mb-8">
             <h1 className="font-headline text-4xl font-bold">All Products</h1>
             <div className="flex items-center gap-2">
@@ -281,4 +281,3 @@ export default function ProductsClient({
     </div>
   );
 }
-
