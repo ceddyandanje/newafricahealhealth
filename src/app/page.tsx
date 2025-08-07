@@ -391,23 +391,23 @@ export default function Home() {
               
               <div className="glassmorphic p-8">
                 <form action="#" className="space-y-6">
-                  <div>
-                    <label htmlFor="name" className="sr-only">Name</label>
-                    <Input id="name" name="name" type="text" placeholder="Name" required />
+                  <div className="space-y-2">
+                    <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Name</label>
+                    <input id="name" name="name" type="text" placeholder="Name" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
                   </div>
                   <div className="grid sm:grid-cols-2 gap-6">
-                    <div>
-                      <label htmlFor="email" className="sr-only">Email</label>
-                      <Input id="email" name="email" type="email" placeholder="Email" required />
+                    <div className="space-y-2">
+                      <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
+                      <input id="email" name="email" type="email" placeholder="Email" required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
                     </div>
-                    <div>
-                      <label htmlFor="phone" className="sr-only">Phone</label>
-                      <Input id="phone" name="phone" type="tel" placeholder="Phone" />
+                    <div className="space-y-2">
+                      <label htmlFor="phone" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Phone</label>
+                      <input id="phone" name="phone" type="tel" placeholder="Phone" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" />
                     </div>
                   </div>
-                  <div>
-                    <label htmlFor="message" className="sr-only">Message</label>
-                    <Textarea id="message" name="message" placeholder="Message" rows={5} required />
+                  <div className="space-y-2">
+                    <label htmlFor="message" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Message</label>
+                    <textarea id="message" name="message" placeholder="Message" rows={5} required className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"></textarea>
                   </div>
                   <div>
                     <Button type="submit" size="lg" className="w-full">
