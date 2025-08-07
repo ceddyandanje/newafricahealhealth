@@ -330,7 +330,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold text-foreground">Chronic Care</h3>
                 </div>
               </Link>
-              <Link href="/products?category=Emergency+Response" className="block group">
+              <Link href="/emergency-services" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Ambulance className="h-10 w-10" />
