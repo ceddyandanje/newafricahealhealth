@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, AirVent, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
@@ -48,40 +48,40 @@ export default function Home() {
           <div className="relative container mx-auto px-4 -mt-20 z-20">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               <Link href="/profile" className="block group">
-                  <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-                    <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
-                      <User className="h-8 w-8" />
-                    </div>
-                    <h3 className="font-semibold text-lg text-foreground">Personalized Care</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Log in to access personalized care anytime, anywhere.</p>
+                <div className="bg-blue-100/30 dark:bg-blue-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
+                  <div className="inline-block p-4 bg-blue-200 text-blue-700 rounded-full mb-4">
+                    <User className="h-8 w-8" />
                   </div>
+                  <h3 className="font-semibold text-lg text-foreground">Personalized Care</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Log in to access personalized care anytime, anywhere.</p>
+                </div>
               </Link>
               <Link href="/products" className="block group">
-                  <div className="bg-green-100/30 dark:bg-green-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-                    <div className="inline-block p-4 bg-green-200 text-green-700 rounded-full mb-4">
-                      <HeartPulse className="h-8 w-8" />
-                    </div>
-                    <h3 className="font-semibold text-lg text-foreground">Health & Drug Plans</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Find & compare products in your area.</p>
+                <div className="bg-green-100/30 dark:bg-green-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
+                  <div className="inline-block p-4 bg-green-200 text-green-700 rounded-full mb-4">
+                    <HeartPulse className="h-8 w-8" />
                   </div>
+                  <h3 className="font-semibold text-lg text-foreground">Health & Drug Plans</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Find & compare products in your area.</p>
+                </div>
               </Link>
               <Link href="/emergency-services" className="block group">
-                  <div className="bg-red-100/30 dark:bg-red-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-                    <div className="inline-block p-4 bg-red-200 text-red-700 rounded-full mb-4">
-                      <Stethoscope className="h-8 w-8" />
-                    </div>
-                    <h3 className="font-semibold text-lg text-foreground">Emergency Services</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Medevac and ground ambulance services.</p>
+                <div className="bg-red-100/30 dark:bg-red-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
+                  <div className="inline-block p-4 bg-red-200 text-red-700 rounded-full mb-4">
+                    <Stethoscope className="h-8 w-8" />
                   </div>
+                  <h3 className="font-semibold text-lg text-foreground">Emergency Services</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Medevac and ground ambulance services.</p>
+                </div>
               </Link>
               <Link href="/#consultation" className="block group">
-                  <div className="bg-teal-100/30 dark:bg-teal-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
-                    <div className="inline-block p-4 bg-teal-200 text-teal-700 rounded-full mb-4">
-                      <Phone className="h-8 w-8" />
-                    </div>
-                    <h3 className="font-semibold text-lg text-foreground">24/7 Support</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Contact us for support and assistance.</p>
+                <div className="bg-teal-100/30 dark:bg-teal-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
+                  <div className="inline-block p-4 bg-teal-200 text-teal-700 rounded-full mb-4">
+                    <Phone className="h-8 w-8" />
                   </div>
+                  <h3 className="font-semibold text-lg text-foreground">24/7 Support</h3>
+                  <p className="text-sm text-muted-foreground mt-1">Contact us for support and assistance.</p>
+                </div>
               </Link>
             </div>
           </div>
@@ -258,7 +258,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <Image src="https://placehold.co/100x100.png" alt="Amina K." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="Amina K." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>AK</AvatarFallback>
                             </Avatar>
                             <div>
@@ -280,7 +280,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <Image src="https://placehold.co/100x100.png" alt="John M." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="John M." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>JM</AvatarFallback>
                             </Avatar>
                             <div>
@@ -302,7 +302,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <Image src="https://placehold.co/100x100.png" alt="Sarah L." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="Sarah L." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>SL</AvatarFallback>
                             </Avatar>
                             <div>
