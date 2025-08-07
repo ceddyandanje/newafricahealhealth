@@ -29,7 +29,7 @@ export default function OrganTransplantsPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/600x450.png"
+                        src="https://images.unsplash.com/photo-1682706841291-d4aadc6fde6c?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                         alt="Heart illustration with technology elements"
                         fill
                         className="object-cover rounded-xl"
