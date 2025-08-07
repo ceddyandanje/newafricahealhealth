@@ -64,6 +64,40 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <section className="py-20 bg-white dark:bg-gray-800">
+          <div className="container mx-auto px-4 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-gray-800 dark:text-white">
+              Your Chronic Care Journey, Simplified
+            </h2>
+            <p className="text-lg text-muted-foreground mb-16">
+              Your health journey in three simple steps.
+            </p>
+            <div className="relative grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16 items-start">
+              <div className="absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 dark:bg-gray-700 hidden md:block" />
+              <div className="relative flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-[#28a745] text-white flex items-center justify-center text-2xl font-bold mb-4 z-10">1</div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Upload Prescription</h3>
+                <p className="text-muted-foreground">Safely upload your doctor's prescription. Our AI helps digitize it instantly.</p>
+              </div>
+              <div className="relative flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-[#28a745] text-white flex items-center justify-center text-2xl font-bold mb-4 z-10">2</div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Order Medicine</h3>
+                <p className="text-muted-foreground">Browse our extensive catalog or use your digitized prescription to order.</p>
+              </div>
+              <div className="relative flex flex-col items-center">
+                <div className="w-16 h-16 rounded-full bg-[#28a745] text-white flex items-center justify-center text-2xl font-bold mb-4 z-10">3</div>
+                <h3 className="text-xl font-semibold mb-2 text-gray-800 dark:text-white">Delivered to You</h3>
+                <p className="text-muted-foreground">Receive your medication at your doorstep, with automated refills available.</p>
+              </div>
+            </div>
+            <div className="mt-16">
+              <Button size="lg" className="bg-[#28a745] hover:bg-[#218838] text-white font-semibold rounded-full px-8 py-3">
+                Get Started <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   )
