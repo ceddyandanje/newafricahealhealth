@@ -6,7 +6,6 @@ import { onAuthStateChanged, User } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase';
 import { doc, getDoc } from "firebase/firestore";
 import { Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -24,7 +23,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -33,10 +31,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userDoc = await getDoc(userDocRef);
         if (userDoc.exists() && userDoc.data().role === 'admin') {
           setIsAdmin(true);
-          router.push('/admin');
         } else {
           setIsAdmin(false);
-          router.push('/profile');
         }
         setUser(user);
       } else {
@@ -47,7 +43,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading, isAdmin }}>

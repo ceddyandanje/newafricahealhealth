@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
-import { Package, Heart, LogOut, User as UserIcon } from "lucide-react";
+import { Package, Heart, LogOut, User as UserIcon, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -91,7 +91,11 @@ export default function ProfilePage() {
     }, [user, loading, router]);
 
     if (loading || !user) {
-        return null; // or a loading spinner
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            </div>
+        );
     }
 
     return (

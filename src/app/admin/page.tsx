@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { collection, getDocs, onSnapshot, doc, getDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -24,38 +24,29 @@ interface AppUser {
 }
 
 export default function AdminPage() {
-    const { user, loading: authLoading } = useAuth();
+    const { user, isAdmin, loading: authLoading } = useAuth();
     const router = useRouter();
     const [users, setUsers] = useState<AppUser[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!authLoading && !user) {
-            router.push('/login');
-            return;
+        if (!authLoading) {
+            if (!user) {
+                router.push('/login');
+            } else if (!isAdmin) {
+                router.push('/profile');
+            } else {
+                const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
+                    const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppUser));
+                    setUsers(usersData);
+                    setLoading(false);
+                });
+                return () => unsubscribe();
+            }
         }
+    }, [user, isAdmin, authLoading, router]);
 
-        if (user) {
-            const checkAdmin = async () => {
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists() && userDoc.data().role !== 'admin') {
-                    router.push('/profile');
-                } else {
-                    const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
-                        const usersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppUser));
-                        setUsers(usersData);
-                        setLoading(false);
-                    });
-                     return () => unsubscribe();
-                }
-            };
-            checkAdmin();
-        }
-
-    }, [user, authLoading, router]);
-    
-
-    if (authLoading || loading) {
+    if (authLoading || loading || !isAdmin) {
         return (
             <div className="flex justify-center items-center h-screen">
                 <Loader2 className="h-12 w-12 animate-spin text-primary" />
