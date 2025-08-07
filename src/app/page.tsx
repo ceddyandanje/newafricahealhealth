@@ -15,7 +15,7 @@ export default function Home() {
             alt="A diverse group of healthcare professionals smiling"
             fill
             className="object-cover object-center"
-            data-ai-hint="healthcare professionals group"
+            data-ai-hint="diverse healthcare professionals"
             priority
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-black/20" />
