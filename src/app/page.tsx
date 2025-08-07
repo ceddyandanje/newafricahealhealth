@@ -74,7 +74,7 @@ export default function Home() {
                     <p className="text-sm text-muted-foreground mt-1">Medevac and ground ambulance services.</p>
                   </div>
               </Link>
-              <Link href="/emergency-services" className="block group">
+              <Link href="/#consultation" className="block group">
                   <div className="bg-teal-100/30 dark:bg-teal-900/40 backdrop-blur-sm p-6 rounded-xl text-center shadow-lg border border-gray-200/50 dark:border-gray-700/50 h-full transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1">
                     <div className="inline-block p-4 bg-teal-200 text-teal-700 rounded-full mb-4">
                       <Phone className="h-8 w-8" />
@@ -359,7 +359,7 @@ export default function Home() {
         </section>
 
         {/* Consultation Section */}
-        <section className="py-12 bg-background">
+        <section id="consultation" className="py-12 bg-background scroll-mt-20">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">
               Book Your Free Consultation Today
