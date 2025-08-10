@@ -20,11 +20,12 @@ import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 
 export default function PatientSettingsPage() {
     const { theme, setTheme } = useTheme();
-    const { user } = useAuth();
+    const { user, reauthenticateAndChangePassword } = useAuth();
     const { users, setUsers } = useUsers();
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -33,7 +34,6 @@ export default function PatientSettingsPage() {
     // State for profile form
     const [name, setName] = useState(user?.name || '');
     const [phone, setPhone] = useState(user?.phone || '');
-    const [dob, setDob] = useState('');
     const [address, setAddress] = useState('');
     
     // State for medical form
@@ -42,6 +42,14 @@ export default function PatientSettingsPage() {
     const [primaryPhysician, setPrimaryPhysician] = useState('');
     const [emergencyName, setEmergencyName] = useState('');
     const [emergencyPhone, setEmergencyPhone] = useState('');
+
+    // State for password form
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isPasswordChangeDialogOpen, setIsPasswordChangeDialogOpen] = useState(false);
+    const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+
 
     useEffect(() => {
         // When the user context loads, update the form state
@@ -57,6 +65,7 @@ export default function PatientSettingsPage() {
                     setPrimaryPhysician(profile.primaryPhysician);
                     setEmergencyName(profile.emergencyContact.name);
                     setEmergencyPhone(profile.emergencyContact.phone);
+                    setAddress(profile.address || '');
                 }
             }
             fetchProfile();
@@ -90,6 +99,7 @@ export default function PatientSettingsPage() {
             bloodType,
             allergies,
             primaryPhysician,
+            address,
             emergencyContact: {
                 name: emergencyName,
                 phone: emergencyPhone
@@ -105,6 +115,28 @@ export default function PatientSettingsPage() {
             toast({ variant: 'destructive', title: "Update Failed", description: "Could not save medical details." });
         }
     }
+
+    const handlePasswordChange = async () => {
+        if (newPassword !== confirmPassword) {
+            toast({ variant: 'destructive', title: "Password Mismatch", description: "The new passwords do not match." });
+            return;
+        }
+        if (newPassword.length < 8) {
+            toast({ variant: 'destructive', title: "Password Too Short", description: "Password must be at least 8 characters long." });
+            return;
+        }
+        
+        setIsPasswordSubmitting(true);
+        const success = await reauthenticateAndChangePassword(currentPassword, newPassword);
+        setIsPasswordSubmitting(false);
+
+        if (success) {
+            setIsPasswordChangeDialogOpen(false);
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        }
+    };
 
     const handleAvatarClick = () => {
         fileInputRef.current?.click();
@@ -191,14 +223,6 @@ export default function PatientSettingsPage() {
                                     <Label htmlFor="phone">Phone Number</Label>
                                     <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+254 712 345 678" />
                                 </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="dob">Date of Birth</Label>
-                                    <Input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
-                                </div>
-                            </div>
-                             <div className="space-y-1">
-                                <Label htmlFor="address">Shipping Address</Label>
-                                <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Health St, Nairobi, Kenya" />
                             </div>
                             <Button onClick={handleProfileUpdate}>Update Profile</Button>
                         </CardContent>
@@ -210,6 +234,10 @@ export default function PatientSettingsPage() {
                             <CardDescription>This information is vital for your care team. Please keep it updated.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                             <div className="space-y-1">
+                                <Label htmlFor="address">Shipping Address</Label>
+                                <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Health St, Nairobi, Kenya" />
+                            </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="blood-type">Blood Type</Label>
@@ -259,22 +287,8 @@ export default function PatientSettingsPage() {
                             <CardTitle className="flex items-center gap-2"><Lock /> Security</CardTitle>
                             <CardDescription>Manage your password and account security.</CardDescription>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                             <div className="space-y-1">
-                                <Label htmlFor="current-password">Current Password</Label>
-                                <Input id="current-password" type="password" />
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <Label htmlFor="new-password">New Password</Label>
-                                    <Input id="new-password" type="password" />
-                                </div>
-                                 <div className="space-y-1">
-                                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                                    <Input id="confirm-password" type="password" />
-                                </div>
-                            </div>
-                            <Button onClick={() => toast({ title: "Coming Soon!", description: "This feature is not yet implemented."})}>Change Password</Button>
+                        <CardContent>
+                             <Button onClick={() => setIsPasswordChangeDialogOpen(true)}>Change Password</Button>
                         </CardContent>
                     </Card>
                 </div>
@@ -330,6 +344,42 @@ export default function PatientSettingsPage() {
                     </Card>
                 </div>
             </div>
+
+            <AlertDialog open={isPasswordChangeDialogOpen} onOpenChange={setIsPasswordChangeDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Change Your Password</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Enter your current password, followed by a new password.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="space-y-4 py-2">
+                        <div className="space-y-1">
+                            <Label htmlFor="current-password">Current Password</Label>
+                            <Input id="current-password" type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="new-password">New Password</Label>
+                            <Input id="new-password" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+                        </div>
+                        <div className="space-y-1">
+                            <Label htmlFor="confirm-password">Confirm New Password</Label>
+                            <Input id="confirm-password" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+                        </div>
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => {
+                            setCurrentPassword('');
+                            setNewPassword('');
+                            setConfirmPassword('');
+                        }}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handlePasswordChange} disabled={isPasswordSubmitting}>
+                            {isPasswordSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Change Password
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -9,6 +9,9 @@ import {
     signInWithEmailAndPassword, 
     onAuthStateChanged, 
     signOut,
+    updatePassword,
+    EmailAuthProvider,
+    reauthenticateWithCredential,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -16,6 +19,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 import { type User, type LoginCredentials, type SignUpCredentials } from "@/lib/types";
 import { useToast } from "./use-toast";
 import { createUserInFirestore } from "@/lib/users";
+import { addLog } from "@/lib/logs";
 
 interface AuthContextType {
   user: User | null;
@@ -24,6 +28,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   signup: (credentials: SignUpCredentials) => Promise<boolean>;
   logout: () => void;
+  reauthenticateAndChangePassword: (currentPass: string, newPass: string) => Promise<boolean>;
   isLoading: boolean;
 }
 
@@ -79,7 +84,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             handleRedirect(userData);
             return true;
         }
-        // This case should ideally not happen if signup is correctly creating a firestore doc
         toast({ variant: 'destructive', title: "Login Failed", description: "User profile not found in database." });
         return false;
     } catch (error: any) {
@@ -139,12 +143,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.push("/login");
   }, [router, toast]);
+
+  const reauthenticateAndChangePassword = async (currentPass: string, newPass: string) => {
+    if (!firebaseUser || !firebaseUser.email) {
+      toast({ variant: 'destructive', title: "Error", description: "No user is currently signed in." });
+      return false;
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(firebaseUser.email, currentPass);
+      await reauthenticateWithCredential(firebaseUser, credential);
+      
+      // If re-authentication is successful, update the password
+      await updatePassword(firebaseUser, newPass);
+      addLog("INFO", `User ${firebaseUser.email} successfully changed their password.`);
+      toast({ title: "Success", description: "Your password has been changed successfully." });
+      return true;
+
+    } catch (error: any) {
+      let description = "An unknown error occurred.";
+      switch (error.code) {
+        case 'auth/wrong-password':
+          description = "The current password you entered is incorrect.";
+          break;
+        case 'auth/too-many-requests':
+            description = "Too many failed attempts. Please try again later.";
+            break;
+        default:
+          description = "Failed to re-authenticate. Please try logging out and in again.";
+      }
+      addLog("WARN", `Failed password change attempt for user ${firebaseUser.email}. Reason: ${error.code}`);
+      toast({ variant: 'destructive', title: "Password Change Failed", description });
+      return false;
+    }
+  };
   
 
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, isAdmin, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, firebaseUser, isAdmin, login, signup, logout, reauthenticateAndChangePassword, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

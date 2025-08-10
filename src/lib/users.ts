@@ -107,7 +107,7 @@ export const getMedicalProfile = async (userId: string): Promise<MedicalProfile 
 }
 
 // Creates or updates the medical profile for a specific user
-export const updateUserMedicalProfile = async (userId: string, data: MedicalProfile): Promise<boolean> => {
+export const updateUserMedicalProfile = async (userId: string, data: Partial<MedicalProfile>): Promise<boolean> => {
     try {
         const profileDocRef = doc(db, 'users', userId, 'medicalProfile', 'details');
         // `setDoc` with `merge: true` will create the document if it doesn't exist, or update it if it does.

@@ -87,9 +87,11 @@ export type MedicalProfile = {
   bloodType: string;
   allergies: string;
   primaryPhysician: string;
+  address: string;
   emergencyContact: {
     name: string;
     phone: string;
   };
 };
+
 
