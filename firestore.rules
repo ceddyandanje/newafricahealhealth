@@ -1,14 +1,13 @@
+
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow any user to create a document in the 'users' collection.
-    // This is necessary for the signup process.
-    match /users/{userId} {
-      allow create: if request.auth != null;
-
-      // Logged-in users can read their own profile,
-      // and admins can read any profile.
-      allow read, update: if request.auth != null && (request.auth.uid == userId || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin');
+    // Allow read/write access to all documents for any authenticated user.
+    // This is a simple rule for development and should be secured further
+    // for a production environment.
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
