@@ -24,10 +24,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useLocalStorage<string | null>("userId", null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
   const router = useRouter();
   const { toast } = useToast();
   
-  const allUsers = getAllUsers();
+  useEffect(() => {
+    setAllUsers(getAllUsers());
+  }, []);
+
 
   useEffect(() => {
     setIsLoading(true);
@@ -63,6 +67,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
 
     const newUser = createUser(credentials);
+    setAllUsers(prev => [...prev, newUser]); // Update local state
     setUserId(newUser.id);
     toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
     router.push("/patient/dashboard");
