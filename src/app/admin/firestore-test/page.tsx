@@ -23,7 +23,7 @@ export default function FirestoreTestPage() {
         try {
             // A lightweight operation to test connection.
             // getFirestore() will throw if not initialized, and getDocs will throw if permissions fail.
-            await getDocs(collection(db, `__test_connection__`));
+            await getDocs(collection(db, `test-connection-collection`));
             toast({
                 title: "Connection Successful",
                 description: "Successfully connected to Firestore.",
