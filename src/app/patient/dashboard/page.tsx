@@ -13,6 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Line, LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell } from "recharts"
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 
 const dailyGlanceItems = [
     { icon: Pill, title: "Take Metformin", time: "8:00 AM", status: "Done" },
@@ -36,10 +40,27 @@ const healthTrendData = [
 ];
 
 export default function PatientDashboardPage() {
+    const { user, isLoading } = useAuth();
+    const router = useRouter();
+    
+    useEffect(() => {
+        if (!isLoading && !user) {
+          router.push("/login");
+        }
+    }, [user, isLoading, router]);
+
+    if (isLoading || !user) {
+        return (
+          <div className="flex h-screen w-full items-center justify-center bg-background">
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+          </div>
+        );
+    }
+
     return (
         <div className="p-6">
             <header className="py-6">
-                <h1 className="text-3xl font-bold">Good morning, Sarah</h1>
+                <h1 className="text-3xl font-bold">Good morning, {user?.name.split(' ')[0]}</h1>
                 <p className="text-muted-foreground">Here’s what your day looks like.</p>
             </header>
 

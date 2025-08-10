@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect, RefObject } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { LayoutGrid, Calendar, Mail, FileText, Pill, Phone, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -17,15 +17,10 @@ const navItems = [
     { href: '/patient/settings', icon: Settings, label: 'Settings' },
 ];
 
-interface PatientSidebarProps {
-  mainContentRef: RefObject<HTMLDivElement>;
-}
 
-export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) {
+export default function PatientSidebar() {
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isFixed, setIsFixed] = useState(true);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
-    const sidebarRef = useRef<HTMLElement>(null);
     const pathname = usePathname();
 
     const handleMouseEnter = () => {
@@ -41,52 +36,13 @@ export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) 
         setIsExpanded(false);
     };
 
-    useEffect(() => {
-        const handleScroll = () => {
-            if (!sidebarRef.current || !mainContentRef.current) return;
-
-            const scrollY = window.scrollY;
-            const headerHeight = 64; 
-            const mainTop = mainContentRef.current.offsetTop;
-            const mainHeight = mainContentRef.current.offsetHeight;
-            const mainBottom = mainTop + mainHeight;
-            const sidebarHeight = sidebarRef.current.offsetHeight;
-            const viewportHeight = window.innerHeight;
-
-            const isBelowHeader = scrollY > headerHeight;
-            const isSidebarWithinViewport = scrollY + viewportHeight < mainBottom + sidebarHeight;
-            
-            if (isBelowHeader && isSidebarWithinViewport) {
-                setIsFixed(true);
-            } else {
-                setIsFixed(false);
-            }
-        };
-
-        window.addEventListener('scroll', handleScroll, { passive: true });
-        handleScroll(); // Initial check
-
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-            if (timerRef.current) {
-                clearTimeout(timerRef.current);
-            }
-        };
-    }, [mainContentRef]);
-
     return (
         <aside
-            ref={sidebarRef}
             className={cn(
-                'left-4 z-50 flex flex-col items-start gap-1 p-2 transition-all duration-300',
+                'fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-start gap-1 p-2 transition-all duration-300',
                 'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl',
                 isExpanded ? 'w-48' : 'w-14 items-center',
-                isFixed ? 'fixed top-1/2 -translate-y-1/2' : 'absolute'
             )}
-            style={isFixed ? {} : { 
-                top: mainContentRef.current ? mainContentRef.current.offsetTop + 16 : 16,
-                bottom: 'auto'
-            }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >

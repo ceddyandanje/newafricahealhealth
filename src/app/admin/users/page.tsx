@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Shield, PlusCircle, Search, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { getAllUsers, createUser, saveAllUsers } from "@/lib/users";
+import { useUsers, createUser, saveAllUsers, getAllUsers } from "@/lib/users";
 import { type User, type UserRole, type UserStatus } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
@@ -139,25 +139,18 @@ function ManageUserDialog({ user, onUpdate, onDelete, onOpenChange }: { user: Us
 
 
 export default function UsersPage() {
-    const [users, setUsers] = useState<User[]>([]);
+    const [users, setUsers] = useUsers();
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
     const { toast } = useToast();
 
-    useEffect(() => {
-        setUsers(getAllUsers());
-    }, []);
-
     const handleAddUser = (userData: z.infer<typeof userSchema>) => {
-        if (getAllUsers().some(u => u.email === userData.email)) {
+        if (users.some(u => u.email === userData.email)) {
             toast({ variant: 'destructive', title: "Creation Failed", description: "A user with this email already exists."});
             return;
         }
         const newUser = createUser(userData);
-        const updatedUsers = [...users, newUser];
-        setUsers(updatedUsers);
-        // No need to call saveAllUsers here, createUser does it.
-
+        // The useUsers hook will update the state automatically due to the storage event
         addLog('INFO', `New user created: ${newUser.name} (${newUser.email}) with role ${newUser.role}.`);
         addNotification({ type: 'new_appointment', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
         toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
@@ -165,9 +158,7 @@ export default function UsersPage() {
     
     const handleUpdateUser = (updates: Partial<User>) => {
         if (!selectedUser) return;
-        const updatedUsers = users.map(u => u.id === selectedUser.id ? { ...u, ...updates } : u);
-        setUsers(updatedUsers);
-        saveAllUsers(updatedUsers);
+        setUsers(prevUsers => prevUsers.map(u => u.id === selectedUser.id ? { ...u, ...updates } : u));
         
         let updateMessage = `User ${selectedUser.name}'s details were updated.`;
         if (updates.role && updates.role !== selectedUser.role) {
@@ -191,9 +182,7 @@ export default function UsersPage() {
             return;
         }
         const userToDelete = selectedUser;
-        const updatedUsers = users.filter(u => u.id !== userToDelete.id);
-        setUsers(updatedUsers);
-        saveAllUsers(updatedUsers);
+        setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
 
         addLog('WARN', `User ${userToDelete.name} (${userToDelete.email}) was deleted.`);
         addNotification({ type: 'system_update', title: 'User Deleted', description: `The account for ${userToDelete.name} has been removed.`});

@@ -3,38 +3,32 @@
 
 import { type Notification, type NotificationType } from './types';
 import initialNotifications from './data/notifications.json';
-import { UserPlus, MessageSquare, Cog, Mail, Bell } from 'lucide-react';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { Dispatch, SetStateAction } from 'react';
 
-const NOTIFICATIONS_STORAGE_KEY = 'app-notifications';
+// This is now a hook that provides live-synced notifications
+export const useNotifications = (): [Notification[], Dispatch<SetStateAction<Notification[]>>] => {
+    return useLocalStorage<Notification[]>('app-notifications', initialNotifications as Notification[]);
+};
 
-export const getAllNotifications = (): Notification[] => {
+// The functions below are for components that cannot use hooks (e.g., non-component files)
+// They will write to localStorage, and the hook will pick up the changes.
+
+const getNotificationsSnapshot = (): Notification[] => {
     if (typeof window === 'undefined') {
         return initialNotifications as Notification[];
     }
-    try {
-        const storedNotifications = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
-        if (storedNotifications) {
-            return JSON.parse(storedNotifications);
-        } else {
-            localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(initialNotifications));
-            return initialNotifications as Notification[];
-        }
-    } catch (error) {
-        console.error('Error reading notifications from localStorage:', error);
-        return initialNotifications as Notification[];
-    }
-};
+    const storedNotifications = localStorage.getItem('app-notifications');
+    return storedNotifications ? JSON.parse(storedNotifications) : (initialNotifications as Notification[]);
+}
 
-export const saveAllNotifications = (notifications: Notification[]) => {
-    if (typeof window === 'undefined') {
-        return;
-    }
-    try {
-        localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
-    } catch (error) {
-        console.error('Error writing notifications to localStorage:', error);
-    }
-};
+const saveNotificationsSnapshot = (notifications: Notification[]) => {
+     if (typeof window === 'undefined') return;
+    localStorage.setItem('app-notifications', JSON.stringify(notifications));
+    // Manually dispatch event for the current window to update UI
+    window.dispatchEvent(new StorageEvent('storage', { key: 'app-notifications' }));
+}
+
 
 type NewNotificationPayload = {
     type: NotificationType;
@@ -43,7 +37,7 @@ type NewNotificationPayload = {
 }
 
 export const addNotification = (payload: NewNotificationPayload) => {
-    const notifications = getAllNotifications();
+    const notifications = getNotificationsSnapshot();
     const newNotification: Notification = {
         id: notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) + 1 : 1,
         type: payload.type,
@@ -52,6 +46,6 @@ export const addNotification = (payload: NewNotificationPayload) => {
         time: new Date().toISOString(),
         read: false,
     };
-    const updatedNotifications = [...notifications, newNotification];
-    saveAllNotifications(updatedNotifications);
+    const updatedNotifications = [newNotification, ...notifications];
+    saveNotificationsSnapshot(updatedNotifications);
 };

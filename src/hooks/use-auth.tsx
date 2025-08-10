@@ -3,10 +3,11 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { findUserByEmail, createUser, findUserById } from "@/lib/users";
+import { getAllUsers, createUser, findUserById } from "@/lib/users";
 import { type User } from "@/lib/types";
 import type { LoginCredentials, SignUpCredentials } from "@/lib/types";
 import { useToast } from "./use-toast";
+import { useLocalStorage } from "./use-local-storage";
 
 interface AuthContextType {
   user: User | null;
@@ -20,38 +21,34 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [userId, setUserId] = useLocalStorage<string | null>("userId", null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const { toast } = useToast();
+  
+  const allUsers = getAllUsers();
 
   useEffect(() => {
-    try {
-      const storedUserId = localStorage.getItem("userId");
-      if (storedUserId) {
-        const loggedInUser = findUserById(storedUserId);
-        if (loggedInUser) {
-          setUser(loggedInUser);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to load user from local storage", error);
-      setUser(null);
-    } finally {
-        setIsLoading(false);
+    setIsLoading(true);
+    if (userId) {
+        const loggedInUser = findUserById(userId, allUsers);
+        setUser(loggedInUser || null);
+    } else {
+        setUser(null);
     }
-  }, []);
+    setIsLoading(false);
+  }, [userId, allUsers]);
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    const foundUser = findUserByEmail(credentials.email);
+    const foundUser = allUsers.find(u => u.email === credentials.email);
     if (foundUser && foundUser.password === credentials.password) {
-      setUser(foundUser);
-      localStorage.setItem("userId", foundUser.id);
+      setUserId(foundUser.id);
       toast({ title: "Login Successful", description: `Welcome back, ${foundUser.name}!` });
       if (foundUser.role === 'admin') {
           router.push("/admin");
       } else {
-          router.push("/profile");
+          router.push("/patient/dashboard");
       }
       return true;
     }
@@ -60,26 +57,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signup = async (credentials: SignUpCredentials): Promise<boolean> => {
-    const existingUser = findUserByEmail(credentials.email);
-    if (existingUser) {
+    if (allUsers.some(u => u.email === credentials.email)) {
         toast({ variant: 'destructive', title: "Signup Failed", description: "An account with this email already exists." });
         return false;
     }
 
     const newUser = createUser(credentials);
-    setUser(newUser);
-    localStorage.setItem("userId", newUser.id);
+    setUserId(newUser.id);
     toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
-    router.push("/profile");
+    router.push("/patient/dashboard");
     return true;
   };
 
   const logout = useCallback(() => {
-    setUser(null);
-    localStorage.removeItem("userId");
+    setUserId(null);
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.push("/login");
-  }, [router, toast]);
+  }, [router, toast, setUserId]);
   
 
   const isAdmin = user?.role === 'admin';

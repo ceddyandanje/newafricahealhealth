@@ -4,54 +4,47 @@
 import { User } from './types';
 import initialUsers from './data/users.json';
 import type { SignUpCredentials } from './types';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
-// IMPORTANT: This is a temporary localStorage-based database for prototyping.
-// In a production environment, use a proper database like Firebase Firestore.
+// This is now a hook that provides live-synced users
+export const useUsers = () => {
+    return useLocalStorage<User[]>('app-users', initialUsers as User[]);
+}
 
-const USERS_STORAGE_KEY = 'app-users';
+// The functions below are for components that cannot use hooks (e.g., non-component files)
+// They will write to localStorage, and the hook will pick up the changes.
 
-// Function to get all users from localStorage, seeded with initial data if empty.
+// Function to get a snapshot of all users.
 export const getAllUsers = (): User[] => {
   if (typeof window === 'undefined') {
     return initialUsers as User[];
   }
   try {
-    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-    if (storedUsers) {
-      return JSON.parse(storedUsers);
-    } else {
-      // If no users in storage, seed it with the initial data.
-      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialUsers));
-      return initialUsers as User[];
-    }
+    const storedUsers = localStorage.getItem('app-users');
+    return storedUsers ? JSON.parse(storedUsers) : (initialUsers as User[]);
   } catch (error) {
     console.error('Error reading users from localStorage:', error);
-    return initialUsers as User[]; // Fallback to initial data
+    return initialUsers as User[];
   }
 };
 
-// Function to save the entire list of users to localStorage.
+// Function to save the entire list of users and notify other tabs.
 export const saveAllUsers = (users: User[]) => {
-  if (typeof window === 'undefined') {
-    console.error("Cannot save users on the server side.");
-    return;
-  }
+  if (typeof window === 'undefined') return;
   try {
-    const jsonData = JSON.stringify(users, null, 2);
-    localStorage.setItem(USERS_STORAGE_KEY, jsonData);
+    localStorage.setItem('app-users', JSON.stringify(users));
+    // Manually dispatch event for the current window to update UI
+    window.dispatchEvent(new StorageEvent('storage', { key: 'app-users' }));
   } catch (error) {
     console.error('Error writing users to localStorage:', error);
   }
 };
 
-
-export const findUserByEmail = (email: string): User | undefined => {
-  const users = getAllUsers();
+export const findUserByEmail = (email: string, users: User[]): User | undefined => {
   return users.find((user) => user.email === email);
 };
 
-export const findUserById = (id: string): User | undefined => {
-    const users = getAllUsers();
+export const findUserById = (id: string, users: User[]): User | undefined => {
     return users.find((user) => user.id === id);
 }
 

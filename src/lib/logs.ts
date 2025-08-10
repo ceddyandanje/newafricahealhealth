@@ -3,40 +3,34 @@
 
 import { type Log, type LogLevel } from './types';
 import initialLogs from './data/logs.json';
+import { useLocalStorage } from '@/hooks/use-local-storage';
+import { Dispatch, SetStateAction } from 'react';
 
-const LOGS_STORAGE_KEY = 'app-logs';
+// This is now a hook that provides live-synced logs
+export const useLogs = (): [Log[], Dispatch<SetStateAction<Log[]>>] => {
+    return useLocalStorage<Log[]>( 'app-logs', initialLogs as Log[]);
+};
 
-export const getAllLogs = (): Log[] => {
+
+// The functions below are for components that cannot use hooks (e.g., non-component files)
+// They will write to localStorage, and the hook will pick up the changes.
+
+const getLogsSnapshot = (): Log[] => {
     if (typeof window === 'undefined') {
         return initialLogs as Log[];
     }
-    try {
-        const storedLogs = localStorage.getItem(LOGS_STORAGE_KEY);
-        if (storedLogs) {
-            return JSON.parse(storedLogs);
-        } else {
-            localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(initialLogs));
-            return initialLogs as Log[];
-        }
-    } catch (error) {
-        console.error('Error reading logs from localStorage:', error);
-        return initialLogs as Log[];
-    }
-};
+    const storedLogs = localStorage.getItem('app-logs');
+    return storedLogs ? JSON.parse(storedLogs) : (initialLogs as Log[]);
+}
 
-export const saveAllLogs = (logs: Log[]) => {
-    if (typeof window === 'undefined') {
-        return;
-    }
-    try {
-        localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify(logs));
-    } catch (error) {
-        console.error('Error writing logs to localStorage:', error);
-    }
-};
+const saveLogsSnapshot = (logs: Log[]) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('app-logs', JSON.stringify(logs));
+    window.dispatchEvent(new StorageEvent('storage', { key: 'app-logs' }));
+}
 
 export const addLog = (level: LogLevel, message: string) => {
-    const logs = getAllLogs();
+    const logs = getLogsSnapshot();
     const newLog: Log = {
         id: logs.length > 0 ? Math.max(...logs.map(l => l.id)) + 1 : 1,
         level,
@@ -44,5 +38,5 @@ export const addLog = (level: LogLevel, message: string) => {
         timestamp: new Date().toISOString(),
     };
     const updatedLogs = [...logs, newLog];
-    saveAllLogs(updatedLogs);
+    saveLogsSnapshot(updatedLogs);
 };

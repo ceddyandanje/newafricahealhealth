@@ -1,7 +1,6 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
   Sheet,
   SheetContent,
@@ -15,7 +14,7 @@ import { Bell, Clock, UserPlus, MessageSquare, Mail, Cog, Info, Package, PenSqua
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
-import { getAllNotifications, saveAllNotifications, type Notification } from '@/lib/notifications';
+import { useNotifications, type Notification } from '@/lib/notifications';
 
 const iconMap = {
     new_appointment: UserPlus,
@@ -30,36 +29,15 @@ const iconMap = {
 };
 
 export default function Notifications() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useNotifications();
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  useEffect(() => {
-    const fetchNotifications = () => {
-      const allNotifications = getAllNotifications();
-      const sorted = allNotifications.sort((a,b) => new Date(b.time).getTime() - new Date(a.time).getTime())
-      setNotifications(sorted);
-    }
-    
-    fetchNotifications();
-
-    const interval = setInterval(fetchNotifications, 5000); // Poll for new notifications every 5 seconds
-    
-    return () => clearInterval(interval);
-  }, []);
-
-  const updateNotifications = (updated: Notification[]) => {
-    setNotifications(updated);
-    saveAllNotifications(updated);
-  }
-
   const handleMarkAsRead = (id: number) => {
-    const updated = notifications.map(n => (n.id === id ? { ...n, read: true } : n));
-    updateNotifications(updated);
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, read: true } : n)));
   };
   
   const handleMarkAllAsRead = () => {
-    const updated = notifications.map(n => ({...n, read: true}));
-    updateNotifications(updated);
+    setNotifications(prev => prev.map(n => ({...n, read: true})));
   }
 
   const formatTimeAgo = (dateString: string) => {
@@ -84,6 +62,8 @@ export default function Notifications() {
     
     return Math.floor(seconds) + " seconds ago";
   }
+
+  const sortedNotifications = [...notifications].sort((a,b) => new Date(b.time).getTime() - new Date(a.time).getTime());
 
   return (
     <Sheet>
@@ -112,7 +92,7 @@ export default function Notifications() {
         </div>
         <ScrollArea className="h-[calc(100vh-150px)]">
             <div className="py-4 pr-4 space-y-4">
-            {notifications.map(notification => {
+            {sortedNotifications.map(notification => {
                 const Icon = iconMap[notification.type as keyof typeof iconMap] || iconMap.default;
                 return (
                     <div

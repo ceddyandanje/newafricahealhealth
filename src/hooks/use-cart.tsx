@@ -1,7 +1,9 @@
+
 "use client"
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react"
+import React, { createContext, useContext, ReactNode } from "react"
 import type { CartItem, Product } from "@/lib/types"
+import { useLocalStorage } from "./use-local-storage"
 
 interface CartContextType {
   items: CartItem[]
@@ -15,26 +17,7 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined)
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [items, setItems] = useState<CartItem[]>([])
-
-  useEffect(() => {
-    try {
-      const savedCart = localStorage.getItem("cart")
-      if (savedCart) {
-        setItems(JSON.parse(savedCart))
-      }
-    } catch (error) {
-      console.error("Could not load cart from local storage", error);
-    }
-  }, [])
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("cart", JSON.stringify(items))
-    } catch (error) {
-      console.error("Could not save cart to local storage", error);
-    }
-  }, [items])
+  const [items, setItems] = useLocalStorage<CartItem[]>("cart", [])
 
   const addToCart = (product: Product, quantity = 1) => {
     setItems((prevItems) => {
