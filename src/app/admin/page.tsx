@@ -35,7 +35,7 @@ const availableDoctors = [
 export default function AdminDashboardPage() {
     const [isClient, setIsClient] = useState(false);
     const [requests] = useRequests();
-    const [users] = useUsers();
+    const { users } = useUsers();
     const [selectedRequest, setSelectedRequest] = useState<RefillRequest | null>(null);
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
@@ -244,5 +244,7 @@ export default function AdminDashboardPage() {
         </div>
     );
 }
+
+    
 
     
