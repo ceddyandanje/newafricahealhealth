@@ -30,7 +30,7 @@ export type User = {
     createdAt: string;
     avatarUrl?: string;
     location?: string;
-    age?: number;
+    age?: string;
     phone?: string;
 };
 
