@@ -3,15 +3,17 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hospital, Truck, Users, ClipboardList } from "lucide-react";
+import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell } from "recharts"
+import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell, Line, LineChart as LineChartComponent, Area } from "recharts"
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRequests, type RefillRequest } from "@/lib/refillRequests";
 import RefillRequestDialog from "@/components/admin/refill-request-dialog";
 import { useUsers } from "@/lib/users";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const revenueChartData = [
     { name: '10 May', income: 80, expense: 40 },
@@ -35,6 +37,7 @@ export default function AdminDashboardPage() {
     const [requests] = useRequests();
     const [users] = useUsers();
     const [selectedRequest, setSelectedRequest] = useState<RefillRequest | null>(null);
+    const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
     const patients = users.filter(u => u.role === 'user');
@@ -129,8 +132,16 @@ export default function AdminDashboardPage() {
             </Card>
 
             <Card className="lg:col-span-2 flex flex-col">
-                <CardHeader>
+                <CardHeader className="flex justify-between items-center">
                     <CardTitle>Daily Revenue Report</CardTitle>
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => setChartType('bar')} className={cn(chartType === 'bar' && 'bg-accent')}>
+                            <BarChart3 className="h-5 w-5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={() => setChartType('line')} className={cn(chartType === 'line' && 'bg-accent')}>
+                            <LineChartIcon className="h-5 w-5" />
+                        </Button>
+                    </div>
                 </CardHeader>
                 <CardContent className="flex-grow">
                      <div className="flex justify-end items-center gap-2 mb-4">
@@ -140,18 +151,39 @@ export default function AdminDashboardPage() {
                     {!isClient ? <Skeleton className="h-[250px] w-full" /> :
                     <>
                         <ChartContainer config={{}} className="h-[250px] w-full">
-                            <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                                <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
-                                <Bar dataKey="expense" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} barSize={10} />
-                            </BarChartComponent>
+                           {chartType === 'bar' ? (
+                                <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                    <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+                                    <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar dataKey="expense" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} barSize={10} />
+                                </BarChartComponent>
+                            ) : (
+                                <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                     <defs>
+                                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                        </linearGradient>
+                                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                    <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
+                                    <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorIncome)" />
+                                    <Area type="monotone" dataKey="expense" stroke="hsl(var(--secondary-foreground))" fillOpacity={1} fill="url(#colorExpense)" />
+                                </LineChartComponent>
+                            )}
                         </ChartContainer>
                         <div className="flex justify-center items-center gap-6 mt-4 text-sm">
                             <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Income</div>
-                            <div className="flex items-center gap-2"><span className="h-3 w-3 bg-secondary"></span>Expense</div>
+                            <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary))'}}></span>Expense</div>
                         </div>
                     </>
                     }
