@@ -3,10 +3,11 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileText, RefreshCw } from "lucide-react";
+import { FileText, RefreshCw, Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLogs } from '@/lib/logs';
 import { Button } from '@/components/ui/button';
+import { useEffect, useState } from "react";
 
 const levelVariant = {
     'INFO': 'default',
@@ -16,7 +17,17 @@ const levelVariant = {
 } as const;
 
 export default function LogsPage() {
-    const [logs] = useLogs();
+    const [logs, setLogs] = useLogs();
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+      // Small delay to give impression of loading, can be removed
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 500);
+      return () => clearTimeout(timer);
+    }, [logs]);
+
 
     const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
@@ -27,29 +38,34 @@ export default function LogsPage() {
           <FileText className="w-8 h-8" />
           System Logs
         </h1>
-        {/* Refresh button may no longer be needed with live updates, but can be kept for manual refresh */}
         <Button variant="outline" onClick={() => window.location.reload()}><RefreshCw className="mr-2 h-4 w-4"/> Refresh</Button>
       </div>
       <Card>
         <CardHeader>
-          <CardTitle>Real-time Log Stream</CardTitle>
+          <CardTitle>Real-time Log Stream from Firestore</CardTitle>
           <CardDescription>
             Monitor system events, errors, and activities as they happen across all user sessions.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-96 w-full rounded-md border bg-muted/50">
-            <div className="p-4 font-mono text-sm">
-              {sortedLogs.length > 0 ? sortedLogs.map((log) => (
-                <div key={log.id} className="flex items-start gap-4 mb-2">
-                  <span className="text-muted-foreground whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</span>
-                  <Badge variant={levelVariant[log.level as keyof typeof levelVariant]} className="w-16 justify-center">{log.level}</Badge>
-                  <p className="flex-1 whitespace-pre-wrap">{log.message}</p>
-                </div>
-              )) : (
-                <div className="text-center py-8 text-muted-foreground">No logs found.</div>
-              )}
-            </div>
+             {isLoading ? (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : (
+              <div className="p-4 font-mono text-sm">
+                {sortedLogs.length > 0 ? sortedLogs.map((log) => (
+                  <div key={log.id} className="flex items-start gap-4 mb-2">
+                    <span className="text-muted-foreground whitespace-nowrap">{new Date(log.timestamp).toLocaleString()}</span>
+                    <Badge variant={levelVariant[log.level as keyof typeof levelVariant]} className="w-16 justify-center">{log.level}</Badge>
+                    <p className="flex-1 whitespace-pre-wrap">{log.message}</p>
+                  </div>
+                )) : (
+                  <div className="text-center py-8 text-muted-foreground">No logs found in Firestore.</div>
+                )}
+              </div>
+            )}
           </ScrollArea>
         </CardContent>
       </Card>

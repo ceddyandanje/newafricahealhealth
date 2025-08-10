@@ -2,41 +2,39 @@
 'use client';
 
 import { type Log, type LogLevel } from './types';
-import initialLogs from './data/logs.json';
 import { useLocalStorage } from '@/hooks/use-local-storage';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState, useEffect } from 'react';
+import { db } from './firebase';
+import { collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
 
-// This is now a hook that provides live-synced logs
+// Custom hook to fetch logs from Firestore
 export const useLogs = (): [Log[], Dispatch<SetStateAction<Log[]>>] => {
-    return useLocalStorage<Log[]>( 'app-logs', initialLogs as Log[]);
+    const [logs, setLogs] = useState<Log[]>([]);
+    
+    useEffect(() => {
+        const fetchLogs = async () => {
+            const logsCollection = collection(db, 'logs');
+            const q = query(logsCollection, orderBy('timestamp', 'desc'), limit(100));
+            const logSnapshot = await getDocs(q);
+            const logList = logSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Log));
+            setLogs(logList);
+        };
+
+        fetchLogs();
+    }, []);
+
+    return [logs, setLogs];
 };
 
-
-// The functions below are for components that cannot use hooks (e.g., non-component files)
-// They will write to localStorage, and the hook will pick up the changes.
-
-const getLogsSnapshot = (): Log[] => {
-    if (typeof window === 'undefined') {
-        return initialLogs as Log[];
+// Function to add a new log document to Firestore
+export const addLog = async (level: LogLevel, message: string) => {
+    try {
+        await addDoc(collection(db, 'logs'), {
+            level,
+            message,
+            timestamp: new Date().toISOString(),
+        });
+    } catch (error) {
+        console.error("Error adding log to Firestore: ", error);
     }
-    const storedLogs = localStorage.getItem('app-logs');
-    return storedLogs ? JSON.parse(storedLogs) : (initialLogs as Log[]);
-}
-
-const saveLogsSnapshot = (logs: Log[]) => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('app-logs', JSON.stringify(logs));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'app-logs' }));
-}
-
-export const addLog = (level: LogLevel, message: string) => {
-    const logs = getLogsSnapshot();
-    const newLog: Log = {
-        id: logs.length > 0 ? Math.max(...logs.map(l => l.id)) + 1 : 1,
-        level,
-        message,
-        timestamp: new Date().toISOString(),
-    };
-    const updatedLogs = [...logs, newLog];
-    saveLogsSnapshot(updatedLogs);
 };
