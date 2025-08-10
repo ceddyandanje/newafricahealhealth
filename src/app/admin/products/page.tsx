@@ -88,12 +88,12 @@ export default function ProductsAdminPage() {
         if (isEditing) {
             setProducts(products.map(p => (p.id === product.id ? productWithPriceInCents : p)));
             addLog('INFO', `Product "${product.name}" was updated.`);
-            addNotification({ type: 'system_update', title: 'Product Updated', description: `Product "${product.name}" was successfully updated.`});
+            addNotification({ type: 'product_update', title: 'Product Updated', description: `Product "${product.name}" was successfully updated.`});
             toast({ title: "Product Saved", description: "Changes to the product have been saved." });
         } else {
             setProducts([productWithPriceInCents, ...products]);
             addLog('INFO', `New product "${product.name}" was added.`);
-            addNotification({ type: 'system_update', title: 'Product Added', description: `A new product, "${product.name}", is now available.`});
+            addNotification({ type: 'product_update', title: 'Product Added', description: `A new product, "${product.name}", is now available.`});
             toast({ title: "Product Added", description: "The new product has been added to the inventory." });
         }
         setEditingProduct(undefined);
@@ -102,7 +102,7 @@ export default function ProductsAdminPage() {
     const handleDeleteProduct = (product: Product) => {
         setProducts(products.filter(p => p.id !== product.id));
         addLog('WARN', `Product "${product.name}" was deleted.`);
-        addNotification({ type: 'system_update', title: 'Product Deleted', description: `Product "${product.name}" has been removed from inventory.`});
+        addNotification({ type: 'product_update', title: 'Product Deleted', description: `Product "${product.name}" has been removed from inventory.`});
         toast({ variant: 'destructive', title: "Product Deleted", description: "The product has been removed." });
         setDeletingProduct(undefined);
         setIsDeleteConfirmOpen(false);

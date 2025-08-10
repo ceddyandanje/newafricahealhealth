@@ -74,12 +74,12 @@ export default function ServicesPage() {
     if (isEditing) {
       setServices(services.map(s => s.id === service.id ? service : s));
       addLog('INFO', `Service "${service.name}" was updated.`);
-      addNotification({ type: 'system_update', title: 'Service Updated', description: `The service "${service.name}" has been successfully updated.` });
+      addNotification({ type: 'service_update', title: 'Service Updated', description: `The service "${service.name}" has been successfully updated.` });
       toast({ title: "Service Updated", description: "The service has been saved." });
     } else {
       setServices([...services, service]);
       addLog('INFO', `New service "${service.name}" was created.`);
-      addNotification({ type: 'system_update', title: 'Service Added', description: `A new service, "${service.name}", is now available.` });
+      addNotification({ type: 'service_update', title: 'Service Added', description: `A new service, "${service.name}", is now available.` });
       toast({ title: "Service Added", description: "The new service has been added." });
     }
     setEditingService(undefined);
@@ -88,7 +88,7 @@ export default function ServicesPage() {
   const handleDeleteService = (service: ServiceCategory) => {
     setServices(services.filter(s => s.id !== service.id));
     addLog('WARN', `Service "${service.name}" was deleted.`);
-    addNotification({ type: 'system_update', title: 'Service Deleted', description: `The service "${service.name}" has been removed.` });
+    addNotification({ type: 'service_update', title: 'Service Deleted', description: `The service "${service.name}" has been removed.` });
     toast({ variant: 'destructive', title: "Service Deleted", description: "The service has been removed." });
     setDeletingService(undefined);
     setIsDeleteConfirmOpen(false);
