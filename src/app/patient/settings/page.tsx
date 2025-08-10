@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 export default function PatientSettingsPage() {
     const { theme, setTheme } = useTheme();
     const { user } = useAuth();
-    const [users, setUsers] = useUsers();
+    const { users, setUsers } = useUsers();
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
