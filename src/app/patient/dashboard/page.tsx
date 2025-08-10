@@ -37,7 +37,7 @@ const healthTrendData = [
 
 export default function PatientDashboardPage() {
     return (
-        <div className="bg-muted/40 p-6 min-h-screen">
+        <div className="p-6">
             <header className="py-6">
                 <h1 className="text-3xl font-bold">Good morning, Sarah</h1>
                 <p className="text-muted-foreground">Here’s what your day looks like.</p>
