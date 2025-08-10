@@ -6,14 +6,16 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Database, Edit, List, CheckCircle, XCircle } from 'lucide-react';
+import { Database, Edit, List, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { addLog } from '@/lib/logs';
 
 export default function FirestoreTestPage() {
     const [isLoadingWrite, setIsLoadingWrite] = useState(false);
     const [isLoadingRead, setIsLoadingRead] = useState(false);
     const [isLoadingTest, setIsLoadingTest] = useState(false);
+    const [isLoadingLog, setIsLoadingLog] = useState(false);
     const [readData, setReadData] = useState<any[]>([]);
     const { toast } = useToast();
     const testCollectionName = "test-collection";
@@ -21,8 +23,6 @@ export default function FirestoreTestPage() {
     const handleConnectionTest = async () => {
         setIsLoadingTest(true);
         try {
-            // A lightweight operation to test connection. This will fail if rules are incorrect.
-            // We are trying to get a document that doesn't exist. The success/failure of the *request* is what we care about.
             await getDoc(doc(db, "test-connection-collection", "test-doc"));
             toast({
                 title: "Connection Successful",
@@ -94,19 +94,39 @@ export default function FirestoreTestPage() {
         }
     };
 
+    const handleGenerateLog = async () => {
+        setIsLoadingLog(true);
+        try {
+            await addLog('DEBUG', 'This is a test log from the Firestore Test page.');
+            toast({
+                title: "Log Generated",
+                description: "A test log has been written to Firestore. Check the Logs page.",
+            });
+        } catch (e: any) {
+             console.error("Error generating log: ", e);
+             toast({
+                variant: "destructive",
+                title: "Log Failed",
+                description: `Could not generate the test log. ${e.message}`,
+            });
+        } finally {
+            setIsLoadingLog(false);
+        }
+    }
+
     return (
         <div className="p-6">
             <header className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold flex items-center gap-2">
                     <Database className="w-8 h-8" />
-                    Firestore Connection Test
+                    Firestore & Logging Test
                 </h1>
             </header>
             <div className="grid md:grid-cols-2 gap-6">
                  <Card className="md:col-span-2">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><CheckCircle className="w-5 h-5 text-green-500"/> 1. Test Connection</CardTitle>
-                        <CardDescription>Click this button first to verify that the app can communicate with your Firestore database.</CardDescription>
+                        <CardDescription>Click this button first to verify that the app can communicate with your Firestore database. It checks permissions without writing data.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Button onClick={handleConnectionTest} disabled={isLoadingTest}>
@@ -140,10 +160,24 @@ export default function FirestoreTestPage() {
                          </Button>
                     </CardContent>
                 </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><MessageSquare className="w-5 h-5 text-blue-500"/> 4. Generate Log</CardTitle>
+                        <CardDescription>Click this to write a single 'DEBUG' level log entry to the 'logs' collection to test the logging system.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button onClick={handleGenerateLog} disabled={isLoadingLog} variant="secondary">
+                            {isLoadingLog && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Generate Test Log
+                        </Button>
+                    </CardContent>
+                </Card>
+
                  <div className="md:col-span-2">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Results</CardTitle>
+                            <CardTitle>Read Results</CardTitle>
                             <CardDescription>Data read from Firestore will be displayed here.</CardDescription>
                         </CardHeader>
                         <CardContent>
