@@ -83,9 +83,12 @@ export default function PatientSidebar() {
 
                     <div className="flex-grow">
                         <Collapsible>
-                            <CollapsibleTrigger className="w-full text-left font-semibold text-sm flex items-center gap-2 mb-2 text-foreground/80">
-                                 <div className="w-1 h-4 bg-primary rounded-full" />
-                                Find Care
+                            <CollapsibleTrigger className="w-full text-left font-semibold text-sm flex items-center justify-between gap-2 mb-2 text-foreground/80 group">
+                                <div className="flex items-center gap-2">
+                                     <div className="w-1 h-4 bg-primary rounded-full" />
+                                    Find Care
+                                </div>
+                                <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                             </CollapsibleTrigger>
                             <CollapsibleContent className="space-y-1 pl-1">
                                 {findCareItems.map(item => (
@@ -114,7 +117,7 @@ export default function PatientSidebar() {
                 </div>
             ) : (
                 // Collapsed View
-                 <div className="flex flex-col gap-2">
+                 <div className="flex flex-col gap-2 h-full">
                     {mainNavItems.map((item) => (
                         <Link
                             key={item.label}
@@ -130,14 +133,26 @@ export default function PatientSidebar() {
                         </Link>
                     ))}
                     <div className="my-1 h-px w-full bg-border/50" />
-                    {findCareItems.slice(0, 1).map((item) => (
-                         <Link key={item.label} href={item.href} title={item.label} className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
-                            <LifeBuoy className="h-5 w-5" />
-                        </Link>
-                    ))}
-                     <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
-                        <Settings className="h-5 w-5" />
+                    
+                    <Link href={'#'} title="Search" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                        <Search className="h-5 w-5" />
                     </Link>
+                    <Link href={'/patient/messages'} title="Communications" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                        <Mail className="h-5 w-5" />
+                    </Link>
+                    <Link href={'/patient/documents'} title="My Record" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                        <FileText className="h-5 w-5" />
+                    </Link>
+                    <Link href={'#'} title="Find Care" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                        <LifeBuoy className="h-5 w-5" />
+                    </Link>
+                    
+                    <div className="mt-auto">
+                        <div className="my-1 h-px w-full bg-border/50" />
+                         <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
+                            <Settings className="h-5 w-5" />
+                        </Link>
+                    </div>
                 </div>
             )}
         </aside>
