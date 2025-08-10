@@ -73,5 +73,15 @@ export type RefillRequest = {
   };
 
 
+export type DayEventType = 'medication' | 'appointment' | 'measurement';
+
+export type DayEvent = {
+    id: string;
+    type: DayEventType;
+    title: string;
+    time: string; // ISO 8601 string
+    status: 'Done' | 'Due' | 'Upcoming';
+};
+
 
 

@@ -7,6 +7,9 @@ import {
   Video,
   ChevronRight,
   Flag,
+  CalendarPlus,
+  UploadCloud,
+  MessageSquare,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,12 +20,9 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useEvents, type DayEvent } from '@/lib/events';
+import Link from 'next/link';
 
-const dailyGlanceItems = [
-    { icon: Pill, title: "Take Metformin", time: "8:00 AM", status: "Done" },
-    { icon: Droplets, title: "Log Blood Sugar", time: "8:05 AM", status: "Due" },
-    { icon: Video, title: "Dr. Chen's Appointment", time: "11:00 AM", status: "Upcoming" },
-];
 
 const subscriptionData = [
   { name: 'Active', value: 3, fill: 'hsl(var(--primary))' },
@@ -39,15 +39,76 @@ const healthTrendData = [
   { day: 'Sun', value: 148 },
 ];
 
+const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
+    medication: Pill,
+    measurement: Droplets,
+    appointment: Video,
+};
+
+function EmptyState() {
+    return (
+        <Card>
+            <CardHeader>
+                 <CardTitle>Welcome to Your Dashboard!</CardTitle>
+            </CardHeader>
+            <CardContent className="text-center">
+                <p className="text-muted-foreground mb-4">Your daily plan will appear here once you get started.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Button asChild variant="outline">
+                        <Link href="/patient/appointments"><CalendarPlus className="mr-2"/> Book an Appointment</Link>
+                    </Button>
+                    <Button asChild variant="outline">
+                       <Link href="/upload-prescription"><UploadCloud className="mr-2"/> Upload a Prescription</Link>
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+function DailyGlance({ events }: { events: DayEvent[] }) {
+    if (events.length === 0) {
+        return <EmptyState />;
+    }
+    
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+           {events.map(item => {
+               const Icon = iconMap[item.type];
+               const statusColor = item.status === "Done" ? "text-green-500" : item.status === "Due" ? "text-orange-500" : "text-blue-500";
+               return (
+                <Card key={item.title} className="bg-background">
+                    <CardContent className="p-4 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="bg-primary/10 text-primary p-3 rounded-lg">
+                                <Icon className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <p className="font-semibold">{item.title}</p>
+                                <p className="text-sm text-muted-foreground">{new Date(item.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                            </div>
+                        </div>
+                        <span className={cn("text-sm font-bold", statusColor)}>{item.status}</span>
+                    </CardContent>
+                </Card>
+               )
+           })}
+        </div>
+    );
+}
+
 export default function PatientDashboardPage() {
-    const { user, isLoading } = useAuth();
+    const { user, isLoading: isAuthLoading } = useAuth();
+    const { events, isLoading: isEventsLoading } = useEvents(user?.id);
     const router = useRouter();
     
     useEffect(() => {
-        if (!isLoading && !user) {
+        if (!isAuthLoading && !user) {
           router.push("/login");
         }
-    }, [user, isLoading, router]);
+    }, [user, isAuthLoading, router]);
+
+    const isLoading = isAuthLoading || isEventsLoading;
 
     if (isLoading || !user) {
         return (
@@ -66,27 +127,7 @@ export default function PatientDashboardPage() {
 
             <section>
                 <h2 className="text-xl font-semibold mb-4">Your day at a glance</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                   {dailyGlanceItems.map(item => {
-                       const statusColor = item.status === "Done" ? "text-green-500" : item.status === "Due" ? "text-orange-500" : "text-blue-500";
-                       return (
-                        <Card key={item.title} className="bg-background">
-                            <CardContent className="p-4 flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 text-primary p-3 rounded-lg">
-                                        <item.icon className="h-6 w-6" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold">{item.title}</p>
-                                        <p className="text-sm text-muted-foreground">{item.time}</p>
-                                    </div>
-                                </div>
-                                <span className={cn("text-sm font-bold", statusColor)}>{item.status}</span>
-                            </CardContent>
-                        </Card>
-                       )
-                   })}
-                </div>
+                {isEventsLoading ? <Loader2 className="animate-spin" /> : <DailyGlance events={events} />}
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
