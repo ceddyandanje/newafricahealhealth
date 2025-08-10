@@ -2,11 +2,29 @@
 import { products, getBrands, getCategories, getMaxPrice } from "@/lib/products";
 import ProductsClient from "./products-client";
 
-export default async function ProductsPage() {
+export default async function ProductsPage({ 
+  searchParams 
+}: { 
+  searchParams?: { [key: string]: string | string[] | undefined } 
+}) {
   const allProducts = products;
   const brands = getBrands();
   const categories = getCategories();
   const maxPrice = getMaxPrice();
+
+  // Parse searchParams on the server to pass to the client
+  const searchTerm = typeof searchParams?.search === 'string' ? searchParams.search : "";
+  
+  const priceParam = typeof searchParams?.price === 'string' ? searchParams.price : `0-${maxPrice}`;
+  const priceRange = priceParam.split('-').map(Number) as [number, number];
+
+  const categoryParams = searchParams?.category;
+  const selectedCategories = Array.isArray(categoryParams) ? categoryParams : typeof categoryParams === 'string' ? [categoryParams] : [];
+  
+  const brandParams = searchParams?.brand;
+  const selectedBrands = Array.isArray(brandParams) ? brandParams : typeof brandParams === 'string' ? [brandParams] : [];
+  
+  const sortBy = typeof searchParams?.sortBy === 'string' ? searchParams.sortBy : "featured";
 
   return (
     <ProductsClient 
@@ -14,6 +32,11 @@ export default async function ProductsPage() {
       brands={brands} 
       categories={categories}
       maxPrice={maxPrice}
+      initialSearch={searchTerm}
+      initialPriceRange={priceRange}
+      initialCategories={selectedCategories}
+      initialBrands={selectedBrands}
+      initialSortBy={sortBy}
     />
   );
 }

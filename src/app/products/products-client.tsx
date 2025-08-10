@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useTransition } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { type Product } from "@/lib/types";
@@ -34,6 +34,11 @@ interface ProductsClientProps {
   brands: string[];
   categories: string[];
   maxPrice: number;
+  initialSearch: string;
+  initialPriceRange: [number, number];
+  initialCategories: string[];
+  initialBrands: string[];
+  initialSortBy: string;
 }
 
 const formatPrice = (priceInCents: number) => {
@@ -80,25 +85,22 @@ export default function ProductsClient({
   brands,
   categories,
   maxPrice,
+  initialSearch,
+  initialPriceRange,
+  initialCategories,
+  initialBrands,
+  initialSortBy,
 }: ProductsClientProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
 
-  // State for filters
-  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
-  const [priceRange, setPriceRange] = useState<[number, number]>([
-    0,
-    parseInt(searchParams.get("price") || `${maxPrice}`),
-  ]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    searchParams.getAll("category") || []
-  );
-  const [selectedBrands, setSelectedBrands] = useState<string[]>(
-    searchParams.getAll("brand") || []
-  );
-  const [sortBy, setSortBy] = useState(searchParams.get("sortBy") || "featured");
+  // State for filters, initialized from server-passed props
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
+  const [priceRange, setPriceRange] = useState<[number, number]>(initialPriceRange);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(initialCategories);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>(initialBrands);
+  const [sortBy, setSortBy] = useState(initialSortBy);
   
   const debouncedSearch = useDebounce(searchTerm, 300);
   const debouncedPrice = useDebounce(priceRange, 300);
@@ -108,9 +110,12 @@ export default function ProductsClient({
     startTransition(() => {
         const params = new URLSearchParams();
         if (debouncedSearch) params.set("search", debouncedSearch);
+
+        // Only add price to URL if it's not the default full range
         if (debouncedPrice[0] > 0 || debouncedPrice[1] < maxPrice) {
           params.set("price", `${debouncedPrice[0]}-${debouncedPrice[1]}`);
         }
+
         selectedCategories.forEach((cat) => params.append("category", cat));
         selectedBrands.forEach((brand) => params.append("brand", brand));
         if (sortBy) params.set("sortBy", sortBy);
@@ -137,13 +142,13 @@ export default function ProductsClient({
   const filteredProducts = useMemo(() => {
     let products = initialProducts;
     
-    const [minPrice, maxPrice] = debouncedPrice;
+    const [minPrice, maxPriceVal] = priceRange;
   
-    if (debouncedSearch) {
-      products = products.filter((p) => p.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+    if (searchTerm) {
+      products = products.filter((p) => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
     }
   
-    products = products.filter((p) => p.price >= minPrice && p.price <= maxPrice);
+    products = products.filter((p) => p.price >= minPrice && p.price <= maxPriceVal);
 
     if (selectedCategories.length > 0) {
       products = products.filter((p) => selectedCategories.includes(p.category));
@@ -169,7 +174,7 @@ export default function ProductsClient({
           return 0;
       }
     });
-  }, [debouncedSearch, debouncedPrice, selectedCategories, selectedBrands, sortBy, initialProducts]);
+  }, [searchTerm, priceRange, selectedCategories, selectedBrands, sortBy, initialProducts]);
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -197,7 +202,6 @@ export default function ProductsClient({
                 onValueChange={(value) => setPriceRange(value as [number, number])}
                 max={maxPrice}
                 step={100}
-                minStepsBetweenThumbs={1}
               />
               <p className="text-sm text-muted-foreground mt-2 text-center">
                 {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
