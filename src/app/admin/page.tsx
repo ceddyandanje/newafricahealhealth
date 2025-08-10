@@ -132,8 +132,10 @@ export default function AdminDashboardPage() {
             </Card>
 
             <Card className="lg:col-span-2 flex flex-col">
-                <CardHeader className="flex justify-between items-center">
-                    <CardTitle>Daily Revenue Report</CardTitle>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Daily Revenue Report</CardTitle>
+                    </div>
                     <div className="flex items-center gap-2">
                         <Button variant="ghost" size="icon" onClick={() => setChartType('bar')} className={cn(chartType === 'bar' && 'bg-accent')}>
                             <BarChart3 className="h-5 w-5" />
@@ -158,7 +160,7 @@ export default function AdminDashboardPage() {
                                     <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
                                     <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
                                     <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
-                                    <Bar dataKey="expense" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
                                 </BarChartComponent>
                             ) : (
                                 <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -176,14 +178,14 @@ export default function AdminDashboardPage() {
                                     <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
                                     <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
-                                    <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorIncome)" />
-                                    <Area type="monotone" dataKey="expense" stroke="hsl(var(--secondary-foreground))" fillOpacity={1} fill="url(#colorExpense)" />
+                                    <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
+                                    <Area type="monotone" dataKey="expense" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
                                 </LineChartComponent>
                             )}
                         </ChartContainer>
                         <div className="flex justify-center items-center gap-6 mt-4 text-sm">
                             <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Income</div>
-                            <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary))'}}></span>Expense</div>
+                            <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary-foreground))'}}></span>Expense</div>
                         </div>
                     </>
                     }
