@@ -1,4 +1,5 @@
 
+
 export type Product = {
   id: string;
   name: string;
@@ -52,3 +53,17 @@ export type Notification = {
     time: string; // ISO 8601 string
     read: boolean;
 };
+
+
+export type RefillRequest = {
+    id: string;
+    patientId: string;
+    patientName: string;
+    prescriptionId: string;
+    medicationName: string;
+    requestDate: string; // ISO 8601 string
+    status: 'Pending' | 'Approved' | 'Rejected' | 'Completed';
+    approverId?: string;
+    approverName?: string;
+    paymentStatus: 'Unpaid' | 'Paid';
+  };

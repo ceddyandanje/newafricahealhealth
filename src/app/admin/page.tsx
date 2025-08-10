@@ -3,34 +3,14 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hospital, Truck, Users } from "lucide-react";
+import { Hospital, Truck, Users, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell } from "recharts"
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
-
-const summaryData = [
-    { title: "Patients", value: "1,421", icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
-    { title: "Staffs", value: "1,521", icon: Users, color: "text-yellow-500", bgColor: "bg-yellow-100 dark:bg-yellow-900/50" },
-    { title: "Rooms", value: "2,415", icon: Hospital, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
-    { title: "Ambulance", value: "15", icon: Truck, color: "text-cyan-500", bgColor: "bg-cyan-100 dark:bg-cyan-900/50" },
-];
-
-const patientsChartData = [
-    { name: 'Total', value: 145212, fill: '#6B7280' },
-    { name: 'New', value: 64, fill: '#3B82F6' },
-    { name: 'Recovered', value: 73, fill: '#F59E0B' },
-    { name: 'In Treatment', value: 48, fill: '#EF4444' },
-];
-const a_patientsChartData = [
-    { name: 'New', value: 64, fill: '#3B82F6' },
-    { name: 'Recovered', value: 73, fill: '#F59E0B' },
-    { name: 'In Treatment', value: 48, fill: '#EF4444' },
-    { name: 'Other', value: 145212 - 64 - 73 - 48, fill: '#e5e7eb' },
-];
-
+import { useRequests, type RefillRequest } from "@/lib/refillRequests";
+import RefillRequestDialog from "@/components/admin/refill-request-dialog";
 
 const revenueChartData = [
     { name: '10 May', income: 80, expense: 40 },
@@ -51,17 +31,47 @@ const availableDoctors = [
 
 export default function AdminDashboardPage() {
     const [isClient, setIsClient] = useState(false);
+    const [requests] = useRequests();
+    const [selectedRequest, setSelectedRequest] = useState<RefillRequest | null>(null);
+
+    const pendingRequests = requests.filter(r => r.status === 'Pending');
+
+    const summaryData = [
+        { title: "Patients", value: "1,421", icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
+        { title: "Pending Requests", value: pendingRequests.length.toString(), icon: ClipboardList, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-900/50", clickable: true },
+        { title: "Rooms", value: "2,415", icon: Hospital, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
+        { title: "Ambulance", value: "15", icon: Truck, color: "text-cyan-500", bgColor: "bg-cyan-100 dark:bg-cyan-900/50" },
+    ];
+    
+    const patientsChartData = [
+        { name: 'Total', value: 145212, fill: '#6B7280' },
+        { name: 'New', value: 64, fill: '#3B82F6' },
+        { name: 'Recovered', value: 73, fill: '#F59E0B' },
+        { name: 'In Treatment', value: 48, fill: '#EF4444' },
+    ];
+    const a_patientsChartData = [
+        { name: 'New', value: 64, fill: '#3B82F6' },
+        { name: 'Recovered', value: 73, fill: '#F59E0B' },
+        { name: 'In Treatment', value: 48, fill: '#EF4444' },
+        { name: 'Other', value: 145212 - 64 - 73 - 48, fill: '#e5e7eb' },
+    ];
   
     useEffect(() => {
         setIsClient(true)
     }, [])
+
+    const handleCardClick = (itemTitle: string) => {
+        if (itemTitle === "Pending Requests" && pendingRequests.length > 0) {
+            setSelectedRequest(pendingRequests[0]);
+        }
+    }
 
     return (
         <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Top Row: Summary Cards */}
             <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {summaryData.map(item => (
-                    <Card key={item.title}>
+                    <Card key={item.title} onClick={() => item.clickable && handleCardClick(item.title)} className={item.clickable ? "cursor-pointer hover:shadow-lg" : ""}>
                         <CardContent className="p-4 flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-muted-foreground">{item.title}</p>
@@ -187,6 +197,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
+             {selectedRequest && <RefillRequestDialog request={selectedRequest} isOpen={!!selectedRequest} onClose={() => setSelectedRequest(null)} />}
         </div>
     );
 }

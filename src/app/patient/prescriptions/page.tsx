@@ -12,6 +12,8 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
+import { useAuth } from '@/hooks/use-auth';
+import { addRequest } from '@/lib/refillRequests';
 
 type Prescription = {
     id: string;
@@ -42,6 +44,7 @@ const statusVariant = {
 export default function PatientPrescriptionsPage() {
     const [prescriptions, setPrescriptions] = useState<Prescription[]>(initialPrescriptions);
     const { toast } = useToast();
+    const { user } = useAuth();
 
     const handleRequestRefill = (rxId: string) => {
         setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, isRequesting: true } : rx));
@@ -49,20 +52,31 @@ export default function PatientPrescriptionsPage() {
         // Simulate API call
         setTimeout(() => {
             const prescription = prescriptions.find(rx => rx.id === rxId);
-            if (!prescription) return;
+            if (!prescription || !user) return;
 
+            // Update local UI state
             setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, status: 'Refill Requested', isRequesting: false } : rx));
             
+            // Create a structured request
+            addRequest({
+                patientId: user.id,
+                patientName: user.name,
+                prescriptionId: prescription.id,
+                medicationName: prescription.name,
+            });
+
+            // Show confirmation toast
             toast({
                 title: "Refill Requested",
                 description: `Your request for ${prescription.name} has been sent.`,
             });
             
-            addLog('INFO', `Patient requested refill for ${prescription.name} (ID: ${prescription.id})`);
+            // Add a generic log and notification for system-wide visibility
+            addLog('INFO', `Patient ${user.name} requested refill for ${prescription.name} (ID: ${prescription.id})`);
             addNotification({
                 type: 'info',
                 title: 'Refill Request',
-                description: `A patient has requested a refill for ${prescription.name}.`,
+                description: `A new refill request from ${user.name} is pending approval.`,
             });
         }, 1500);
     }
