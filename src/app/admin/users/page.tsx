@@ -6,11 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Shield, PlusCircle, Search, Edit, Trash2 } from "lucide-react";
+import { Shield, PlusCircle, Search, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { getAllUsers, createUser, saveAllUsers } from "@/lib/users";
-import { type User } from "@/lib/types";
+import { type User, type UserRole, type UserStatus } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,33 +18,23 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 const userSchema = z.object({
     name: z.string().min(2, 'Name is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
-    role: z.enum(['admin', 'user']),
+    role: z.enum(['admin', 'user', 'delivery-driver', 'emergency-services', 'doctor']),
 });
 
-// A slightly different schema for editing, where password is not required
-const editUserSchema = userSchema.extend({
-    password: z.string().min(8, 'Password must be at least 8 characters').or(z.literal('')),
-});
-
-
-function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: User) => void, onOpenChange: (open: boolean) => void }) {
+function AddUserForm({ onSave, onOpenChange }: { onSave: (data: z.infer<typeof userSchema>) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof userSchema>>({
-        resolver: zodResolver(user ? editUserSchema : userSchema),
-        defaultValues: user ? { ...user, password: '' } : { name: '', email: '', password: '', role: 'user' },
+        resolver: zodResolver(userSchema),
+        defaultValues: { name: '', email: '', password: '', role: 'user' },
     });
 
     const handleSubmit = (values: z.infer<typeof userSchema>) => {
-        let passwordToSave = values.password;
-        if(user && !values.password) {
-            passwordToSave = user.password; // Keep old password if field is blank during edit
-        }
-
-        onSave({ ...values, id: user?.id || '', password: passwordToSave });
+        onSave(values);
         onOpenChange(false);
         form.reset();
     };
@@ -56,10 +46,10 @@ function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: 
                     <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={!!user} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="password" render={({ field }) => (
-                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} placeholder={user ? "Leave blank to keep unchanged" : ""} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="role" render={({ field }) => (
                     <FormItem>
@@ -69,64 +59,140 @@ function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: 
                             <SelectContent>
                                 <SelectItem value="user">User</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
+                                <SelectItem value="emergency-services">Emergency Services</SelectItem>
+                                <SelectItem value="doctor">Doctor</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
                     </FormItem>
                 )} />
                 <DialogFooter>
-                    <Button type="submit">Save</Button>
+                    <Button type="submit">Create User</Button>
                 </DialogFooter>
             </form>
         </Form>
     );
 }
 
+function ManageUserDialog({ user, onUpdate, onDelete, onOpenChange }: { user: User, onUpdate: (data: Partial<User>) => void, onDelete: () => void, onOpenChange: (open: boolean) => void }) {
+    const [role, setRole] = useState(user.role);
+    const [status, setStatus] = useState(user.status);
+
+    const handleUpdate = () => {
+        onUpdate({ role, status });
+        onOpenChange(false);
+    }
+    
+    return (
+        <DialogContent>
+            <DialogHeader>
+                 <div className="flex items-center gap-4">
+                    <Avatar className="h-16 w-16">
+                        <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
+                        <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <DialogTitle className="text-2xl">{user.name}</DialogTitle>
+                        <DialogDescription>{user.email}</DialogDescription>
+                    </div>
+                </div>
+            </DialogHeader>
+
+            <div className="py-4 space-y-4">
+                 <div>
+                    <Label htmlFor="role-select">Role</Label>
+                    <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
+                        <SelectTrigger id="role-select"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                             <SelectItem value="user">User</SelectItem>
+                             <SelectItem value="admin">Admin</SelectItem>
+                             <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
+                             <SelectItem value="emergency-services">Emergency Services</SelectItem>
+                             <SelectItem value="doctor">Doctor</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+                 <div>
+                    <Label htmlFor="status-select">Account Status</Label>
+                    <Select value={status} onValueChange={(value) => setStatus(value as UserStatus)}>
+                        <SelectTrigger id="status-select"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                             <SelectItem value="active">Active</SelectItem>
+                             <SelectItem value="on-hold">On Hold</SelectItem>
+                             <SelectItem value="inactive">Inactive</SelectItem>
+                        </SelectContent>
+                    </Select>
+                 </div>
+            </div>
+
+            <DialogFooter className="grid grid-cols-2 gap-2">
+                <Button variant="destructive" onClick={onDelete}><Trash2 className="mr-2 h-4 w-4"/> Delete User</Button>
+                <Button onClick={handleUpdate}>Save Changes</Button>
+            </DialogFooter>
+        </DialogContent>
+    )
+}
+
+
 export default function UsersPage() {
     const [users, setUsers] = useState<User[]>([]);
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
-    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-    const [deletingUser, setDeletingUser] = useState<User | undefined>(undefined);
+    const [isAddUserOpen, setIsAddUserOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
     const { toast } = useToast();
 
     useEffect(() => {
         setUsers(getAllUsers());
     }, []);
 
-    const handleSaveUser = (userData: User) => {
-        let updatedUsers;
-        if (editingUser) {
-            // Edit existing user
-             updatedUsers = users.map(u => (u.id === editingUser.id ? { ...u, ...userData } : u));
-             toast({ title: "User Updated", description: `Details for ${userData.name} have been saved.`});
-        } else {
-            // Add new user
-            if (getAllUsers().some(u => u.email === userData.email)) {
-                toast({ variant: 'destructive', title: "Creation Failed", description: "A user with this email already exists."});
-                return;
-            }
-            const newUser = createUser({name: userData.name, email: userData.email, password: userData.password});
-            updatedUsers = [...users, newUser];
-            toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
+    const handleAddUser = (userData: z.infer<typeof userSchema>) => {
+        if (getAllUsers().some(u => u.email === userData.email)) {
+            toast({ variant: 'destructive', title: "Creation Failed", description: "A user with this email already exists."});
+            return;
         }
+        const newUser = createUser(userData);
+        const updatedUsers = [...users, newUser];
         setUsers(updatedUsers);
         saveAllUsers(updatedUsers);
-        setEditingUser(undefined);
+        toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
     };
     
-    const handleDeleteUser = (userToDelete: User) => {
+    const handleUpdateUser = (updates: Partial<User>) => {
+        if (!selectedUser) return;
+        const updatedUsers = users.map(u => u.id === selectedUser.id ? { ...u, ...updates } : u);
+        setUsers(updatedUsers);
+        saveAllUsers(updatedUsers);
+        toast({ title: "User Updated", description: `Details for ${selectedUser.name} have been saved.`});
+        setSelectedUser(undefined);
+    }
+    
+    const handleDeleteUser = () => {
+        if (!selectedUser) return;
+
         if (users.length <= 1) {
             toast({ variant: 'destructive', title: "Action Forbidden", description: "You cannot delete the last user."});
             return;
         }
-        const updatedUsers = users.filter(u => u.id !== userToDelete.id);
+        const updatedUsers = users.filter(u => u.id !== selectedUser.id);
         setUsers(updatedUsers);
         saveAllUsers(updatedUsers);
-        setDeletingUser(undefined);
-        setIsDeleteConfirmOpen(false);
-        toast({ title: "User Deleted", description: `Account for ${userToDelete.name} has been removed.`});
+        toast({ title: "User Deleted", description: `Account for ${selectedUser.name} has been removed.`});
+        setSelectedUser(undefined);
     };
+
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+
+    const statusBadgeVariant = {
+        'active': 'default',
+        'inactive': 'destructive',
+        'on-hold': 'secondary'
+    } as const;
 
     return (
         <div className="p-6">
@@ -135,22 +201,20 @@ export default function UsersPage() {
                     <Shield className="w-8 h-8" />
                     Users Management
                 </h1>
-                <Dialog open={isFormOpen} onOpenChange={(isOpen) => { if(!isOpen) setEditingUser(undefined); setIsFormOpen(isOpen);}}>
+                <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
                     <DialogTrigger asChild>
-                        <Button onClick={() => { setEditingUser(undefined); setIsFormOpen(true); }}><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
+                        <Button><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
                     </DialogTrigger>
                     <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
-                        </DialogHeader>
-                        <UserForm user={editingUser} onSave={handleSaveUser} onOpenChange={setIsFormOpen} />
+                        <DialogHeader><DialogTitle>Add New User</DialogTitle></DialogHeader>
+                        <AddUserForm onSave={handleAddUser} onOpenChange={setIsAddUserOpen} />
                     </DialogContent>
                 </Dialog>
             </div>
             <Card>
                 <CardHeader>
                     <CardTitle>All System Users</CardTitle>
-                    <CardDescription>Manage user accounts and roles.</CardDescription>
+                    <CardDescription>Click a user row to manage their account.</CardDescription>
                     <div className="pt-4 relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                         <Input placeholder="Search users by name or email..." className="pl-10 max-w-sm" />
@@ -162,12 +226,13 @@ export default function UsersPage() {
                             <TableRow>
                                 <TableHead>User</TableHead>
                                 <TableHead>Role</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Date Joined</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {users.map((user) => (
-                                <TableRow key={user.id}>
+                                <TableRow key={user.id} onClick={() => setSelectedUser(user)} className="cursor-pointer">
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar>
@@ -181,11 +246,13 @@ export default function UsersPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'}>{user.role}</Badge>
+                                        <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'} className="capitalize">{user.role.replace('-', ' ')}</Badge>
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => { setEditingUser(user); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingUser(user); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
+                                    <TableCell>
+                                        <Badge variant={statusBadgeVariant[user.status]} className="capitalize">{user.status}</Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        {formatDate(user.createdAt)}
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -194,19 +261,8 @@ export default function UsersPage() {
                 </CardContent>
             </Card>
             
-             <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Are you sure?</DialogTitle>
-                        <DialogDescription>
-                            This action cannot be undone. This will permanently delete the user account for {deletingUser?.name}.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
-                        <Button variant="destructive" onClick={() => handleDeleteUser(deletingUser!)}>Delete</Button>
-                    </DialogFooter>
-                </DialogContent>
+            <Dialog open={!!selectedUser} onOpenChange={(isOpen) => !isOpen && setSelectedUser(undefined)}>
+                {selectedUser && <ManageUserDialog user={selectedUser} onUpdate={handleUpdateUser} onDelete={handleDeleteUser} onOpenChange={(isOpen) => !isOpen && setSelectedUser(undefined)} />}
             </Dialog>
         </div>
     );

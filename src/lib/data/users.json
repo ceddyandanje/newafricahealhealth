@@ -5,20 +5,26 @@
     "name": "Admin User",
     "email": "admin@example.com",
     "password": "password123",
-    "role": "admin"
+    "role": "admin",
+    "status": "active",
+    "createdAt": "2023-10-01T10:00:00Z"
   },
   {
     "id": "2",
     "name": "Test User",
     "email": "user@example.com",
     "password": "password123",
-    "role": "user"
+    "role": "user",
+    "status": "active",
+    "createdAt": "2023-10-05T11:30:00Z"
   },
   {
     "id": "3",
     "name": "Admin Root",
     "email": "rootaccessdenied4312@gmail.com",
     "password": "password123",
-    "role": "admin"
+    "role": "admin",
+    "status": "active",
+    "createdAt": "2023-09-28T09:00:00Z"
   }
 ]
