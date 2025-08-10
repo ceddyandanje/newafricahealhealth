@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
-import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut, Package, PenSquare } from "lucide-react";
+import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut, Package, PenSquare, Database } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Notifications from "@/components/admin/notifications";
@@ -23,6 +23,7 @@ const sidebarNavItems = [
     { href: "/admin/services", icon: ShoppingBag, label: "Services" },
     { href: "/admin/blog", icon: PenSquare, label: "Blog" },
     { href: "/admin/logs", icon: FileText, label: "Logs" },
+    { href: "/admin/firestore-test", icon: Database, label: "Firestore Test" },
 ];
 
 export default function AdminLayout({
