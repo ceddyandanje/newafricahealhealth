@@ -29,10 +29,13 @@ export type User = {
     status: UserStatus;
     createdAt: string;
     avatarUrl?: string;
+    location?: string;
+    age?: number;
+    phone?: string;
 };
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;
-export type SignUpCredentials = Pick<User, 'name' | 'email' | 'password'>;
+export type SignUpCredentials = Pick<User, 'name' | 'email' | 'password' | 'location' | 'age' | 'phone'>;
 
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
@@ -68,4 +71,5 @@ export type RefillRequest = {
     approverName?: string;
     paymentStatus: 'Unpaid' | 'Paid';
   };
+
 

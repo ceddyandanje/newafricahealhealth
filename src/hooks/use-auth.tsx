@@ -44,7 +44,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const userDocRef = doc(db, "users", fbUser.uid);
             const userDoc = await getDoc(userDocRef);
             if (userDoc.exists()) {
-                setUser({ id: userDoc.id, ...userDoc.data() } as User);
+                const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                setUser(userData);
             } else {
                  setUser(null);
             }
@@ -58,14 +59,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
+  const handleRedirect = (user: User | null) => {
+    if (user?.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/patient/dashboard');
+    }
+  };
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
-        await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
-        // onAuthStateChanged will handle the rest
-        toast({ title: "Login Successful", description: `Welcome back!` });
-        // The redirect will be handled by the effect in layouts based on the user role
-        return true;
+        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
+        const userDocRef = doc(db, "users", userCredential.user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+            toast({ title: "Login Successful", description: `Welcome back, ${userData.name}!` });
+            handleRedirect(userData);
+            return true;
+        }
+        return false;
     } catch (error: any) {
         toast({ variant: 'destructive', title: "Login Failed", description: error.message });
         return false;
@@ -85,12 +98,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             role: role,
             status: 'active',
             createdAt: new Date().toISOString(),
+            age: credentials.age,
+            phone: credentials.phone,
+            location: credentials.location,
+            avatarUrl: ''
         };
 
         await setDoc(doc(db, "users", fbUser.uid), newUser);
         
-        // onAuthStateChanged will set the user state
         toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
+        handleRedirect(newUser);
         return true;
     } catch (error: any) {
          toast({ variant: 'destructive', title: "Signup Failed", description: error.message });
@@ -100,6 +117,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(async () => {
     await signOut(auth);
+    setUser(null);
+    setFirebaseUser(null);
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.push("/login");
   }, [router, toast]);
