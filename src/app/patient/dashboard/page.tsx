@@ -47,7 +47,7 @@ const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
 
 function EmptyState() {
     return (
-        <Card>
+        <Card className="bg-background">
             <CardHeader>
                  <CardTitle>Welcome to Your Dashboard!</CardTitle>
             </CardHeader>
@@ -119,7 +119,7 @@ export default function PatientDashboardPage() {
     }
 
     return (
-        <div className="p-6">
+        <div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10 dark:to-green-900/10">
             <header className="py-6">
                 <h1 className="text-3xl font-bold">Good morning, {user?.name.split(' ')[0]}</h1>
                 <p className="text-muted-foreground">Here’s what your day looks like.</p>
