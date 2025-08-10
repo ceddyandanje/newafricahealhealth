@@ -132,7 +132,7 @@ export default function PatientDashboardPage() {
                             <CardTitle>Health Trends</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <ResponsiveContainer width="100%" height={250}>
+                            <ChartContainer config={{}} className="h-[250px] w-full">
                                 <LineChart data={healthTrendData}>
                                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                                     <XAxis dataKey="day" axisLine={false} tickLine={false} />
@@ -140,7 +140,7 @@ export default function PatientDashboardPage() {
                                     <ChartTooltip content={<ChartTooltipContent />} />
                                     <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} />
                                 </LineChart>
-                            </ResponsiveContainer>
+                            </ChartContainer>
                         </CardContent>
                     </Card>
 
@@ -150,7 +150,7 @@ export default function PatientDashboardPage() {
                             <CardTitle>Your Subscription</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-grow flex items-center justify-center">
-                             <ResponsiveContainer width="100%" height={200}>
+                             <ChartContainer config={{}} className="h-[200px] w-full">
                                 <PieChart>
                                 <Pie
                                     data={subscriptionData}
@@ -166,7 +166,7 @@ export default function PatientDashboardPage() {
                                 </Pie>
                                 <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                                 </PieChart>
-                            </ResponsiveContainer>
+                            </ChartContainer>
                         </CardContent>
                         <div className="flex justify-center gap-4 p-4 text-sm">
                             <div className="flex items-center gap-2">
