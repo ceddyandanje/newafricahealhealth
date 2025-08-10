@@ -6,6 +6,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import PatientSidebar from "@/components/patient/sidebar";
+import { cn } from '@/lib/utils';
+import { useSidebar } from '@/hooks/use-sidebar';
 
 export default function PatientLayout({
   children,
@@ -13,6 +15,7 @@ export default function PatientLayout({
   children: React.ReactNode
 }) {
   const { user, isLoading } = useAuth();
+  const { isExpanded } = useSidebar();
   const router = useRouter();
 
   useEffect(() => {
@@ -32,7 +35,7 @@ export default function PatientLayout({
   return (
     <div className="min-h-screen bg-muted/40">
         <PatientSidebar />
-        <main className="ml-20 transition-all duration-300">
+        <main className={cn("transition-all duration-300", isExpanded ? "ml-80" : "ml-20")}>
           {children}
         </main>
     </div>
