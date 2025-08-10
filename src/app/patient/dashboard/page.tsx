@@ -208,7 +208,7 @@ export default function PatientDashboardPage() {
             </main>
 
             {/* Right Action Bar */}
-            <div className="patient-actions-container">
+            <div className="patient-actions-bar">
                  <div className="flex items-center justify-between mb-6">
                     <Avatar>
                         <AvatarImage src="https://i.pravatar.cc/150?u=sarah" alt="Sarah" />
