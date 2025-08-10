@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Settings, User, Bell, Lock, Palette, Phone, ShieldAlert, Home } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Settings, User, Bell, Lock, Palette, Phone, ShieldAlert, Home, UploadCloud, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -16,12 +16,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUsers } from '@/lib/users';
 import { useToast } from '@/hooks/use-toast';
 import { addLog } from '@/lib/logs';
+import { storage } from '@/lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
+
 
 export default function PatientSettingsPage() {
     const { theme, setTheme } = useTheme();
     const { user } = useAuth();
     const [users, setUsers] = useUsers();
     const { toast } = useToast();
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     // State for profile form
     const [name, setName] = useState(user?.name || '');
@@ -46,11 +53,10 @@ export default function PatientSettingsPage() {
     const handleProfileUpdate = () => {
         if (!user) return;
         
-        // This is the correct way to update the user list
         setUsers(prevUsers => 
             prevUsers.map(u => 
                 u.id === user.id 
-                    ? { ...u, name: name } // Only update name for this example
+                    ? { ...u, name: name }
                     : u
             )
         );
@@ -58,6 +64,39 @@ export default function PatientSettingsPage() {
         addLog("INFO", `User ${user.email} updated their profile name to "${name}".`);
         toast({ title: "Profile Updated", description: "Your profile information has been saved." });
     };
+
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file || !user) return;
+
+        setIsUploading(true);
+        const storageRef = ref(storage, `profile-pictures/${user.id}`);
+
+        try {
+            await uploadBytes(storageRef, file);
+            const downloadURL = await getDownloadURL(storageRef);
+
+            setUsers(prevUsers =>
+                prevUsers.map(u =>
+                    u.id === user.id ? { ...u, avatarUrl: downloadURL } : u
+                )
+            );
+
+            addLog("INFO", `User ${user.email} updated their profile picture.`);
+            toast({ title: "Avatar Updated", description: "Your new profile picture has been saved." });
+
+        } catch (error) {
+            console.error("Error uploading image:", error);
+            toast({ variant: 'destructive', title: "Upload Failed", description: "Could not upload your profile picture." });
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
 
     return (
         <div className="p-6">
@@ -75,6 +114,27 @@ export default function PatientSettingsPage() {
                             <CardDescription>Update your personal and contact details.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                             <div className="flex items-center gap-4">
+                                <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                                    <Avatar className="h-24 w-24">
+                                        <AvatarImage src={user?.avatarUrl || `https://i.pravatar.cc/150?u=${user?.email}`} alt={user?.name} />
+                                        <AvatarFallback className="text-3xl">{user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div className={cn(
+                                        "absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
+                                        isUploading && "opacity-100"
+                                    )}>
+                                        {isUploading ? <Loader2 className="h-8 w-8 animate-spin text-white"/> : <UploadCloud className="h-8 w-8 text-white" />}
+                                    </div>
+                                    <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold">{user?.name}</h3>
+                                    <p className="text-muted-foreground">{user?.email}</p>
+                                    <Button variant="link" className="p-0 h-auto" onClick={handleAvatarClick}>Change Photo</Button>
+                                </div>
+                            </div>
+                            <Separator/>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="name">Full Name</Label>

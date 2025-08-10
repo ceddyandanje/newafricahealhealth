@@ -109,7 +109,7 @@ export default function AdminLayout({
                         {user && (
                             <>
                                 <Avatar>
-                                    <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
+                                    <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
                                     <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <div className="hidden md:block">

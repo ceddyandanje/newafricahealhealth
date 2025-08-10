@@ -58,6 +58,7 @@ export const createUser = (details: SignUpCredentials): User => {
     role: details.email === 'rootaccessdenied4312@gmail.com' ? 'admin' : 'user',
     status: 'active',
     createdAt: new Date().toISOString(),
+    avatarUrl: ''
   };
   const updatedUsers = [...users, newUser];
   saveAllUsers(updatedUsers);

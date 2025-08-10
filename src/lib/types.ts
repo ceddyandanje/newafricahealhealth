@@ -28,6 +28,7 @@ export type User = {
     role: UserRole;
     status: UserStatus;
     createdAt: string;
+    avatarUrl?: string;
 };
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;
