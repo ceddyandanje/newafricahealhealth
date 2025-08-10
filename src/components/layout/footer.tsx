@@ -1,10 +1,11 @@
 import Link from "next/link"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Facebook, Twitter, Instagram, Linkedin, MapPin, Phone, Mail } from "lucide-react"
+import Image from "next/image"
 
 export default function Footer() {
+  const logoUrl = "https://firebasestorage.googleapis.com/v0/b/africa-heal-health-x8xrn.firebasestorage.app/o/FB_IMG_1754584185750.jpg?alt=media&token=447d8b93-7b65-4236-832b-9d9d89411946";
   return (
     <footer className="bg-muted/40 dark:bg-black/20 text-foreground border-t border-black/20">
       <div className="container py-6">
@@ -12,9 +13,7 @@ export default function Footer() {
           {/* Column 1: AHH Info & Socials */}
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Avatar>
-                <AvatarFallback>AHH</AvatarFallback>
-              </Avatar>
+              <Image src={logoUrl} alt="Africa Heal Health Logo" width={40} height={40} className="rounded-full" />
               <span className="font-bold text-xl font-headline">Africa Heal Health</span>
             </Link>
             <p className="text-sm text-muted-foreground">

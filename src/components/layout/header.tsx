@@ -13,6 +13,7 @@ import { useEffect, useState } from "react"
 import ThemeToggleButton from "./theme-toggle-button"
 import AuthButton from "./auth-button"
 import { chronicCareCategories } from "@/lib/chronicCareCategories"
+import Image from "next/image"
 
 const dropdownCategories = [
     ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory'].includes(c.id)),
@@ -81,13 +82,12 @@ function ClientHeaderItems() {
 
 
 export default function Header() {
+  const logoUrl = "https://firebasestorage.googleapis.com/v0/b/africa-heal-health-x8xrn.firebasestorage.app/o/FB_IMG_1754584185750.jpg?alt=media&token=447d8b93-7b65-4236-832b-9d9d89411946";
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm">
       <div className="container flex h-16 items-center">
         <Link href="/" className="flex items-center space-x-2 mr-auto">
-            <Avatar className="h-8 w-8">
-            <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
-            </Avatar>
+            <Image src={logoUrl} alt="Africa Heal Health Logo" width={40} height={40} className="rounded-full" />
             <span className="font-bold sm:inline-block text-gray-800 dark:text-white">Africa Heal Health</span>
         </Link>
         
@@ -127,9 +127,7 @@ export default function Header() {
                 </SheetTrigger>
                 <SheetContent side="right" className="bg-background w-full max-w-xs flex flex-col">
                      <Link href="/" className="flex items-center space-x-2 mb-6">
-                        <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200">AHH</AvatarFallback>
-                        </Avatar>
+                        <Image src={logoUrl} alt="Africa Heal Health Logo" width={32} height={32} className="rounded-full" />
                         <span className="font-bold text-gray-800 dark:text-white">Africa Heal Health</span>
                     </Link>
                     <nav className="flex flex-col space-y-2 flex-grow text-lg">
