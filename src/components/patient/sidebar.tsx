@@ -51,7 +51,7 @@ export default function PatientSidebar() {
         <aside
             className={cn(
                 'fixed left-4 top-20 bottom-4 z-50 flex flex-col items-start transition-all duration-300',
-                'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl',
+                'bg-background/20 dark:bg-black/20 backdrop-blur-lg border border-white/30 dark:border-white/10 rounded-2xl shadow-lg',
                 isExpanded ? 'w-72 p-4' : 'w-14 p-2 items-center',
             )}
             onMouseEnter={handleMouseEnter}
@@ -99,8 +99,8 @@ export default function PatientSidebar() {
                         
                         {secondaryNavItems.map(item => (
                              <Collapsible key={item.label}>
-                                <CollapsibleTrigger className="w-full text-left font-semibold text-sm flex items-center gap-2 my-3">
-                                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-0" />
+                                <CollapsibleTrigger className="w-full text-left font-semibold text-sm flex items-center gap-2 my-3 group">
+                                    <ChevronDown className="h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                                     {item.label}
                                 </CollapsibleTrigger>
                                 <CollapsibleContent>
@@ -130,9 +130,11 @@ export default function PatientSidebar() {
                         </Link>
                     ))}
                     <div className="my-1 h-px w-full bg-border" />
-                    <Link href={'/patient/contact'} title="Find Care" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
-                        <LifeBuoy className="h-5 w-5" />
-                    </Link>
+                    {findCareItems.slice(0, 1).map((item) => (
+                         <Link key={item.label} href={item.href} title={item.label} className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                            <LifeBuoy className="h-5 w-5" />
+                        </Link>
+                    ))}
                      <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
                         <Settings className="h-5 w-5" />
                     </Link>
