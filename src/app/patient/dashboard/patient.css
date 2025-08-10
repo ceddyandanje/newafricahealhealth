@@ -21,16 +21,17 @@
     padding: 0 2rem;
 }
 
-.patient-actions {
+.patient-actions-container {
     position: fixed;
-    top: 0;
-    right: 0;
-    height: 100vh;
+    top: 1rem;
+    right: 1rem;
     width: 250px;
     padding: 1rem;
     display: flex;
     flex-direction: column;
+    z-index: 30; /* Ensure it's above other content */
     background-color: hsl(var(--background));
-    border-left: 1px solid hsl(var(--border));
-    z-index: 20;
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    height: calc(100vh - 2rem);
 }
