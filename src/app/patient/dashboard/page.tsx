@@ -27,6 +27,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Line, LineChart, ResponsiveContainer } from "recharts"
 import { cn } from '@/lib/utils';
 import './patient.css';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const sidebarNavItems = [
   { href: '#', icon: LayoutDashboard, label: 'Dashboard' },
@@ -218,16 +219,28 @@ export default function PatientDashboardPage() {
                             <Bell className="h-5 w-5"/>
                         </Button>
                      </div>
-                     <Card className="flex-grow">
-                         <CardHeader>
-                             <CardTitle className="text-lg">Quick Actions</CardTitle>
-                         </CardHeader>
-                         <CardContent className="space-y-3">
-                             <Button variant="outline" className="w-full justify-start"><MessageSquare className="mr-2 h-4 w-4"/> Message Doctor</Button>
-                             <Button variant="outline" className="w-full justify-start"><FileText className="mr-2 h-4 w-4"/> Upload Document</Button>
-                             <Button variant="outline" className="w-full justify-start"><HelpCircle className="mr-2 h-4 w-4"/> Help & Support</Button>
-                         </CardContent>
-                     </Card>
+                     <TooltipProvider>
+                        <div className="flex-grow flex flex-col items-center justify-center gap-4">
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><MessageSquare/></Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="left"><p>Message Doctor</p></TooltipContent>
+                            </Tooltip>
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><FileText/></Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="left"><p>Upload Document</p></TooltipContent>
+                            </Tooltip>
+                             <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><HelpCircle/></Button>
+                                </TooltipTrigger>
+                                <TooltipContent side="left"><p>Help & Support</p></TooltipContent>
+                            </Tooltip>
+                        </div>
+                     </TooltipProvider>
                 </div>
             </aside>
         </div>
