@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, DocumentData, getFirestore } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Database, Edit, List, CheckCircle, XCircle } from 'lucide-react';
@@ -14,26 +14,26 @@ export default function FirestoreTestPage() {
     const [isLoadingWrite, setIsLoadingWrite] = useState(false);
     const [isLoadingRead, setIsLoadingRead] = useState(false);
     const [isLoadingTest, setIsLoadingTest] = useState(false);
-    const [readData, setReadData] = useState<DocumentData[]>([]);
+    const [readData, setReadData] = useState<any[]>([]);
     const { toast } = useToast();
     const testCollectionName = "test-collection";
 
     const handleConnectionTest = async () => {
         setIsLoadingTest(true);
         try {
-            // A lightweight operation to test connection.
-            // getFirestore() will throw if not initialized, and getDocs will throw if permissions fail.
-            await getDocs(collection(db, `test-connection-collection`));
+            // A lightweight operation to test connection. This will fail if rules are incorrect.
+            // We are trying to get a document that doesn't exist. The success/failure of the *request* is what we care about.
+            await getDoc(doc(db, "test-connection-collection", "test-doc"));
             toast({
                 title: "Connection Successful",
                 description: "Successfully connected to Firestore.",
             });
-        } catch (e) {
+        } catch (e: any) {
             console.error("Error testing connection: ", e);
             toast({
                 variant: "destructive",
                 title: "Connection Failed",
-                description: "Could not connect to Firestore. Check console for errors.",
+                description: `Could not connect to Firestore. ${e.message}`,
             });
         } finally {
             setIsLoadingTest(false);
@@ -52,12 +52,12 @@ export default function FirestoreTestPage() {
                 title: "Write Successful",
                 description: `Document written with ID: ${docRef.id}`,
             });
-        } catch (e) {
+        } catch (e: any) {
             console.error("Error adding document: ", e);
             toast({
                 variant: "destructive",
                 title: "Write Failed",
-                description: "Could not write document to Firestore. Check console for errors.",
+                description: `Could not write document to Firestore. ${e.message}`,
             });
         } finally {
             setIsLoadingWrite(false);
@@ -82,12 +82,12 @@ export default function FirestoreTestPage() {
                     description: `Successfully fetched ${data.length} documents.`,
                 });
             }
-        } catch (e) {
+        } catch (e: any) {
              console.error("Error reading documents: ", e);
              toast({
                 variant: "destructive",
                 title: "Read Failed",
-                description: "Could not read documents from Firestore. Check console for errors.",
+                description: `Could not read documents from Firestore. ${e.message}`,
             });
         } finally {
             setIsLoadingRead(false);
