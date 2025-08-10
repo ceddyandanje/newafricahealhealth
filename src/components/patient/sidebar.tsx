@@ -5,15 +5,16 @@ import { useState, useRef, useEffect, RefObject } from 'react';
 import Link from 'next/link';
 import { LayoutGrid, Calendar, Mail, FileText, Pill, Phone, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
     { href: '/patient/dashboard', icon: LayoutGrid, label: 'Dashboard' },
-    { href: '#', icon: Calendar, label: 'Appointments' },
-    { href: '#', label: 'Messages', icon: Mail },
-    { href: '#', icon: FileText, label: 'Documents' },
-    { href: '#', icon: Pill, label: 'Prescriptions' },
-    { href: '#', icon: Phone, label: 'Contact' },
-    { href: '#', icon: Settings, label: 'Settings' },
+    { href: '/patient/appointments', icon: Calendar, label: 'Appointments' },
+    { href: '/patient/messages', label: 'Messages', icon: Mail },
+    { href: '/patient/documents', icon: FileText, label: 'Documents' },
+    { href: '/patient/prescriptions', icon: Pill, label: 'Prescriptions' },
+    { href: '/patient/contact', icon: Phone, label: 'Contact' },
+    { href: '/patient/settings', icon: Settings, label: 'Settings' },
 ];
 
 interface PatientSidebarProps {
@@ -25,6 +26,7 @@ export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) 
     const [isFixed, setIsFixed] = useState(true);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
     const sidebarRef = useRef<HTMLElement>(null);
+    const pathname = usePathname();
 
     const handleMouseEnter = () => {
         timerRef.current = setTimeout(() => {
@@ -44,17 +46,17 @@ export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) 
             if (!sidebarRef.current || !mainContentRef.current) return;
 
             const scrollY = window.scrollY;
-            const headerHeight = 64; // Approx height of the header
+            const headerHeight = 64; 
             const mainTop = mainContentRef.current.offsetTop;
             const mainHeight = mainContentRef.current.offsetHeight;
             const mainBottom = mainTop + mainHeight;
             const sidebarHeight = sidebarRef.current.offsetHeight;
             const viewportHeight = window.innerHeight;
 
-            const isSidebarBelowHeader = scrollY > mainTop + sidebarHeight / 2 - viewportHeight / 2;
-            const isSidebarAboveFooter = scrollY + viewportHeight < mainBottom + sidebarHeight / 2 - viewportHeight / 2;
-
-            if (isSidebarBelowHeader && isSidebarAboveFooter) {
+            const isBelowHeader = scrollY > headerHeight;
+            const isSidebarWithinViewport = scrollY + viewportHeight < mainBottom + sidebarHeight;
+            
+            if (isBelowHeader && isSidebarWithinViewport) {
                 setIsFixed(true);
             } else {
                 setIsFixed(false);
@@ -82,20 +84,20 @@ export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) 
                 isFixed ? 'fixed top-1/2 -translate-y-1/2' : 'absolute'
             )}
             style={isFixed ? {} : { 
-                top: window.scrollY > mainContentRef.current!.offsetTop ? 'auto' : `${mainContentRef.current!.offsetTop}px`, 
-                bottom: window.scrollY > mainContentRef.current!.offsetTop ? '0' : 'auto'
+                top: mainContentRef.current ? mainContentRef.current.offsetTop + 16 : 16,
+                bottom: 'auto'
             }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            {navItems.map((item, index) => (
+            {navItems.map((item) => (
                 <Link
                     key={item.label}
                     href={item.href}
                     className={cn(
                         'h-10 flex items-center justify-start rounded-lg transition-colors w-full',
                         'hover:bg-black/10 dark:hover:bg-white/10',
-                        index === 0 && 'bg-black/10 dark:bg-white/20'
+                        pathname === item.href && 'bg-black/10 dark:bg-white/20'
                     )}
                 >
                     <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center">
