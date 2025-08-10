@@ -3,6 +3,7 @@
 
 import { User } from './types';
 import initialUsers from './data/users.json';
+import type { SignUpCredentials } from './types';
 
 // IMPORTANT: This is a temporary localStorage-based database for prototyping.
 // In a production environment, use a proper database like Firebase Firestore.
@@ -54,11 +55,13 @@ export const findUserById = (id: string): User | undefined => {
     return users.find((user) => user.id === id);
 }
 
-export const createUser = (details: Omit<User, 'id' | 'role'>): User => {
+export const createUser = (details: SignUpCredentials): User => {
   const users = getAllUsers();
   const newUser: User = {
     id: (users.length > 0 ? Math.max(...users.map(u => parseInt(u.id))) + 1 : 1).toString(),
-    ...details,
+    name: details.name,
+    email: details.email,
+    password: details.password,
     // Assign 'admin' role only to a specific email for testing purposes
     role: details.email === 'rootaccessdenied4312@gmail.com' ? 'admin' : 'user',
   };

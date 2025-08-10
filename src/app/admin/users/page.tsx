@@ -17,6 +17,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 const userSchema = z.object({
     name: z.string().min(2, 'Name is required'),
@@ -25,14 +26,25 @@ const userSchema = z.object({
     role: z.enum(['admin', 'user']),
 });
 
+// A slightly different schema for editing, where password is not required
+const editUserSchema = userSchema.extend({
+    password: z.string().min(8, 'Password must be at least 8 characters').or(z.literal('')),
+});
+
+
 function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: User) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof userSchema>>({
-        resolver: zodResolver(userSchema),
-        defaultValues: user ? { ...user, password: user.password || '********' } : { name: '', email: '', password: '', role: 'user' },
+        resolver: zodResolver(user ? editUserSchema : userSchema),
+        defaultValues: user ? { ...user, password: '' } : { name: '', email: '', password: '', role: 'user' },
     });
 
     const handleSubmit = (values: z.infer<typeof userSchema>) => {
-        onSave({ ...values, id: user?.id || Date.now().toString() });
+        let passwordToSave = values.password;
+        if(user && !values.password) {
+            passwordToSave = user.password; // Keep old password if field is blank during edit
+        }
+
+        onSave({ ...values, id: user?.id || '', password: passwordToSave });
         onOpenChange(false);
         form.reset();
     };
@@ -47,7 +59,7 @@ function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: 
                     <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={!!user} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="password" render={({ field }) => (
-                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} placeholder={user ? "Unchanged" : ""} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} placeholder={user ? "Leave blank to keep unchanged" : ""} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="role" render={({ field }) => (
                     <FormItem>
@@ -76,30 +88,44 @@ export default function UsersPage() {
     const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [deletingUser, setDeletingUser] = useState<User | undefined>(undefined);
+    const { toast } = useToast();
 
     useEffect(() => {
         setUsers(getAllUsers());
     }, []);
 
-    const handleSaveUser = (user: User) => {
+    const handleSaveUser = (userData: User) => {
         let updatedUsers;
         if (editingUser) {
-            updatedUsers = users.map(u => (u.id === user.id ? { ...u, ...user, password: user.password === '********' ? u.password : user.password } : u));
+            // Edit existing user
+             updatedUsers = users.map(u => (u.id === editingUser.id ? { ...u, ...userData } : u));
+             toast({ title: "User Updated", description: `Details for ${userData.name} have been saved.`});
         } else {
-            const newUser = createUser({name: user.name, email: user.email, password: user.password});
+            // Add new user
+            if (getAllUsers().some(u => u.email === userData.email)) {
+                toast({ variant: 'destructive', title: "Creation Failed", description: "A user with this email already exists."});
+                return;
+            }
+            const newUser = createUser({name: userData.name, email: userData.email, password: userData.password});
             updatedUsers = [...users, newUser];
+            toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
         }
         setUsers(updatedUsers);
         saveAllUsers(updatedUsers);
         setEditingUser(undefined);
     };
     
-    const handleDeleteUser = (user: User) => {
-        const updatedUsers = users.filter(u => u.id !== user.id);
+    const handleDeleteUser = (userToDelete: User) => {
+        if (users.length <= 1) {
+            toast({ variant: 'destructive', title: "Action Forbidden", description: "You cannot delete the last user."});
+            return;
+        }
+        const updatedUsers = users.filter(u => u.id !== userToDelete.id);
         setUsers(updatedUsers);
         saveAllUsers(updatedUsers);
         setDeletingUser(undefined);
         setIsDeleteConfirmOpen(false);
+        toast({ title: "User Deleted", description: `Account for ${userToDelete.name} has been removed.`});
     };
 
     return (
@@ -109,9 +135,9 @@ export default function UsersPage() {
                     <Shield className="w-8 h-8" />
                     Users Management
                 </h1>
-                <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+                <Dialog open={isFormOpen} onOpenChange={(isOpen) => { if(!isOpen) setEditingUser(undefined); setIsFormOpen(isOpen);}}>
                     <DialogTrigger asChild>
-                        <Button onClick={() => setEditingUser(undefined)}><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
+                        <Button onClick={() => { setEditingUser(undefined); setIsFormOpen(true); }}><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
                     </DialogTrigger>
                     <DialogContent>
                         <DialogHeader>
