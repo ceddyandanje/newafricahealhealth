@@ -1,4 +1,5 @@
 
+
 export type Product = {
   id: string;
   name: string;
@@ -93,5 +94,16 @@ export type MedicalProfile = {
   };
 };
 
+export type RoadmapTaskStatus = 'Todo' | 'In Progress' | 'Done';
+export type RoadmapTaskCategory = 'Core Feature' | 'AI & Automation' | 'UI/UX' | 'Security' | 'Other';
+
+export type RoadmapTask = {
+    id: string;
+    title: string;
+    description: string;
+    status: RoadmapTaskStatus;
+    category: RoadmapTaskCategory;
+    createdAt: string; // ISO 8601 string
+};
 
 

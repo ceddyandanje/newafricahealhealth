@@ -1,0 +1,83 @@
+
+[
+    {
+        "id": "task-1",
+        "title": "Migrate Products to Firestore",
+        "description": "Move the product catalog from the static 'src/lib/products.ts' file to a 'products' collection in Firestore to allow dynamic management.",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-28T10:00:00Z"
+    },
+    {
+        "id": "task-2",
+        "title": "Migrate Blog Posts to Firestore",
+        "description": "Move blog content from the static arrays in the component files to a 'blog' collection in Firestore.",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-28T10:01:00Z"
+    },
+    {
+        "id": "task-3",
+        "title": "Implement Firestore Security Rules",
+        "description": "Write and deploy comprehensive security rules to protect all Firestore collections (users, logs, refillRequests, roadmap, etc.). This is a critical security step.",
+        "status": "Todo",
+        "category": "Security",
+        "createdAt": "2023-10-28T10:02:00Z"
+    },
+    {
+        "id": "task-4",
+        "title": "Build User Activity Timeline",
+        "description": "Create the dedicated page for viewing a single user's activity log, linked from the 'View all activity' button in the user management dialog.",
+        "status": "Todo",
+        "category": "UI/UX",
+        "createdAt": "2023-10-28T10:03:00Z"
+    },
+    {
+        "id": "task-5",
+        "title": "Implement Real Appointment Booking",
+        "description": "Connect the 'Book Appointment' buttons to a Firestore collection, allowing patients to schedule real appointments that admins can view and manage.",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-28T10:04:00Z"
+    },
+    {
+        "id": "task-6",
+        "title": "Integrate a Payment Gateway",
+        "description": "Integrate Stripe or another payment provider into the checkout page to handle real financial transactions.",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-28T10:05:00Z"
+    },
+    {
+        "id": "task-7",
+        "title": "Implement Cloud Functions for Notifications",
+        "description": "Write and deploy Firebase Cloud Functions to send real email/SMS notifications when important events happen (e.g., new refill request, approved order).",
+        "status": "Todo",
+        "category": "AI & Automation",
+        "createdAt": "2023-10-28T10:06:00Z"
+    },
+    {
+        "id": "task-8",
+        "title": "Develop Doctor/Driver Dashboards",
+        "description": "Create specialized dashboard views for users with 'Doctor' or 'Delivery Driver' roles to manage their specific tasks.",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-28T10:07:00Z"
+    },
+     {
+        "id": "task-9",
+        "title": "User Authentication & Firestore Setup",
+        "description": "Initial setup of Firebase Auth and core Firestore collections like users, logs, and refill requests.",
+        "status": "Done",
+        "category": "Core Feature",
+        "createdAt": "2023-10-27T09:00:00Z"
+    },
+    {
+        "id": "task-10",
+        "title": "Build Patient Dashboard",
+        "description": "Create the main dashboard for logged-in patients, including the 'day at a glance' feature.",
+        "status": "In Progress",
+        "category": "UI/UX",
+        "createdAt": "2023-10-27T09:01:00Z"
+    }
+]

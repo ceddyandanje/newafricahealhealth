@@ -1,9 +1,10 @@
 
+
 'use client';
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon } from "lucide-react";
+import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell, Line, LineChart as LineChartComponent, Area } from "recharts"
@@ -14,6 +15,7 @@ import RefillRequestDialog from "@/components/admin/refill-request-dialog";
 import { useUsers } from "@/lib/users";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useRoadmapTasks } from "@/lib/roadmap";
 
 const revenueChartData = [
     { name: '10 May', income: 80, expense: 40 },
@@ -36,18 +38,20 @@ export default function AdminDashboardPage() {
     const [isClient, setIsClient] = useState(false);
     const [requests] = useRequests();
     const { users } = useUsers();
+    const { tasks } = useRoadmapTasks();
     const [selectedRequest, setSelectedRequest] = useState<RefillRequest | null>(null);
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
     const patients = users.filter(u => u.role === 'user');
     const patientCount = patients.length;
+    const pendingTasksCount = tasks.filter(t => t.status === 'Todo' || t.status === 'In Progress').length;
 
     const summaryData = [
         { title: "Patients", value: patientCount.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
         { title: "Pending Requests", value: pendingRequests.length.toString(), icon: ClipboardList, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-900/50", clickable: true },
+        { title: "Pending Tasks", value: pendingTasksCount.toString(), icon: ListChecks, color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/50", href: "/admin/roadmap" },
         { title: "Staff", value: (users.length - patientCount).toString(), icon: Users, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
-        { title: "Ambulance", value: "15", icon: Truck, color: "text-cyan-500", bgColor: "bg-cyan-100 dark:bg-cyan-900/50" },
     ];
     
     // Note: The breakdown is illustrative. In a real app, this would come from patient status data.
@@ -78,23 +82,39 @@ export default function AdminDashboardPage() {
         }
     }
 
+    const renderCard = (item: typeof summaryData[0]) => {
+        const cardContent = (
+             <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                    <p className="text-sm text-muted-foreground">{item.title}</p>
+                    <p className="text-2xl font-bold">{item.value}</p>
+                </div>
+                <div className={`p-3 rounded-full ${item.bgColor} ${item.color}`}>
+                    <item.icon className="h-6 w-6"/>
+                </div>
+            </CardContent>
+        );
+
+        if (item.href) {
+            return (
+                <Link href={item.href} key={item.title}>
+                    <Card className="hover:shadow-lg transition-shadow h-full">{cardContent}</Card>
+                </Link>
+            )
+        }
+
+        return (
+            <Card key={item.title} onClick={() => item.clickable && handleCardClick(item.title)} className={item.clickable ? "cursor-pointer hover:shadow-lg transition-shadow h-full" : "h-full"}>
+               {cardContent}
+            </Card>
+        );
+    }
+
     return (
         <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Top Row: Summary Cards */}
             <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {summaryData.map(item => (
-                    <Card key={item.title} onClick={() => item.clickable && handleCardClick(item.title)} className={item.clickable ? "cursor-pointer hover:shadow-lg" : ""}>
-                        <CardContent className="p-4 flex items-center justify-between">
-                            <div>
-                                <p className="text-sm text-muted-foreground">{item.title}</p>
-                                <p className="text-2xl font-bold">{item.value}</p>
-                            </div>
-                            <div className={`p-3 rounded-full ${item.bgColor} ${item.color}`}>
-                                <item.icon className="h-6 w-6"/>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
+                {summaryData.map(renderCard)}
             </div>
 
             {/* Middle Row: Charts */}

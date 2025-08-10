@@ -1,10 +1,11 @@
 
+
 'use client';
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
-import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut, Package, PenSquare, Database } from "lucide-react";
+import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut, Package, PenSquare, Database, ListChecks } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Notifications from "@/components/admin/notifications";
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button";
 
 const sidebarNavItems = [
     { href: "/admin", icon: Home, label: "Dashboard" },
+    { href: "/admin/roadmap", icon: ListChecks, label: "Roadmap" },
     { href: "/admin/appointments", icon: Calendar, label: "Appointments" },
     { href: "/admin/products", icon: Package, label: "Products" },
     { href: "/admin/patients", icon: Users, label: "Patients" },
