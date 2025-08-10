@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAuth } from "@/hooks/use-auth";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -27,6 +28,8 @@ const signupSchema = z.object({
 function LoginForm() {
     const { login } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
         defaultValues: { email: "", password: "" },
@@ -34,7 +37,12 @@ function LoginForm() {
 
     async function onSubmit(values: z.infer<typeof loginSchema>) {
         setIsLoading(true);
-        await login(values);
+        const success = await login(values);
+        if (success) {
+            // The redirection logic is now handled in the layout based on the user role
+            // but we can push a default route here to get things started.
+             router.push('/patient/dashboard');
+        }
         setIsLoading(false);
     }
 
@@ -59,6 +67,8 @@ function LoginForm() {
 function SignUpForm() {
     const { signup } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const router = useRouter();
+
     const form = useForm<z.infer<typeof signupSchema>>({
         resolver: zodResolver(signupSchema),
         defaultValues: { name: "", email: "", password: "" },
@@ -66,7 +76,10 @@ function SignUpForm() {
 
      async function onSubmit(values: z.infer<typeof signupSchema>) {
         setIsLoading(true);
-        await signup(values);
+        const success = await signup(values);
+         if (success) {
+             router.push('/patient/dashboard');
+        }
         setIsLoading(false);
     }
 

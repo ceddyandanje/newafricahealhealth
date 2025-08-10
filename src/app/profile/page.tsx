@@ -33,7 +33,7 @@ export default function ProfilePage() {
             <Card className="glassmorphic">
                 <CardHeader className="items-center text-center">
                      <Avatar className="h-24 w-24 mb-4">
-                        <AvatarImage src={`https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
+                        <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
                         <AvatarFallback className="text-4xl">{user.name.charAt(0).toUpperCase()}</AvatarFallback>
                     </Avatar>
                     <CardTitle className="text-3xl">{user.name}</CardTitle>
@@ -43,7 +43,10 @@ export default function ProfilePage() {
                     <p className="text-muted-foreground mb-6">
                         Welcome to your profile page. This area is under construction.
                     </p>
-                    <Button onClick={logout} variant="outline">Log Out</Button>
+                     <div className="flex justify-center gap-4">
+                        <Button onClick={() => router.push('/patient/settings')} variant="default">Go to Settings</Button>
+                        <Button onClick={logout} variant="outline">Log Out</Button>
+                    </div>
                 </CardContent>
             </Card>
         </div>
