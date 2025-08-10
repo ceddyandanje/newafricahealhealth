@@ -17,17 +17,21 @@ const levelVariant = {
 } as const;
 
 export default function LogsPage() {
-    const [logs, setLogs] = useLogs();
+    const { logs, setLogs, refetch } = useLogs();
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-      // Small delay to give impression of loading, can be removed
-      const timer = setTimeout(() => {
+      if (logs.length > 0) {
         setIsLoading(false);
-      }, 500);
-      return () => clearTimeout(timer);
+      }
     }, [logs]);
 
+    const handleRefresh = async () => {
+        setIsLoading(true);
+        await refetch();
+        // A small delay to give user feedback
+        setTimeout(() => setIsLoading(false), 300);
+    }
 
     const sortedLogs = [...logs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
@@ -38,7 +42,7 @@ export default function LogsPage() {
           <FileText className="w-8 h-8" />
           System Logs
         </h1>
-        <Button variant="outline" onClick={() => window.location.reload()}><RefreshCw className="mr-2 h-4 w-4"/> Refresh</Button>
+        <Button variant="outline" onClick={handleRefresh} disabled={isLoading}><RefreshCw className="mr-2 h-4 w-4"/> Refresh</Button>
       </div>
       <Card>
         <CardHeader>

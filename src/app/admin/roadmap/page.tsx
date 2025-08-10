@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRoadmapTasks, updateTaskStatus, addTask, deleteTask } from "@/lib/roadmap";
@@ -103,7 +103,7 @@ function TaskCard({ task, onStatusChange, onDelete }: { task: RoadmapTask, onSta
                     </Button>
                 </div>
                 <h4 className="font-semibold mb-2">{task.title}</h4>
-                <p className="text-sm text-muted-foreground mb-4">{task.description}</p>
+                <p className="text-sm text-muted-foreground mb-4 whitespace-pre-line">{task.description}</p>
                 <Select value={task.status} onValueChange={(value) => onStatusChange(task.id, value as RoadmapTaskStatus)}>
                     <SelectTrigger className="text-xs h-8">
                         <SelectValue />
@@ -218,7 +218,6 @@ export default function RoadmapPage() {
     );
 }
 
-// Dummy icons for categories, replace with actual Lucide icons if needed
 const CoreFeature = (props: any) => <ListChecks {...props} />;
 const AiAutomation = (props: any) => <Loader2 {...props} />;
 const UiUx = (props: any) => <ListChecks {...props} />;

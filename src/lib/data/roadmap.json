@@ -3,7 +3,7 @@
     {
         "id": "task-1",
         "title": "Migrate Products to Firestore",
-        "description": "Move the product catalog from the static 'src/lib/products.ts' file to a 'products' collection in Firestore to allow dynamic management.",
+        "description": "Currently, the entire product catalog is a static file (`src/lib/products.ts`). This task involves moving all product data into a 'products' collection in Firestore. \n\n**Data Handling:** Each product should be a separate document. This will allow admins to dynamically add, edit, and delete products from the admin panel instead of needing code changes. The public-facing product pages will then fetch data from this collection.",
         "status": "Todo",
         "category": "Core Feature",
         "createdAt": "2023-10-28T10:00:00Z"
@@ -11,7 +11,7 @@
     {
         "id": "task-2",
         "title": "Migrate Blog Posts to Firestore",
-        "description": "Move blog content from the static arrays in the component files to a 'blog' collection in Firestore.",
+        "description": "Similar to products, all blog posts are currently hard-coded in the component files. This task is to move them to a 'blog' collection in Firestore. \n\n**Data Handling:** Each post will be a document containing its title, content (as HTML or Markdown), category, etc. This enables dynamic blog management from the admin panel.",
         "status": "Todo",
         "category": "Core Feature",
         "createdAt": "2023-10-28T10:01:00Z"
@@ -19,15 +19,15 @@
     {
         "id": "task-3",
         "title": "Implement Firestore Security Rules",
-        "description": "Write and deploy comprehensive security rules to protect all Firestore collections (users, logs, refillRequests, roadmap, etc.). This is a critical security step.",
+        "description": "This is a **critical security task**. We need to write and deploy comprehensive security rules for all Firestore collections. \n\n**Data Handling:** The rules will define who can read/write data. For example: \n- Users can only read/write their own documents in the `users` collection. \n- Only admins can write to `products` or `blog`. \n- Only admins can read the `logs` collection.",
         "status": "Todo",
         "category": "Security",
         "createdAt": "2023-10-28T10:02:00Z"
     },
     {
         "id": "task-4",
-        "title": "Build User Activity Timeline",
-        "description": "Create the dedicated page for viewing a single user's activity log, linked from the 'View all activity' button in the user management dialog.",
+        "title": "Build User Activity Timeline Page",
+        "description": "Create the dedicated page for viewing a single user's full activity log, which will be linked from the 'View all activity' button in the user management dialog. \n\n**Data Handling:** This page will query the `logs` collection, filtering for entries related to a specific `userId`.",
         "status": "Todo",
         "category": "UI/UX",
         "createdAt": "2023-10-28T10:03:00Z"
@@ -35,7 +35,7 @@
     {
         "id": "task-5",
         "title": "Implement Real Appointment Booking",
-        "description": "Connect the 'Book Appointment' buttons to a Firestore collection, allowing patients to schedule real appointments that admins can view and manage.",
+        "description": "Connect the 'Book Appointment' buttons to a Firestore collection. \n\n**Data Handling:** Create an `appointments` collection. When a user books, a new document will be created containing patientId, doctorId, requested time, etc. Admins will then be able to view and manage these appointments.",
         "status": "Todo",
         "category": "Core Feature",
         "createdAt": "2023-10-28T10:04:00Z"
@@ -43,7 +43,7 @@
     {
         "id": "task-6",
         "title": "Integrate a Payment Gateway",
-        "description": "Integrate Stripe or another payment provider into the checkout page to handle real financial transactions.",
+        "description": "Integrate a real payment provider like Stripe or M-Pesa into the checkout page to handle financial transactions securely. \n\n**Data Handling:** This will likely involve creating a `orders` collection in Firestore to track payment status and order details.",
         "status": "Todo",
         "category": "Core Feature",
         "createdAt": "2023-10-28T10:05:00Z"
@@ -51,7 +51,7 @@
     {
         "id": "task-7",
         "title": "Implement Cloud Functions for Notifications",
-        "description": "Write and deploy Firebase Cloud Functions to send real email/SMS notifications when important events happen (e.g., new refill request, approved order).",
+        "description": "Write and deploy Firebase Cloud Functions to send real email/SMS notifications for important events. \n\n**Data Handling:** A function will trigger on document creation in collections like `refillRequests` or `orders`. It will then use a service like SendGrid or Twilio to dispatch the notification.",
         "status": "Todo",
         "category": "AI & Automation",
         "createdAt": "2023-10-28T10:06:00Z"
@@ -59,7 +59,7 @@
     {
         "id": "task-8",
         "title": "Develop Doctor/Driver Dashboards",
-        "description": "Create specialized dashboard views for users with 'Doctor' or 'Delivery Driver' roles to manage their specific tasks.",
+        "description": "Create specialized, secure dashboard views for users with 'Doctor' or 'Delivery Driver' roles to manage their specific tasks (e.g., view assigned appointments, see delivery routes). \n\n**Data Handling:** This involves creating new pages and components that conditionally render based on the user's role.",
         "status": "Todo",
         "category": "Core Feature",
         "createdAt": "2023-10-28T10:07:00Z"
@@ -67,7 +67,7 @@
      {
         "id": "task-9",
         "title": "User Authentication & Firestore Setup",
-        "description": "Initial setup of Firebase Auth and core Firestore collections like users, logs, and refill requests.",
+        "description": "Initial setup of Firebase Auth and core Firestore collections like users, logs, and refill requests. This foundational step enables user login/signup and data persistence.",
         "status": "Done",
         "category": "Core Feature",
         "createdAt": "2023-10-27T09:00:00Z"
@@ -75,9 +75,17 @@
     {
         "id": "task-10",
         "title": "Build Patient Dashboard",
-        "description": "Create the main dashboard for logged-in patients, including the 'day at a glance' feature.",
+        "description": "Create the main dashboard for logged-in patients. It dynamically shows a welcome message for new users and a 'day at a glance' timeline for returning users. It fetches data from the `users/{userId}/events` subcollection.",
         "status": "In Progress",
         "category": "UI/UX",
         "createdAt": "2023-10-27T09:01:00Z"
+    },
+    {
+        "id": "task-11",
+        "title": "Categorize Logs",
+        "description": "Implement a tabbed interface on the logs page to categorize logs (e.g., System, Admin, User). This will require adding a 'category' field to each log entry to allow for efficient filtering. This will make monitoring and debugging much easier.",
+        "status": "Todo",
+        "category": "UI/UX",
+        "createdAt": "2023-10-29T11:00:00Z"
     }
 ]

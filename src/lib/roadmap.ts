@@ -6,6 +6,7 @@ import { db } from './firebase';
 import { collection, query, onSnapshot, orderBy, doc, getDocs, writeBatch, addDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { type RoadmapTask, RoadmapTaskStatus } from './types';
 import initialTasks from './data/roadmap.json';
+import { addLog } from './logs';
 
 // Function to seed tasks if the collection is empty
 const seedRoadmapTasks = async () => {
@@ -14,6 +15,7 @@ const seedRoadmapTasks = async () => {
 
     if (snapshot.empty) {
         console.log("No roadmap tasks found. Seeding initial tasks.");
+        addLog('INFO', 'Roadmap collection is empty. Seeding initial tasks.');
         const batch = writeBatch(db);
         initialTasks.forEach(taskData => {
             const taskRef = doc(db, 'roadmap', taskData.id); // Use the ID from JSON
@@ -63,18 +65,21 @@ export const useRoadmapTasks = () => {
 
 // CRUD functions for managing tasks
 export const addTask = async (task: Omit<RoadmapTask, 'id' | 'createdAt'>) => {
-    await addDoc(collection(db, 'roadmap'), {
+    const newTaskRef = await addDoc(collection(db, 'roadmap'), {
         ...task,
         createdAt: new Date().toISOString()
     });
+    addLog('INFO', `New roadmap task added: "${task.title}" (ID: ${newTaskRef.id})`);
 };
 
 export const updateTaskStatus = async (taskId: string, status: RoadmapTaskStatus) => {
     const taskRef = doc(db, 'roadmap', taskId);
     await updateDoc(taskRef, { status });
+    addLog('INFO', `Roadmap task (ID: ${taskId}) status updated to ${status}.`);
 };
 
 export const deleteTask = async (taskId: string) => {
     const taskRef = doc(db, 'roadmap', taskId);
     await deleteDoc(taskRef);
+    addLog('WARN', `Roadmap task (ID: ${taskId}) was deleted.`);
 };
