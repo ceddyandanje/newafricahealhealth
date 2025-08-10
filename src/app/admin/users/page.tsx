@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Shield, PlusCircle, Search, Edit, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { users as initialUsers, createUser } from "@/lib/users";
+import { getAllUsers, createUser, saveAllUsers } from "@/lib/users";
 import { type User } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
@@ -28,7 +28,7 @@ const userSchema = z.object({
 function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: User) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof userSchema>>({
         resolver: zodResolver(userSchema),
-        defaultValues: user || { name: '', email: '', password: '', role: 'user' },
+        defaultValues: user ? { ...user, password: user.password || '********' } : { name: '', email: '', password: '', role: 'user' },
     });
 
     const handleSubmit = (values: z.infer<typeof userSchema>) => {
@@ -43,10 +43,10 @@ function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: 
                     <FormItem><FormLabel>Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="email" render={({ field }) => (
-                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} disabled={!!user} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="password" render={({ field }) => (
-                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} placeholder={user ? "Unchanged" : ""} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="role" render={({ field }) => (
                     <FormItem>
@@ -70,24 +70,33 @@ function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: 
 }
 
 export default function UsersPage() {
-    const [users, setUsers] = useState<User[]>(initialUsers);
+    const [users, setUsers] = useState<User[]>([]);
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const [deletingUser, setDeletingUser] = useState<User | undefined>(undefined);
 
+    useEffect(() => {
+        setUsers(getAllUsers());
+    }, []);
+
     const handleSaveUser = (user: User) => {
+        let updatedUsers;
         if (editingUser) {
-            setUsers(users.map(u => (u.id === user.id ? user : u)));
+            updatedUsers = users.map(u => (u.id === user.id ? { ...u, ...user, password: user.password === '********' ? u.password : user.password } : u));
         } else {
             const newUser = createUser({name: user.name, email: user.email, password: user.password});
-            setUsers([...users, newUser]);
+            updatedUsers = [...users, newUser];
         }
+        setUsers(updatedUsers);
+        saveAllUsers(updatedUsers);
         setEditingUser(undefined);
     };
     
     const handleDeleteUser = (user: User) => {
-        setUsers(users.filter(u => u.id !== user.id));
+        const updatedUsers = users.filter(u => u.id !== user.id);
+        setUsers(updatedUsers);
+        saveAllUsers(updatedUsers);
         setDeletingUser(undefined);
         setIsDeleteConfirmOpen(false);
     };

@@ -1,46 +1,68 @@
 
-import { User } from './types';
+'use client';
 
-// Let's create a default admin user and a regular user for testing.
-// In a real app, NEVER store passwords in plain text. This is for prototype purposes only.
-export let users: User[] = [
-  {
-    id: '1',
-    name: 'Admin User',
-    email: 'admin@example.com',
-    password: 'password123', // Unsafe, for demo only
-    role: 'admin',
-  },
-  {
-    id: '2',
-    name: 'Test User',
-    email: 'user@example.com',
-    password: 'password123', // Unsafe, for demo only
-    role: 'user',
-  },
-  {
-    id: '3',
-    name: 'Admin Root',
-    email: 'rootaccessdenied4312@gmail.com',
-    password: 'password123', // Unsafe, for demo only
-    role: 'admin',
+import { User } from './types';
+import initialUsers from './data/users.json';
+
+// IMPORTANT: This is a temporary localStorage-based database for prototyping.
+// In a production environment, use a proper database like Firebase Firestore.
+
+const USERS_STORAGE_KEY = 'app-users';
+
+// Function to get all users from localStorage, seeded with initial data if empty.
+export const getAllUsers = (): User[] => {
+  if (typeof window === 'undefined') {
+    return initialUsers as User[];
   }
-];
+  try {
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    if (storedUsers) {
+      return JSON.parse(storedUsers);
+    } else {
+      // If no users in storage, seed it with the initial data.
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(initialUsers));
+      return initialUsers as User[];
+    }
+  } catch (error) {
+    console.error('Error reading users from localStorage:', error);
+    return initialUsers as User[]; // Fallback to initial data
+  }
+};
+
+// Function to save the entire list of users to localStorage.
+export const saveAllUsers = (users: User[]) => {
+  if (typeof window === 'undefined') {
+    console.error("Cannot save users on the server side.");
+    return;
+  }
+  try {
+    const jsonData = JSON.stringify(users, null, 2);
+    localStorage.setItem(USERS_STORAGE_KEY, jsonData);
+  } catch (error) {
+    console.error('Error writing users to localStorage:', error);
+  }
+};
+
 
 export const findUserByEmail = (email: string): User | undefined => {
+  const users = getAllUsers();
   return users.find((user) => user.email === email);
 };
 
 export const findUserById = (id: string): User | undefined => {
+    const users = getAllUsers();
     return users.find((user) => user.id === id);
 }
 
 export const createUser = (details: Omit<User, 'id' | 'role'>): User => {
+  const users = getAllUsers();
   const newUser: User = {
-    id: (users.length + 1).toString(),
+    id: (users.length > 0 ? Math.max(...users.map(u => parseInt(u.id))) + 1 : 1).toString(),
     ...details,
+    // Assign 'admin' role only to a specific email for testing purposes
     role: details.email === 'rootaccessdenied4312@gmail.com' ? 'admin' : 'user',
   };
-  users.push(newUser);
+  const updatedUsers = [...users, newUser];
+  saveAllUsers(updatedUsers);
   return newUser;
 };

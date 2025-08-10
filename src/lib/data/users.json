@@ -1,0 +1,24 @@
+
+[
+  {
+    "id": "1",
+    "name": "Admin User",
+    "email": "admin@example.com",
+    "password": "password123",
+    "role": "admin"
+  },
+  {
+    "id": "2",
+    "name": "Test User",
+    "email": "user@example.com",
+    "password": "password123",
+    "role": "user"
+  },
+  {
+    "id": "3",
+    "name": "Admin Root",
+    "email": "rootaccessdenied4312@gmail.com",
+    "password": "password123",
+    "role": "admin"
+  }
+]
