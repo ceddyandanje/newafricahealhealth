@@ -1,9 +1,10 @@
 
 .patient-dashboard-layout {
     display: grid;
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto 1fr;
     height: 100vh;
     overflow: hidden;
+    position: relative;
 }
 
 .patient-sidebar {
@@ -11,6 +12,7 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    z-index: 20;
 }
 
 .patient-main-content {
@@ -20,9 +22,15 @@
 }
 
 .patient-actions {
-    grid-column: 3;
-    position: sticky;
+    position: fixed;
     top: 0;
+    right: 0;
     height: 100vh;
-    width: 300px;
+    width: 250px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    background-color: hsl(var(--background));
+    border-left: 1px solid hsl(var(--border));
+    z-index: 20;
 }

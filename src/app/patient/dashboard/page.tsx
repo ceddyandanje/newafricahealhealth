@@ -209,39 +209,37 @@ export default function PatientDashboardPage() {
 
             {/* Right Action Bar */}
             <aside className="patient-actions">
-                <div className="flex flex-col h-full bg-background border-l p-4">
-                     <div className="flex items-center justify-between mb-6">
-                        <Avatar>
-                            <AvatarImage src="https://i.pravatar.cc/150?u=sarah" alt="Sarah" />
-                            <AvatarFallback>S</AvatarFallback>
-                        </Avatar>
-                        <Button variant="ghost" size="icon">
-                            <Bell className="h-5 w-5"/>
-                        </Button>
-                     </div>
-                     <TooltipProvider>
-                        <div className="flex-grow flex flex-col items-center justify-center gap-4">
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><MessageSquare/></Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="left"><p>Message Doctor</p></TooltipContent>
-                            </Tooltip>
-                             <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><FileText/></Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="left"><p>Upload Document</p></TooltipContent>
-                            </Tooltip>
-                             <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><HelpCircle/></Button>
-                                </TooltipTrigger>
-                                <TooltipContent side="left"><p>Help & Support</p></TooltipContent>
-                            </Tooltip>
-                        </div>
-                     </TooltipProvider>
-                </div>
+                 <div className="flex items-center justify-between mb-6">
+                    <Avatar>
+                        <AvatarImage src="https://i.pravatar.cc/150?u=sarah" alt="Sarah" />
+                        <AvatarFallback>S</AvatarFallback>
+                    </Avatar>
+                    <Button variant="ghost" size="icon">
+                        <Bell className="h-5 w-5"/>
+                    </Button>
+                 </div>
+                 <TooltipProvider>
+                    <div className="flex-grow flex flex-col items-center justify-center gap-4">
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><MessageSquare/></Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left"><p>Message Doctor</p></TooltipContent>
+                        </Tooltip>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><FileText/></Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left"><p>Upload Document</p></TooltipContent>
+                        </Tooltip>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-12 w-12 rounded-full"><HelpCircle/></Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="left"><p>Help & Support</p></TooltipContent>
+                        </Tooltip>
+                    </div>
+                 </TooltipProvider>
             </aside>
         </div>
     );
