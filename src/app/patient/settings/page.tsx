@@ -1,7 +1,8 @@
 
 'use client';
 
-import { Settings, User, Bell, Lock, Palette, Heart, Phone, ShieldAlert, Home } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, User, Bell, Lock, Palette, Phone, ShieldAlert, Home } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,10 +13,47 @@ import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useUsers } from '@/lib/users';
+import { useToast } from '@/hooks/use-toast';
+import { addLog } from '@/lib/logs';
 
 export default function PatientSettingsPage() {
     const { theme, setTheme } = useTheme();
     const { user } = useAuth();
+    const [users, setUsers] = useUsers();
+    const { toast } = useToast();
+
+    // State for profile form
+    const [name, setName] = useState(user?.name || '');
+    const [phone, setPhone] = useState('');
+    const [dob, setDob] = useState('');
+    const [address, setAddress] = useState('');
+    
+    // State for medical form
+    const [bloodType, setBloodType] = useState('');
+    const [allergies, setAllergies] = useState('');
+    const [primaryPhysician, setPrimaryPhysician] = useState('');
+    const [emergencyName, setEmergencyName] = useState('');
+    const [emergencyPhone, setEmergencyPhone] = useState('');
+
+    useEffect(() => {
+        // You would typically fetch and set this data from your backend
+        // For this prototype, we'll just pre-fill the name
+        setName(user?.name || '');
+    }, [user]);
+
+    const handleProfileUpdate = () => {
+        if (!user) return;
+        
+        const updatedUsers = users.map(u => 
+            u.id === user.id 
+                ? { ...u, name } // In a real app, you'd update other fields too
+                : u
+        );
+        setUsers(updatedUsers);
+        addLog("INFO", `User ${user.email} updated their profile name to "${name}".`);
+        toast({ title: "Profile Updated", description: "Your profile information has been saved." });
+    };
 
     return (
         <div className="p-6">
@@ -36,26 +74,26 @@ export default function PatientSettingsPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="name">Full Name</Label>
-                                    <Input id="name" defaultValue={user?.name || "Sarah"} />
+                                    <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="email">Email</Label>
-                                    <Input id="email" type="email" defaultValue={user?.email || "sarah@example.com"} disabled />
+                                    <Input id="email" type="email" value={user?.email || ""} disabled />
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="phone">Phone Number</Label>
-                                    <Input id="phone" type="tel" placeholder="+254 712 345 678" />
+                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+254 712 345 678" />
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="dob">Date of Birth</Label>
-                                    <Input id="dob" type="date" />
+                                    <Input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
                                 </div>
                             </div>
                              <div className="space-y-1">
                                 <Label htmlFor="address">Shipping Address</Label>
-                                <Textarea id="address" placeholder="123 Health St, Nairobi, Kenya" />
+                                <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Health St, Nairobi, Kenya" />
                             </div>
-                            <Button>Update Profile</Button>
+                            <Button onClick={handleProfileUpdate}>Update Profile</Button>
                         </CardContent>
                     </Card>
 
@@ -68,7 +106,7 @@ export default function PatientSettingsPage() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="blood-type">Blood Type</Label>
-                                     <Select>
+                                     <Select value={bloodType} onValueChange={setBloodType}>
                                         <SelectTrigger id="blood-type">
                                             <SelectValue placeholder="Select..." />
                                         </SelectTrigger>
@@ -86,26 +124,26 @@ export default function PatientSettingsPage() {
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="primary-physician">Primary Physician</Label>
-                                    <Input id="primary-physician" placeholder="Dr. Jane Smith" />
+                                    <Input id="primary-physician" value={primaryPhysician} onChange={(e) => setPrimaryPhysician(e.target.value)} placeholder="Dr. Jane Smith" />
                                 </div>
                             </div>
                             <div className="space-y-1">
                                 <Label htmlFor="allergies">Known Allergies</Label>
-                                <Textarea id="allergies" placeholder="e.g., Penicillin, Peanuts, Pollen" />
+                                <Textarea id="allergies" value={allergies} onChange={(e) => setAllergies(e.target.value)} placeholder="e.g., Penicillin, Peanuts, Pollen" />
                             </div>
                              <Separator />
                             <h3 className="text-base font-medium">Emergency Contact</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="emergency-name">Contact Name</Label>
-                                    <Input id="emergency-name" placeholder="John Doe" />
+                                    <Input id="emergency-name" value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} placeholder="John Doe" />
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="emergency-phone">Contact Phone</Label>
-                                    <Input id="emergency-phone" type="tel" placeholder="+254 700 123 456" />
+                                    <Input id="emergency-phone" type="tel" value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} placeholder="+254 700 123 456" />
                                 </div>
                             </div>
-                             <Button>Update Medical Details</Button>
+                             <Button onClick={() => toast({ title: "Coming Soon!", description: "This feature is not yet implemented."})}>Update Medical Details</Button>
                         </CardContent>
                     </Card>
 
@@ -129,7 +167,7 @@ export default function PatientSettingsPage() {
                                     <Input id="confirm-password" type="password" />
                                 </div>
                             </div>
-                            <Button>Change Password</Button>
+                            <Button onClick={() => toast({ title: "Coming Soon!", description: "This feature is not yet implemented."})}>Change Password</Button>
                         </CardContent>
                     </Card>
                 </div>
