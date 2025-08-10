@@ -40,7 +40,7 @@ export type SignUpCredentials = Pick<User, 'name' | 'email' | 'password' | 'loca
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
 export type Log = {
-    id: number;
+    id: string;
     timestamp: string;
     level: LogLevel;
     message: string;
@@ -71,6 +71,7 @@ export type RefillRequest = {
     approverName?: string;
     paymentStatus: 'Unpaid' | 'Paid';
   };
+
 
 
 

@@ -2,7 +2,6 @@
 'use client';
 
 import { type Log, type LogLevel } from './types';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { Dispatch, SetStateAction, useState, useEffect } from 'react';
 import { db } from './firebase';
 import { collection, addDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
