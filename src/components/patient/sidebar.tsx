@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, RefObject } from 'react';
 import Link from 'next/link';
 import { LayoutGrid, Calendar, Mail, FileText, Pill, Phone, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -16,9 +16,15 @@ const navItems = [
     { href: '#', icon: Settings, label: 'Settings' },
 ];
 
-export default function PatientSidebar() {
+interface PatientSidebarProps {
+  mainContentRef: RefObject<HTMLDivElement>;
+}
+
+export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isFixed, setIsFixed] = useState(true);
     const timerRef = useRef<NodeJS.Timeout | null>(null);
+    const sidebarRef = useRef<HTMLElement>(null);
 
     const handleMouseEnter = () => {
         timerRef.current = setTimeout(() => {
@@ -34,20 +40,42 @@ export default function PatientSidebar() {
     };
 
     useEffect(() => {
+        const handleScroll = () => {
+            if (!sidebarRef.current || !mainContentRef.current) return;
+
+            const mainBottom = mainContentRef.current.offsetTop + mainContentRef.current.offsetHeight;
+            const sidebarHeight = sidebarRef.current.offsetHeight;
+            const scrollY = window.scrollY;
+
+            // When the bottom of the viewport hits the bottom of the main content
+            if (scrollY + window.innerHeight >= mainBottom) {
+                setIsFixed(false);
+            } else {
+                setIsFixed(true);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll(); // Initial check
+
         return () => {
+            window.removeEventListener('scroll', handleScroll);
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
             }
         };
-    }, []);
+    }, [mainContentRef]);
 
     return (
         <aside
+            ref={sidebarRef}
             className={cn(
-                'fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-start gap-1 p-2 transition-all duration-300',
+                'left-4 z-50 flex flex-col items-start gap-1 p-2 transition-all duration-300',
                 'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl',
-                isExpanded ? 'w-48' : 'w-14 items-center'
+                isExpanded ? 'w-48' : 'w-14 items-center',
+                isFixed ? 'fixed top-1/2 -translate-y-1/2' : 'absolute bottom-0'
             )}
+            style={isFixed ? {} : { top: 'auto' }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
