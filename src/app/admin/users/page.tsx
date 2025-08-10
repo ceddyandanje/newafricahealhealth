@@ -1,16 +1,17 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, PlusCircle, Search, Trash2 } from "lucide-react";
+import { Shield, PlusCircle, Search, Trash2, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useUsers, createUser, saveAllUsers, getAllUsers } from "@/lib/users";
+import { useUsers, createUserInFirestore, updateUserInFirestore, deleteUserInFirestore } from "@/lib/users";
+import { useAuth } from '@/hooks/use-auth';
 import { type User, type UserRole, type UserStatus } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
@@ -78,12 +79,13 @@ function AddUserForm({ onSave, onOpenChange }: { onSave: (data: z.infer<typeof u
     );
 }
 
-function ManageUserDialog({ user, onUpdate, onDelete, onOpenChange }: { user: User, onUpdate: (data: Partial<User>) => void, onDelete: () => void, onOpenChange: (open: boolean) => void }) {
+function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange }: { user: User, currentUser: User | null, onUpdate: (id: string, data: Partial<User>) => void, onDelete: (id: string) => void, onOpenChange: (open: boolean) => void }) {
     const [role, setRole] = useState(user.role);
     const [status, setStatus] = useState(user.status);
+    const isEditingSelf = currentUser?.id === user.id;
 
     const handleUpdate = () => {
-        onUpdate({ role, status });
+        onUpdate(user.id, { role, status });
         onOpenChange(false);
     }
     
@@ -105,7 +107,7 @@ function ManageUserDialog({ user, onUpdate, onDelete, onOpenChange }: { user: Us
             <div className="py-4 space-y-4">
                  <div>
                     <Label htmlFor="role-select">Role</Label>
-                    <Select value={role} onValueChange={(value) => setRole(value as UserRole)}>
+                    <Select value={role} onValueChange={(value) => setRole(value as UserRole)} disabled={isEditingSelf}>
                         <SelectTrigger id="role-select"><SelectValue /></SelectTrigger>
                         <SelectContent>
                              <SelectItem value="user">User</SelectItem>
@@ -115,6 +117,7 @@ function ManageUserDialog({ user, onUpdate, onDelete, onOpenChange }: { user: Us
                              <SelectItem value="doctor">Doctor</SelectItem>
                         </SelectContent>
                     </Select>
+                    {isEditingSelf && <p className="text-xs text-muted-foreground mt-1">You cannot change your own role.</p>}
                  </div>
                  <div>
                     <Label htmlFor="status-select">Account Status</Label>
@@ -130,7 +133,7 @@ function ManageUserDialog({ user, onUpdate, onDelete, onOpenChange }: { user: Us
             </div>
 
             <DialogFooter className="grid grid-cols-2 gap-2">
-                <Button variant="destructive" onClick={onDelete}><Trash2 className="mr-2 h-4 w-4"/> Delete User</Button>
+                <Button variant="destructive" onClick={() => onDelete(user.id)} disabled={isEditingSelf}><Trash2 className="mr-2 h-4 w-4"/> Delete User</Button>
                 <Button onClick={handleUpdate}>Save Changes</Button>
             </DialogFooter>
         </DialogContent>
@@ -139,58 +142,60 @@ function ManageUserDialog({ user, onUpdate, onDelete, onOpenChange }: { user: Us
 
 
 export default function UsersPage() {
-    const [users, setUsers] = useUsers();
+    const { users, setUsers, isLoading } = useUsers();
+    const { user: currentUser } = useAuth();
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
     const { toast } = useToast();
 
-    const handleAddUser = (userData: z.infer<typeof userSchema>) => {
+    const handleAddUser = async (userData: z.infer<typeof userSchema>) => {
         if (users.some(u => u.email === userData.email)) {
             toast({ variant: 'destructive', title: "Creation Failed", description: "A user with this email already exists."});
             return;
         }
-        const newUser = createUser(userData);
-        // The useUsers hook will update the state automatically due to the storage event
-        addLog('INFO', `New user created: ${newUser.name} (${newUser.email}) with role ${newUser.role}.`);
-        addNotification({ type: 'new_appointment', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-        toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
+        const newUser = await createUserInFirestore(userData);
+        if (newUser) {
+            setUsers(prev => [...prev, newUser]);
+            addLog('INFO', `New user created: ${newUser.name} (${newUser.email}) with role ${newUser.role}.`);
+            addNotification({ type: 'new_appointment', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
+            toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
+        } else {
+            toast({ variant: 'destructive', title: "Creation Failed", description: "Could not create user in Firestore."});
+        }
     };
     
-    const handleUpdateUser = (updates: Partial<User>) => {
-        if (!selectedUser) return;
-        setUsers(prevUsers => prevUsers.map(u => u.id === selectedUser.id ? { ...u, ...updates } : u));
-        
-        let updateMessage = `User ${selectedUser.name}'s details were updated.`;
-        if (updates.role && updates.role !== selectedUser.role) {
-            updateMessage += ` Role changed to ${updates.role}.`;
+    const handleUpdateUser = async (id: string, updates: Partial<User>) => {
+        const success = await updateUserInFirestore(id, updates);
+        if (success) {
+            setUsers(prevUsers => prevUsers.map(u => u.id === id ? { ...u, ...updates } : u));
+            const userToUpdate = users.find(u => u.id === id);
+            addLog('INFO', `User ${userToUpdate?.name}'s details were updated.`);
+            addNotification({ type: 'system_update', title: 'User Updated', description: `Details for ${userToUpdate?.name} have been updated.`});
+            toast({ title: "User Updated", description: `Details for ${userToUpdate?.name} have been saved.`});
+        } else {
+            toast({ variant: 'destructive', title: "Update Failed", description: "Could not update user details." });
         }
-        if (updates.status && updates.status !== selectedUser.status) {
-            updateMessage += ` Status changed to ${updates.status}.`;
-        }
-
-        addLog('INFO', updateMessage);
-        addNotification({ type: 'system_update', title: 'User Updated', description: `Details for ${selectedUser.name} have been updated.`});
-        toast({ title: "User Updated", description: `Details for ${selectedUser.name} have been saved.`});
         setSelectedUser(undefined);
     }
     
-    const handleDeleteUser = () => {
-        if (!selectedUser) return;
+    const handleDeleteUser = async (id: string) => {
+        const userToDelete = users.find(u => u.id === id);
+        if (!userToDelete) return;
 
-        if (users.length <= 1) {
-            toast({ variant: 'destructive', title: "Action Forbidden", description: "You cannot delete the last user."});
-            return;
+        const success = await deleteUserInFirestore(id);
+        if (success) {
+            setUsers(prevUsers => prevUsers.filter(u => u.id !== id));
+            addLog('WARN', `User ${userToDelete.name} (${userToDelete.email}) was deleted.`);
+            addNotification({ type: 'system_update', title: 'User Deleted', description: `The account for ${userToDelete.name} has been removed.`});
+            toast({ title: "User Deleted", description: `Account for ${userToDelete.name} has been removed.`});
+        } else {
+             toast({ variant: 'destructive', title: "Deletion Failed", description: "Could not delete user." });
         }
-        const userToDelete = selectedUser;
-        setUsers(prevUsers => prevUsers.filter(u => u.id !== userToDelete.id));
-
-        addLog('WARN', `User ${userToDelete.name} (${userToDelete.email}) was deleted.`);
-        addNotification({ type: 'system_update', title: 'User Deleted', description: `The account for ${userToDelete.name} has been removed.`});
-        toast({ title: "User Deleted", description: `Account for ${userToDelete.name} has been removed.`});
         setSelectedUser(undefined);
     };
 
-    const formatDate = (dateString: string) => {
+    const formatDate = (dateString: string | undefined) => {
+        if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'long',
@@ -231,6 +236,11 @@ export default function UsersPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
+                    {isLoading ? (
+                         <div className="flex items-center justify-center h-48">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                         </div>
+                    ) : (
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -268,11 +278,12 @@ export default function UsersPage() {
                             ))}
                         </TableBody>
                     </Table>
+                    )}
                 </CardContent>
             </Card>
             
             <Dialog open={!!selectedUser} onOpenChange={(isOpen) => !isOpen && setSelectedUser(undefined)}>
-                {selectedUser && <ManageUserDialog user={selectedUser} onUpdate={handleUpdateUser} onDelete={handleDeleteUser} onOpenChange={(isOpen) => !isOpen && setSelectedUser(undefined)} />}
+                {selectedUser && <ManageUserDialog user={selectedUser} currentUser={currentUser} onUpdate={handleUpdateUser} onDelete={handleDeleteUser} onOpenChange={(isOpen) => !isOpen && setSelectedUser(undefined)} />}
             </Dialog>
         </div>
     );
