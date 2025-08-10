@@ -44,9 +44,9 @@ export default function PatientSidebar() {
     return (
         <aside
             className={cn(
-                'fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-start gap-1 py-3 rounded-full transition-all duration-300',
-                'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10',
-                isExpanded ? 'w-48 px-3' : 'w-14 items-center px-1.5'
+                'fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-start gap-1 p-2 transition-all duration-300',
+                'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl',
+                isExpanded ? 'w-48' : 'w-14 items-center'
             )}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -56,7 +56,7 @@ export default function PatientSidebar() {
                     key={item.label}
                     href={item.href}
                     className={cn(
-                        'h-10 flex items-center justify-start rounded-full transition-colors w-full',
+                        'h-10 flex items-center justify-start rounded-lg transition-colors w-full',
                         'hover:bg-black/10 dark:hover:bg-white/10',
                         index === 0 && 'bg-black/10 dark:bg-white/20'
                     )}
