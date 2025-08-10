@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, PlusCircle, Search, Trash2, Loader2 } from "lucide-react";
+import { Shield, PlusCircle, Search, Trash2, Loader2, DollarSign, Flag, ShoppingBag, CalendarIcon, BarChart } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useUsers, createUserInFirestore, updateUserInFirestore, deleteUserInFirestore } from "@/lib/users";
@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
+import { Separator } from '@/components/ui/separator';
 
 const userSchema = z.object({
     name: z.string().min(2, 'Name is required'),
@@ -79,6 +80,18 @@ function AddUserForm({ onSave, onOpenChange }: { onSave: (data: z.infer<typeof u
     );
 }
 
+function StatCard({ icon: Icon, label, value }: { icon: React.ElementType, label: string, value: string | number }) {
+    return (
+        <div className="flex items-center gap-4 p-3 bg-muted/50 rounded-lg">
+            <Icon className="h-6 w-6 text-muted-foreground" />
+            <div>
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="font-semibold">{value}</p>
+            </div>
+        </div>
+    );
+}
+
 function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange }: { user: User, currentUser: User | null, onUpdate: (id: string, data: Partial<User>) => void, onDelete: (id: string) => void, onOpenChange: (open: boolean) => void }) {
     const [role, setRole] = useState(user.role);
     const [status, setStatus] = useState(user.status);
@@ -91,53 +104,70 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
     }
     
     return (
-        <DialogContent>
-            <DialogHeader>
-                 <div className="flex items-center gap-4">
-                    <Avatar className="h-16 w-16">
-                        <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
-                        <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <DialogTitle className="text-2xl">{user.name}</DialogTitle>
-                        <DialogDescription>{user.email}</DialogDescription>
+        <DialogContent className="max-w-4xl">
+           <div className="grid md:grid-cols-2 gap-8">
+                {/* Left Side */}
+                <div className="flex flex-col">
+                     <DialogHeader className="mb-6">
+                         <div className="flex items-center gap-4">
+                            <Avatar className="h-16 w-16">
+                                <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
+                                <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <DialogTitle className="text-2xl">{user.name}</DialogTitle>
+                                <DialogDescription>{user.email}</DialogDescription>
+                            </div>
+                        </div>
+                    </DialogHeader>
+                    
+                    <div className="space-y-4 flex-grow">
+                        <div>
+                            <Label htmlFor="role-select">Role</Label>
+                            <Select value={role} onValueChange={(value) => setRole(value as UserRole)} disabled={isEditingSelf}>
+                                <SelectTrigger id="role-select"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="user">User</SelectItem>
+                                    <SelectItem value="admin">Admin</SelectItem>
+                                    <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
+                                    <SelectItem value="emergency-services">Emergency Services</SelectItem>
+                                    <SelectItem value="doctor">Doctor</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {isEditingSelf && <p className="text-xs text-muted-foreground mt-1">You cannot change your own role.</p>}
+                        </div>
+                        <div>
+                            <Label htmlFor="status-select">Account Status</Label>
+                            <Select value={status} onValueChange={(value) => setStatus(value as UserStatus)} disabled={isEditingAdmin}>
+                                <SelectTrigger id="status-select"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="on-hold">On Hold</SelectItem>
+                                    <SelectItem value="inactive">Inactive</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {isEditingAdmin && <p className="text-xs text-muted-foreground mt-1">An admin's status cannot be changed.</p>}
+                        </div>
+                    </div>
+
+                    <DialogFooter className="mt-8 grid grid-cols-2 gap-2">
+                        <Button variant="destructive" onClick={() => onDelete(user.id)} disabled={isEditingSelf}><Trash2 className="mr-2 h-4 w-4"/> Delete User</Button>
+                        <Button onClick={handleUpdate}>Save Changes</Button>
+                    </DialogFooter>
+                </div>
+
+                {/* Right Side */}
+                <div className="bg-muted/30 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4">User Snapshot</h3>
+                    <div className="space-y-3">
+                       <StatCard icon={CalendarIcon} label="Date Joined" value={new Date(user.createdAt).toLocaleDateString()} />
+                       <StatCard icon={DollarSign} label="Total Spent" value="$0.00" />
+                       <StatCard icon={ShoppingBag} label="Last Order" value="N/A" />
+                       <StatCard icon={Flag} label="Open Flags" value="0" />
+                       <Button variant="link" className="p-0 h-auto">View all activity</Button>
                     </div>
                 </div>
-            </DialogHeader>
-
-            <div className="py-4 space-y-4">
-                 <div>
-                    <Label htmlFor="role-select">Role</Label>
-                    <Select value={role} onValueChange={(value) => setRole(value as UserRole)} disabled={isEditingSelf}>
-                        <SelectTrigger id="role-select"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                             <SelectItem value="user">User</SelectItem>
-                             <SelectItem value="admin">Admin</SelectItem>
-                             <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
-                             <SelectItem value="emergency-services">Emergency Services</SelectItem>
-                             <SelectItem value="doctor">Doctor</SelectItem>
-                        </SelectContent>
-                    </Select>
-                    {isEditingSelf && <p className="text-xs text-muted-foreground mt-1">You cannot change your own role.</p>}
-                 </div>
-                 <div>
-                    <Label htmlFor="status-select">Account Status</Label>
-                    <Select value={status} onValueChange={(value) => setStatus(value as UserStatus)} disabled={isEditingAdmin}>
-                        <SelectTrigger id="status-select"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                             <SelectItem value="active">Active</SelectItem>
-                             <SelectItem value="on-hold">On Hold</SelectItem>
-                             <SelectItem value="inactive">Inactive</SelectItem>
-                        </SelectContent>
-                    </Select>
-                     {isEditingAdmin && <p className="text-xs text-muted-foreground mt-1">An admin's status cannot be changed.</p>}
-                 </div>
-            </div>
-
-            <DialogFooter className="grid grid-cols-2 gap-2">
-                <Button variant="destructive" onClick={() => onDelete(user.id)} disabled={isEditingSelf}><Trash2 className="mr-2 h-4 w-4"/> Delete User</Button>
-                <Button onClick={handleUpdate}>Save Changes</Button>
-            </DialogFooter>
+           </div>
         </DialogContent>
     )
 }
