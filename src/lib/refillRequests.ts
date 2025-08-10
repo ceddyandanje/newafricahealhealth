@@ -2,28 +2,33 @@
 'use client';
 
 import { type RefillRequest } from './types';
-import initialRequests from './data/refillRequests.json';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { db } from './firebase';
+import { useState, useEffect } from 'react';
 
-// This is now a hook that provides live-synced requests
+
+// This is now a hook that provides live-synced requests from Firestore
 export const useRequests = () => {
-    return useLocalStorage<RefillRequest[]>('app-refill-requests', initialRequests as RefillRequest[]);
+    const [requests, setRequests] = useState<RefillRequest[]>([]);
+
+    useEffect(() => {
+        const q = query(collection(db, "refillRequests"), orderBy("requestDate", "desc"));
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            const requestsData: RefillRequest[] = [];
+            querySnapshot.forEach((doc) => {
+                requestsData.push({ id: doc.id, ...doc.data() } as RefillRequest);
+            });
+            setRequests(requestsData);
+        });
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, []);
+
+    return [requests, setRequests] as const;
 };
 
-// The functions below are for components that cannot use hooks
-const getRequestsSnapshot = (): RefillRequest[] => {
-    if (typeof window === 'undefined') {
-        return initialRequests as RefillRequest[];
-    }
-    const stored = localStorage.getItem('app-refill-requests');
-    return stored ? JSON.parse(stored) : (initialRequests as RefillRequest[]);
-}
-
-const saveRequestsSnapshot = (requests: RefillRequest[]) => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem('app-refill-requests', JSON.stringify(requests));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'app-refill-requests' }));
-}
 
 type NewRequestPayload = {
     patientId: string;
@@ -32,18 +37,19 @@ type NewRequestPayload = {
     medicationName: string;
 }
 
-export const addRequest = (payload: NewRequestPayload) => {
-    const requests = getRequestsSnapshot();
-    const newRequest: RefillRequest = {
-        id: `REQ-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        patientId: payload.patientId,
-        patientName: payload.patientName,
-        prescriptionId: payload.prescriptionId,
-        medicationName: payload.medicationName,
-        requestDate: new Date().toISOString(),
-        status: 'Pending',
-        paymentStatus: 'Unpaid'
-    };
-    const updatedRequests = [newRequest, ...requests];
-    saveRequestsSnapshot(updatedRequests);
+export const addRequest = async (payload: NewRequestPayload) => {
+    try {
+        const newRequest: Omit<RefillRequest, 'id'> = {
+            patientId: payload.patientId,
+            patientName: payload.patientName,
+            prescriptionId: payload.prescriptionId,
+            medicationName: payload.medicationName,
+            requestDate: new Date().toISOString(),
+            status: 'Pending',
+            paymentStatus: 'Unpaid'
+        };
+        await addDoc(collection(db, "refillRequests"), newRequest);
+    } catch (error) {
+        console.error("Error adding refill request to Firestore: ", error);
+    }
 };

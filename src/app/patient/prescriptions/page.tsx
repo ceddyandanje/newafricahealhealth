@@ -46,24 +46,26 @@ export default function PatientPrescriptionsPage() {
     const { toast } = useToast();
     const { user } = useAuth();
 
-    const handleRequestRefill = (rxId: string) => {
+    const handleRequestRefill = async (rxId: string) => {
         setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, isRequesting: true } : rx));
 
-        // Simulate API call
-        setTimeout(() => {
-            const prescription = prescriptions.find(rx => rx.id === rxId);
-            if (!prescription || !user) return;
+        const prescription = prescriptions.find(rx => rx.id === rxId);
+        if (!prescription || !user) {
+             setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, isRequesting: false } : rx));
+            return;
+        };
 
-            // Update local UI state
-            setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, status: 'Refill Requested', isRequesting: false } : rx));
-            
-            // Create a structured request
-            addRequest({
+        try {
+            // Create a structured request in Firestore
+            await addRequest({
                 patientId: user.id,
                 patientName: user.name,
                 prescriptionId: prescription.id,
                 medicationName: prescription.name,
             });
+
+            // Update local UI state
+            setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, status: 'Refill Requested', isRequesting: false } : rx));
 
             // Show confirmation toast
             toast({
@@ -78,7 +80,16 @@ export default function PatientPrescriptionsPage() {
                 title: 'Refill Request',
                 description: `A new refill request from ${user.name} is pending approval.`,
             });
-        }, 1500);
+
+        } catch (error) {
+             console.error("Failed to request refill:", error);
+             toast({
+                variant: 'destructive',
+                title: "Request Failed",
+                description: "There was a problem submitting your request. Please try again.",
+            });
+             setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, isRequesting: false } : rx));
+        }
     }
 
     return (
