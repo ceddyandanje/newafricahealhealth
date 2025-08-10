@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 
+// This is still placeholder data. In a real app, you'd fetch this from a CMS or database.
 const blogPosts = [
     {
         slug: 'benefits-of-moringa',
@@ -57,7 +58,7 @@ export default function WellnessBlogPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogPosts.map((post) => (
-                <Card key={post.slug} className="glass-card flex flex-col group overflow-hidden">
+                <Card key={post.slug} className="glassmorphic flex flex-col group overflow-hidden">
                      <Link href={`/wellness-blog/${post.slug}`} className="flex flex-col h-full">
                         <div className="relative w-full aspect-video overflow-hidden">
                             <Image
@@ -86,4 +87,3 @@ export default function WellnessBlogPage() {
       </div>
     );
   }
-  
