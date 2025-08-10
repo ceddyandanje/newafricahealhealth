@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import { User } from './types';
 import initialUsers from './data/users.json';
 import type { SignUpCredentials } from './types';
