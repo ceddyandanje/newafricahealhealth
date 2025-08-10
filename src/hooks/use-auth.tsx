@@ -15,6 +15,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 
 import { type User, type LoginCredentials, type SignUpCredentials } from "@/lib/types";
 import { useToast } from "./use-toast";
+import { createUserInFirestore } from "@/lib/users";
 
 interface AuthContextType {
   user: User | null;
@@ -109,26 +110,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password!);
         const fbUser = userCredential.user;
-        const role = credentials.email === 'rootaccessdenied4312@gmail.com' ? 'admin' : 'user';
-
-        const newUser: User = {
-            id: fbUser.uid,
-            name: credentials.name,
-            email: credentials.email,
-            role: role,
-            status: 'active',
-            createdAt: new Date().toISOString(),
-            age: credentials.age,
-            phone: credentials.phone,
-            location: credentials.location,
-            avatarUrl: ''
-        };
-
-        await setDoc(doc(db, "users", fbUser.uid), newUser);
+        const newUser = await createUserInFirestore(credentials, fbUser.uid);
         
-        toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
-        handleRedirect(newUser);
-        return true;
+        if (newUser) {
+          toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
+          handleRedirect(newUser);
+          return true;
+        } else {
+          throw new Error("Could not create user document in Firestore.");
+        }
+
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         if (error.code === 'auth/email-already-in-use') {

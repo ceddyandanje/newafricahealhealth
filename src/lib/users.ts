@@ -5,13 +5,12 @@ import { useState, useEffect } from 'react';
 import { User } from './types';
 import initialUsers from './data/users.json';
 import type { SignUpCredentials } from './types';
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { db } from './firebase';
-import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 
-// Custom hook to manage users state with persistence and cross-tab syncing.
+// Custom hook to manage users state. It fetches from Firestore on mount.
 export const useUsers = () => {
-    const [users, setUsers] = useLocalStorage<User[]>('app-users-cache', []);
+    const [users, setUsers] = useState<User[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -22,10 +21,11 @@ export const useUsers = () => {
             setIsLoading(false);
         };
         fetchUsers();
-    }, [setUsers]);
+    }, []); // Empty dependency array ensures this runs only once on mount
 
     return { users, setUsers, isLoading };
 };
+
 
 // --- Firestore Interaction Functions ---
 
@@ -55,7 +55,9 @@ export const createUserInFirestore = async (details: SignUpCredentials, uid?: st
             status: 'active',
             createdAt: new Date().toISOString(),
             avatarUrl: '',
-            ...details
+            age: details.age,
+            phone: details.phone,
+            location: details.location
         };
         await setDoc(doc(db, "users", uid), newUser);
         return newUser;
@@ -89,7 +91,6 @@ export const deleteUserInFirestore = async (id: string): Promise<boolean> => {
 };
 
 // Legacy functions using localStorage (can be phased out or used for caching)
-
 export const getAllUsers = (): User[] => {
   if (typeof window === 'undefined') {
     return initialUsers as User[];
