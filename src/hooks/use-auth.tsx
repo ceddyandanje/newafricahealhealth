@@ -24,27 +24,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userId, setUserId] = useLocalStorage<string | null>("userId", null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [allUsers, setAllUsers] = useState<User[]>([]);
-  const router = useRouter();
-  const { toast } = useToast();
   
-  useEffect(() => {
-    setAllUsers(getAllUsers());
-  }, []);
-
-
   useEffect(() => {
     setIsLoading(true);
     if (userId) {
+        const allUsers = getAllUsers();
         const loggedInUser = findUserById(userId, allUsers);
         setUser(loggedInUser || null);
     } else {
         setUser(null);
     }
     setIsLoading(false);
-  }, [userId, allUsers]);
+  }, [userId]);
+
+  const router = useRouter();
+  const { toast } = useToast();
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
+    const allUsers = getAllUsers();
     const foundUser = allUsers.find(u => u.email === credentials.email);
     if (foundUser && foundUser.password === credentials.password) {
       setUserId(foundUser.id);
@@ -61,13 +58,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signup = async (credentials: SignUpCredentials): Promise<boolean> => {
+    const allUsers = getAllUsers();
     if (allUsers.some(u => u.email === credentials.email)) {
         toast({ variant: 'destructive', title: "Signup Failed", description: "An account with this email already exists." });
         return false;
     }
 
     const newUser = createUser(credentials);
-    setAllUsers(prev => [...prev, newUser]); // Update local state
     setUserId(newUser.id);
     toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
     router.push("/patient/dashboard");
@@ -76,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(() => {
     setUserId(null);
+    setUser(null);
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.push("/login");
   }, [router, toast, setUserId]);
