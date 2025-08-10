@@ -37,20 +37,24 @@ export default function PatientSettingsPage() {
     const [emergencyPhone, setEmergencyPhone] = useState('');
 
     useEffect(() => {
-        // You would typically fetch and set this data from your backend
-        // For this prototype, we'll just pre-fill the name
-        setName(user?.name || '');
+        // When the user context loads, update the name in our local state
+        if (user) {
+            setName(user.name);
+        }
     }, [user]);
 
     const handleProfileUpdate = () => {
         if (!user) return;
         
-        const updatedUsers = users.map(u => 
-            u.id === user.id 
-                ? { ...u, name } // In a real app, you'd update other fields too
-                : u
+        // This is the correct way to update the user list
+        setUsers(prevUsers => 
+            prevUsers.map(u => 
+                u.id === user.id 
+                    ? { ...u, name: name } // Only update name for this example
+                    : u
+            )
         );
-        setUsers(updatedUsers);
+
         addLog("INFO", `User ${user.email} updated their profile name to "${name}".`);
         toast({ title: "Profile Updated", description: "Your profile information has been saved." });
     };
@@ -192,7 +196,7 @@ export default function PatientSettingsPage() {
                                  <Label htmlFor="sms-notifications" className="flex flex-col">
                                     <span>SMS Reminders</span>
                                     <span className="text-xs text-muted-foreground">For appointments and refills.</span>
-                                </Label>
+                                 </Label>
                                 <Switch id="sms-notifications" defaultChecked />
                             </div>
                             <Separator />
@@ -200,7 +204,7 @@ export default function PatientSettingsPage() {
                                  <Label htmlFor="push-notifications" className="flex flex-col">
                                     <span>Promotional Updates</span>
                                      <span className="text-xs text-muted-foreground">For new products and offers.</span>
-                                </Label>
+                                 </Label>
                                 <Switch id="push-notifications" />
                             </div>
                         </CardContent>
