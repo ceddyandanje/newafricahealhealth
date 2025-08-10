@@ -43,15 +43,21 @@ export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) 
         const handleScroll = () => {
             if (!sidebarRef.current || !mainContentRef.current) return;
 
-            const mainBottom = mainContentRef.current.offsetTop + mainContentRef.current.offsetHeight;
-            const sidebarHeight = sidebarRef.current.offsetHeight;
             const scrollY = window.scrollY;
+            const headerHeight = 64; // Approx height of the header
+            const mainTop = mainContentRef.current.offsetTop;
+            const mainHeight = mainContentRef.current.offsetHeight;
+            const mainBottom = mainTop + mainHeight;
+            const sidebarHeight = sidebarRef.current.offsetHeight;
+            const viewportHeight = window.innerHeight;
 
-            // When the bottom of the viewport hits the bottom of the main content
-            if (scrollY + window.innerHeight >= mainBottom) {
-                setIsFixed(false);
-            } else {
+            const isSidebarBelowHeader = scrollY > mainTop + sidebarHeight / 2 - viewportHeight / 2;
+            const isSidebarAboveFooter = scrollY + viewportHeight < mainBottom + sidebarHeight / 2 - viewportHeight / 2;
+
+            if (isSidebarBelowHeader && isSidebarAboveFooter) {
                 setIsFixed(true);
+            } else {
+                setIsFixed(false);
             }
         };
 
@@ -73,9 +79,12 @@ export default function PatientSidebar({ mainContentRef }: PatientSidebarProps) 
                 'left-4 z-50 flex flex-col items-start gap-1 p-2 transition-all duration-300',
                 'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl',
                 isExpanded ? 'w-48' : 'w-14 items-center',
-                isFixed ? 'fixed top-1/2 -translate-y-1/2' : 'absolute bottom-0'
+                isFixed ? 'fixed top-1/2 -translate-y-1/2' : 'absolute'
             )}
-            style={isFixed ? {} : { top: 'auto' }}
+            style={isFixed ? {} : { 
+                top: window.scrollY > mainContentRef.current!.offsetTop ? 'auto' : `${mainContentRef.current!.offsetTop}px`, 
+                bottom: window.scrollY > mainContentRef.current!.offsetTop ? '0' : 'auto'
+            }}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
