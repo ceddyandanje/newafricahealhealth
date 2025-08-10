@@ -83,9 +83,10 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
     const [role, setRole] = useState(user.role);
     const [status, setStatus] = useState(user.status);
     const isEditingSelf = currentUser?.id === user.id;
+    const isEditingAdmin = user.role === 'admin';
 
     const handleUpdate = () => {
-        onUpdate(user.id, { role, status });
+        onUpdate(user.id, { role, status: isEditingAdmin ? 'active' : status });
         onOpenChange(false);
     }
     
@@ -121,7 +122,7 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
                  </div>
                  <div>
                     <Label htmlFor="status-select">Account Status</Label>
-                    <Select value={status} onValueChange={(value) => setStatus(value as UserStatus)}>
+                    <Select value={status} onValueChange={(value) => setStatus(value as UserStatus)} disabled={isEditingAdmin}>
                         <SelectTrigger id="status-select"><SelectValue /></SelectTrigger>
                         <SelectContent>
                              <SelectItem value="active">Active</SelectItem>
@@ -129,6 +130,7 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
                              <SelectItem value="inactive">Inactive</SelectItem>
                         </SelectContent>
                     </Select>
+                     {isEditingAdmin && <p className="text-xs text-muted-foreground mt-1">An admin's status cannot be changed.</p>}
                  </div>
             </div>
 
