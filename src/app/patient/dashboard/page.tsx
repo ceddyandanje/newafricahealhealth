@@ -1,32 +1,18 @@
 
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
 import {
-  LayoutDashboard,
-  Calendar,
-  Mail,
-  FileText,
-  User,
-  Settings,
-  Bell,
-  MessageSquare,
-  HelpCircle,
   Pill,
   Droplets,
   Video,
   ChevronRight,
-  MoreVertical,
   Flag,
 } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, Line, LineChart, ResponsiveContainer } from "recharts"
+import { Line, LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell } from "recharts"
 import { cn } from '@/lib/utils';
-import './patient.css';
 
 const dailyGlanceItems = [
     { icon: Pill, title: "Take Metformin", time: "8:00 AM", status: "Done" },
@@ -51,13 +37,12 @@ const healthTrendData = [
 
 export default function PatientDashboardPage() {
     return (
-        <div className="bg-muted/40 p-6">
+        <div className="bg-muted/40 p-6 min-h-screen">
             <header className="py-6">
                 <h1 className="text-3xl font-bold">Good morning, Sarah</h1>
                 <p className="text-muted-foreground">Here’s what your day looks like.</p>
             </header>
 
-            {/* Your Day at a Glance */}
             <section>
                 <h2 className="text-xl font-semibold mb-4">Your day at a glance</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -84,32 +69,27 @@ export default function PatientDashboardPage() {
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-                {/* Health Trends */}
                 <Card className="lg:col-span-3 bg-background">
                     <CardHeader>
                         <CardTitle>Health Trends</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <ChartContainer config={{}} className="h-[250px] w-full">
-                            <LineChart data={healthTrendData}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="day" axisLine={false} tickLine={false} />
-                                <YAxis axisLine={false} tickLine={false} />
+                            <LineChartComponent data={healthTrendData}>
                                 <ChartTooltip content={<ChartTooltipContent />} />
                                 <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} />
-                            </LineChart>
+                            </LineChartComponent>
                         </ChartContainer>
                     </CardContent>
                 </Card>
 
-                {/* Subscription */}
                 <Card className="lg:col-span-2 bg-background flex flex-col">
                     <CardHeader>
                         <CardTitle>Your Subscription</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow flex items-center justify-center">
                          <ChartContainer config={{}} className="h-[200px] w-full">
-                            <PieChart>
+                            <PieChartComponent>
                             <Pie
                                 data={subscriptionData}
                                 cx="50%"
@@ -123,7 +103,7 @@ export default function PatientDashboardPage() {
                                 ))}
                             </Pie>
                             <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                            </PieChart>
+                            </PieChartComponent>
                         </ChartContainer>
                     </CardContent>
                     <div className="flex justify-center gap-4 p-4 text-sm">
@@ -139,7 +119,6 @@ export default function PatientDashboardPage() {
                 </Card>
             </div>
 
-            {/* Care Team */}
             <section className="mt-6">
                 <Card className="bg-background">
                     <CardHeader className="flex flex-row items-center justify-between">
