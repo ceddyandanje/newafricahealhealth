@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { 
-    LayoutGrid, Calendar, Mail, FileText, Pill, Phone, Settings, Search, CheckCircle, Video, Users, MapPin, ChevronDown 
+    LayoutGrid, Calendar, Mail, FileText, Pill, Phone, Settings, Search, CheckCircle, Video, Users, MapPin, ChevronDown, LifeBuoy 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
@@ -50,7 +50,7 @@ export default function PatientSidebar() {
     return (
         <aside
             className={cn(
-                'fixed left-4 top-4 bottom-4 z-50 flex flex-col items-start transition-all duration-300',
+                'fixed left-4 top-20 bottom-4 z-50 flex flex-col items-start transition-all duration-300',
                 'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 rounded-2xl',
                 isExpanded ? 'w-72 p-4' : 'w-14 p-2 items-center',
             )}
@@ -130,7 +130,10 @@ export default function PatientSidebar() {
                         </Link>
                     ))}
                     <div className="my-2 h-px w-full bg-border" />
-                    <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
+                    <Link href={'/patient/contact'} title="Find Care" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                        <LifeBuoy className="h-5 w-5" />
+                    </Link>
+                     <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
                         <Settings className="h-5 w-5" />
                     </Link>
                 </>
