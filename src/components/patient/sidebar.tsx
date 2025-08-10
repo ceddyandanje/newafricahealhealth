@@ -114,7 +114,7 @@ export default function PatientSidebar() {
                 </div>
             ) : (
                 // Collapsed View
-                <>
+                <div className="flex flex-col gap-2">
                     {mainNavItems.map((item) => (
                         <Link
                             key={item.label}
@@ -129,14 +129,14 @@ export default function PatientSidebar() {
                             <item.icon className="h-5 w-5" />
                         </Link>
                     ))}
-                    <div className="my-2 h-px w-full bg-border" />
+                    <div className="my-1 h-px w-full bg-border" />
                     <Link href={'/patient/contact'} title="Find Care" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
                         <LifeBuoy className="h-5 w-5" />
                     </Link>
                      <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
                         <Settings className="h-5 w-5" />
                     </Link>
-                </>
+                </div>
             )}
         </aside>
     );
