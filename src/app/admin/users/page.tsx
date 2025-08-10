@@ -34,6 +34,7 @@ function UserForm({ user, onSave, onOpenChange }: { user?: User, onSave: (data: 
     const handleSubmit = (values: z.infer<typeof userSchema>) => {
         onSave({ ...values, id: user?.id || Date.now().toString() });
         onOpenChange(false);
+        form.reset();
     };
 
     return (
