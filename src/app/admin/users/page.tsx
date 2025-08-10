@@ -200,7 +200,7 @@ export default function UsersPage() {
         if (newUser) {
             setUsers(prev => [...prev, newUser]);
             addLog('INFO', `New user created: ${newUser.name} (${newUser.email}) with role ${newUser.role}.`);
-            addNotification({ type: 'new_appointment', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
+            addNotification({ type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
             toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
         } else {
             toast({ variant: 'destructive', title: "Creation Failed", description: "Could not create user in Firestore."});
