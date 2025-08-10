@@ -10,6 +10,7 @@ import {
   CalendarPlus,
   UploadCloud,
   MessageSquare,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,25 +19,16 @@ import { Line, LineChart as LineChartComponent, Pie, PieChart as PieChartCompone
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useEvents, type DayEvent } from '@/lib/events';
 import Link from 'next/link';
-
+import { useHealthMetrics, addHealthMetric } from '@/lib/healthMetrics';
+import { format, subDays } from 'date-fns';
 
 const subscriptionData = [
   { name: 'Active', value: 3, fill: 'hsl(var(--primary))' },
   { name: 'Paused', value: 1, fill: 'hsl(var(--muted))' },
-];
-
-const healthTrendData = [
-  { day: 'Mon', value: 140 },
-  { day: 'Tue', value: 135 },
-  { day: 'Wed', value: 150 },
-  { day: 'Thu', value: 142 },
-  { day: 'Fri', value: 160 },
-  { day: 'Sat', value: 155 },
-  { day: 'Sun', value: 148 },
 ];
 
 const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
@@ -100,6 +92,7 @@ function DailyGlance({ events }: { events: DayEvent[] }) {
 export default function PatientDashboardPage() {
     const { user, isLoading: isAuthLoading } = useAuth();
     const { events, isLoading: isEventsLoading } = useEvents(user?.id);
+    const { metrics, isLoading: isMetricsLoading } = useHealthMetrics(user?.id);
     const router = useRouter();
     
     useEffect(() => {
@@ -108,7 +101,31 @@ export default function PatientDashboardPage() {
         }
     }, [user, isAuthLoading, router]);
 
-    const isLoading = isAuthLoading || isEventsLoading;
+    const healthTrendData = useMemo(() => {
+        const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
+        
+        return last7Days.map(day => {
+            const dayMetrics = metrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'));
+            const avgValue = dayMetrics.length > 0 ? dayMetrics.reduce((sum, m) => sum + m.value, 0) / dayMetrics.length : 0;
+            
+            return {
+                date: format(day, 'MMM d'),
+                value: avgValue > 0 ? avgValue : null, // Use null for days with no data to create gaps in the chart
+            };
+        });
+    }, [metrics]);
+
+    const handleAddMetric = async () => {
+        if (!user) return;
+        const randomValue = Math.floor(Math.random() * (180 - 80 + 1)) + 80; // Random blood sugar between 80-180
+        await addHealthMetric(user.id, {
+            type: 'bloodSugar',
+            value: randomValue,
+            timestamp: new Date().toISOString()
+        });
+    };
+
+    const isLoading = isAuthLoading || isEventsLoading || isMetricsLoading;
 
     if (isLoading || !user) {
         return (
@@ -132,16 +149,29 @@ export default function PatientDashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
                 <Card className="lg:col-span-3 bg-background">
-                    <CardHeader>
-                        <CardTitle>Health Trends</CardTitle>
+                    <CardHeader className="flex flex-row justify-between items-center">
+                        <CardTitle>Health Trends (Blood Sugar)</CardTitle>
+                        <Button size="sm" onClick={handleAddMetric}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
                     </CardHeader>
                     <CardContent>
+                        {isMetricsLoading ? <Loader2 className="animate-spin" /> :
                         <ChartContainer config={{}} className="h-[250px] w-full">
-                            <LineChartComponent data={healthTrendData}>
-                                <ChartTooltip content={<ChartTooltipContent />} />
-                                <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} />
+                            <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <ChartTooltip 
+                                    content={<ChartTooltipContent indicator="dot" />} 
+                                    formatter={(value) => value === null ? 'No Data' : value}
+                                />
+                                <Line 
+                                    type="monotone" 
+                                    dataKey="value" 
+                                    stroke="hsl(var(--primary))" 
+                                    strokeWidth={2} 
+                                    dot={{ r: 4, fill: 'hsl(var(--primary))' }} 
+                                    connectNulls={false} // This creates gaps for days with no data
+                                />
                             </LineChartComponent>
                         </ChartContainer>
+                        }
                     </CardContent>
                 </Card>
 

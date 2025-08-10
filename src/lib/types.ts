@@ -107,3 +107,9 @@ export type RoadmapTask = {
 };
 
 
+export type HealthMetric = {
+    id: string;
+    type: 'bloodSugar' | 'bloodPressure' | 'weight'; // Example types
+    value: number;
+    timestamp: string; // ISO 8601 string
+};
