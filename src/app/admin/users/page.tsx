@@ -24,6 +24,8 @@ import { cn } from '@/lib/utils';
 import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
 import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 
 const userSchema = z.object({
     name: z.string().min(2, 'Name is required'),
@@ -164,7 +166,16 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
                        <StatCard icon={DollarSign} label="Total Spent" value="$0.00" />
                        <StatCard icon={ShoppingBag} label="Last Order" value="N/A" />
                        <StatCard icon={Flag} label="Open Flags" value="0" />
-                       <Button variant="link" className="p-0 h-auto">View all activity</Button>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="link" className="p-0 h-auto" disabled>View all activity</Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Coming Soon: A dedicated page to view this user's full activity history.</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
                 </div>
            </div>
