@@ -83,5 +83,13 @@ export type DayEvent = {
     status: 'Done' | 'Due' | 'Upcoming';
 };
 
-
+export type MedicalProfile = {
+  bloodType: string;
+  allergies: string;
+  primaryPhysician: string;
+  emergencyContact: {
+    name: string;
+    phone: string;
+  };
+};
 

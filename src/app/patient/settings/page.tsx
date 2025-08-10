@@ -13,7 +13,7 @@ import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useUsers } from '@/lib/users';
+import { useUsers, updateUserInFirestore, getMedicalProfile, updateUserMedicalProfile } from '@/lib/users';
 import { useToast } from '@/hooks/use-toast';
 import { addLog } from '@/lib/logs';
 import { storage } from '@/lib/firebase';
@@ -32,7 +32,7 @@ export default function PatientSettingsPage() {
 
     // State for profile form
     const [name, setName] = useState(user?.name || '');
-    const [phone, setPhone] = useState('');
+    const [phone, setPhone] = useState(user?.phone || '');
     const [dob, setDob] = useState('');
     const [address, setAddress] = useState('');
     
@@ -44,26 +44,67 @@ export default function PatientSettingsPage() {
     const [emergencyPhone, setEmergencyPhone] = useState('');
 
     useEffect(() => {
-        // When the user context loads, update the name in our local state
+        // When the user context loads, update the form state
         if (user) {
             setName(user.name);
+            setPhone(user.phone || '');
+
+            const fetchProfile = async () => {
+                const profile = await getMedicalProfile(user.id);
+                if (profile) {
+                    setBloodType(profile.bloodType);
+                    setAllergies(profile.allergies);
+                    setPrimaryPhysician(profile.primaryPhysician);
+                    setEmergencyName(profile.emergencyContact.name);
+                    setEmergencyPhone(profile.emergencyContact.phone);
+                }
+            }
+            fetchProfile();
         }
     }, [user]);
 
-    const handleProfileUpdate = () => {
+    const handleProfileUpdate = async () => {
         if (!user) return;
         
-        setUsers(prevUsers => 
-            prevUsers.map(u => 
-                u.id === user.id 
-                    ? { ...u, name: name }
-                    : u
-            )
-        );
+        const updates = { name, phone };
+        const success = await updateUserInFirestore(user.id, updates);
 
-        addLog("INFO", `User ${user.email} updated their profile name to "${name}".`);
-        toast({ title: "Profile Updated", description: "Your profile information has been saved." });
+        if (success) {
+             setUsers(prevUsers => 
+                prevUsers.map(u => 
+                    u.id === user.id 
+                        ? { ...u, ...updates }
+                        : u
+                )
+            );
+            addLog("INFO", `User ${user.email} updated their profile info.`);
+            toast({ title: "Profile Updated", description: "Your profile information has been saved." });
+        } else {
+             toast({ variant: 'destructive', title: "Update Failed", description: "Could not save profile changes." });
+        }
     };
+    
+    const handleMedicalUpdate = async () => {
+        if (!user) return;
+        const medicalData = {
+            bloodType,
+            allergies,
+            primaryPhysician,
+            emergencyContact: {
+                name: emergencyName,
+                phone: emergencyPhone
+            }
+        };
+
+        const success = await updateUserMedicalProfile(user.id, medicalData);
+
+        if (success) {
+            addLog("INFO", `User ${user.email} updated their medical details.`);
+            toast({ title: "Medical Details Updated", description: "Your medical information has been securely saved." });
+        } else {
+            toast({ variant: 'destructive', title: "Update Failed", description: "Could not save medical details." });
+        }
+    }
 
     const handleAvatarClick = () => {
         fileInputRef.current?.click();
@@ -79,6 +120,8 @@ export default function PatientSettingsPage() {
         try {
             await uploadBytes(storageRef, file);
             const downloadURL = await getDownloadURL(storageRef);
+
+            await updateUserInFirestore(user.id, { avatarUrl: downloadURL });
 
             setUsers(prevUsers =>
                 prevUsers.map(u =>
@@ -207,7 +250,7 @@ export default function PatientSettingsPage() {
                                     <Input id="emergency-phone" type="tel" value={emergencyPhone} onChange={(e) => setEmergencyPhone(e.target.value)} placeholder="+254 700 123 456" />
                                 </div>
                             </div>
-                             <Button onClick={() => toast({ title: "Coming Soon!", description: "This feature is not yet implemented."})}>Update Medical Details</Button>
+                             <Button onClick={handleMedicalUpdate}>Update Medical Details</Button>
                         </CardContent>
                     </Card>
 

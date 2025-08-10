@@ -2,11 +2,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from './types';
-import initialUsers from './data/users.json';
+import { User, MedicalProfile } from './types';
 import type { SignUpCredentials } from './types';
 import { db } from './firebase';
-import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
 
 // Custom hook to manage users state. It fetches from Firestore on mount.
 export const useUsers = () => {
@@ -90,26 +89,32 @@ export const deleteUserInFirestore = async (id: string): Promise<boolean> => {
     }
 };
 
-// Legacy functions using localStorage (can be phased out or used for caching)
-export const getAllUsers = (): User[] => {
-  if (typeof window === 'undefined') {
-    return initialUsers as User[];
-  }
-  try {
-    const storedUsers = localStorage.getItem('app-users');
-    return storedUsers ? JSON.parse(storedUsers) : (initialUsers as User[]);
-  } catch (error) {
-    console.error('Error reading users from localStorage:', error);
-    return initialUsers as User[];
-  }
-};
+// --- Medical Profile Functions ---
 
-export const saveAllUsers = (users: User[]) => {
-  if (typeof window === 'undefined') return;
-  try {
-    localStorage.setItem('app-users', JSON.stringify(users));
-    window.dispatchEvent(new StorageEvent('storage', { key: 'app-users' }));
-  } catch (error) {
-    console.error('Error writing users to localStorage:', error);
-  }
+// Gets the medical profile for a specific user
+export const getMedicalProfile = async (userId: string): Promise<MedicalProfile | null> => {
+    try {
+        const profileDocRef = doc(db, 'users', userId, 'medicalProfile', 'details');
+        const docSnap = await getDoc(profileDocRef);
+        if (docSnap.exists()) {
+            return docSnap.data() as MedicalProfile;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching medical profile:", error);
+        return null;
+    }
+}
+
+// Creates or updates the medical profile for a specific user
+export const updateUserMedicalProfile = async (userId: string, data: MedicalProfile): Promise<boolean> => {
+    try {
+        const profileDocRef = doc(db, 'users', userId, 'medicalProfile', 'details');
+        // `setDoc` with `merge: true` will create the document if it doesn't exist, or update it if it does.
+        await setDoc(profileDocRef, data, { merge: true });
+        return true;
+    } catch (error) {
+        console.error("Error updating medical profile:", error);
+        return false;
+    }
 };
