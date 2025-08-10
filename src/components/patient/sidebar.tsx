@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 const navItems = [
     { href: '/patient/dashboard', icon: LayoutGrid, label: 'Dashboard' },
     { href: '#', icon: Calendar, label: 'Appointments' },
-    { href: '#', icon: Mail, label: 'Messages' },
+    { href: '#', label: 'Messages', icon: Mail },
     { href: '#', icon: FileText, label: 'Documents' },
     { href: '#', icon: Pill, label: 'Prescriptions' },
     { href: '#', icon: Phone, label: 'Contact' },
@@ -23,7 +23,7 @@ export default function PatientSidebar() {
     const handleMouseEnter = () => {
         timerRef.current = setTimeout(() => {
             setIsExpanded(true);
-        }, 1500);
+        }, 800);
     };
 
     const handleMouseLeave = () => {
