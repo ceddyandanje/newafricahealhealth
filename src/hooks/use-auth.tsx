@@ -78,9 +78,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             handleRedirect(userData);
             return true;
         }
+        // This case should ideally not happen if signup is correctly creating a firestore doc
+        toast({ variant: 'destructive', title: "Login Failed", description: "User profile not found in database." });
         return false;
     } catch (error: any) {
-        toast({ variant: 'destructive', title: "Login Failed", description: error.message });
+        let description = "An unknown error occurred. Please try again.";
+        switch (error.code) {
+            case 'auth/user-not-found':
+            case 'auth/invalid-email':
+                description = "No account found with this email address. Please check your email or sign up.";
+                break;
+            case 'auth/wrong-password':
+                description = "Incorrect password. Please try again.";
+                break;
+            case 'auth/invalid-credential':
+                 description = "The email or password you entered is incorrect. Please try again.";
+                 break;
+            case 'auth/too-many-requests':
+                description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
+                break;
+            default:
+                description = error.message;
+        }
+        toast({ variant: 'destructive', title: "Login Failed", description });
         return false;
     }
   };
@@ -110,7 +130,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         handleRedirect(newUser);
         return true;
     } catch (error: any) {
-         toast({ variant: 'destructive', title: "Signup Failed", description: error.message });
+        let description = "An unknown error occurred. Please try again.";
+        if (error.code === 'auth/email-already-in-use') {
+            description = "This email address is already in use by another account.";
+        } else {
+            description = error.message;
+        }
+         toast({ variant: 'destructive', title: "Signup Failed", description });
         return false;
     }
   };
