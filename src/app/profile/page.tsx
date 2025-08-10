@@ -33,8 +33,8 @@ export default function ProfilePage() {
             <Card className="glassmorphic">
                 <CardHeader className="items-center text-center">
                      <Avatar className="h-24 w-24 mb-4">
-                        <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
-                        <AvatarFallback className="text-4xl">{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                        <AvatarImage src={user.avatarUrl || ''} alt={user.name} />
+                        <AvatarFallback className="text-4xl">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                     </Avatar>
                     <CardTitle className="text-3xl">{user.name}</CardTitle>
                     <CardDescription>{user.email}</CardDescription>

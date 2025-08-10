@@ -112,8 +112,8 @@ export default function AdminLayout({
                         {user && (
                             <>
                                 <Avatar>
-                                    <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
-                                    <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                                    <AvatarImage src={user.avatarUrl || ''} alt={user.name} />
+                                    <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                 </Avatar>
                                 <div className="hidden md:block">
                                     <p className="font-semibold text-sm">{user.name}</p>

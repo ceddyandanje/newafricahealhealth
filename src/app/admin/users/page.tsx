@@ -113,8 +113,8 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
                      <DialogHeader className="mb-6">
                          <div className="flex items-center gap-4">
                             <Avatar className="h-16 w-16">
-                                <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
-                                <AvatarFallback className="text-2xl">{user.name.charAt(0)}</AvatarFallback>
+                                <AvatarImage src={user.avatarUrl || ''} alt={user.name} />
+                                <AvatarFallback className="text-2xl">{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                             </Avatar>
                             <div>
                                 <DialogTitle className="text-2xl">{user.name}</DialogTitle>
@@ -299,8 +299,8 @@ export default function UsersPage() {
                                     <TableCell>
                                         <div className="flex items-center gap-3">
                                             <Avatar>
-                                                <AvatarImage src={user.avatarUrl || `https://i.pravatar.cc/150?u=${user.email}`} alt={user.name} />
-                                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                                <AvatarImage src={user.avatarUrl || ''} alt={user.name} />
+                                                <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                             </Avatar>
                                             <div>
                                                 <p className="font-semibold">{user.name}</p>

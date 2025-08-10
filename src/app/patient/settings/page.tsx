@@ -26,7 +26,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function PatientSettingsPage() {
     const { theme, setTheme } = useTheme();
     const { user, reauthenticateAndChangePassword } = useAuth();
-    const { users, setUsers } = useUsers();
+    const { setUsers } = useUsers();
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState(false);
@@ -192,8 +192,8 @@ export default function PatientSettingsPage() {
                              <div className="flex items-center gap-4">
                                 <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
                                     <Avatar className="h-24 w-24">
-                                        <AvatarImage src={user?.avatarUrl || `https://i.pravatar.cc/150?u=${user?.email}`} alt={user?.name} />
-                                        <AvatarFallback className="text-3xl">{user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                                        <AvatarImage src={user?.avatarUrl || ''} alt={user?.name} />
+                                        <AvatarFallback className="text-3xl">{user?.name?.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                     </Avatar>
                                     <div className={cn(
                                         "absolute inset-0 bg-black/50 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity",
