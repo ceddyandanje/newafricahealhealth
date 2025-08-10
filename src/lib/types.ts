@@ -31,3 +31,24 @@ export type User = {
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;
 export type SignUpCredentials = Pick<User, 'name' | 'email' | 'password'>;
+
+
+export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
+export type Log = {
+    id: number;
+    timestamp: string;
+    level: LogLevel;
+    message: string;
+};
+
+
+export type NotificationType = 'new_appointment' | 'message' | 'system_update' | 'lab_results' | 'info' | 'product_update' | 'blog_update' | 'service_update' | 'default';
+
+export type Notification = {
+    id: number;
+    type: NotificationType;
+    title: string;
+    description: string;
+    time: string; // ISO 8601 string
+    read: boolean;
+};

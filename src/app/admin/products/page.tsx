@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,6 +16,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { addLog } from '@/lib/logs';
+import { addNotification } from '@/lib/notifications';
 
 const productSchema = z.object({
     name: z.string().min(3, 'Name is required'),
@@ -77,19 +80,30 @@ export default function ProductsAdminPage() {
     const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
     const [deletingProduct, setDeletingProduct] = useState<Product | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const { toast } = useToast();
     
     const handleSaveProduct = (product: Product) => {
+        const isEditing = !!editingProduct;
         const productWithPriceInCents = { ...product, price: product.price * 100 };
-        if (editingProduct) {
+        if (isEditing) {
             setProducts(products.map(p => (p.id === product.id ? productWithPriceInCents : p)));
+            addLog('INFO', `Product "${product.name}" was updated.`);
+            addNotification({ type: 'system_update', title: 'Product Updated', description: `Product "${product.name}" was successfully updated.`});
+            toast({ title: "Product Saved", description: "Changes to the product have been saved." });
         } else {
-            setProducts([...products, productWithPriceInCents]);
+            setProducts([productWithPriceInCents, ...products]);
+            addLog('INFO', `New product "${product.name}" was added.`);
+            addNotification({ type: 'system_update', title: 'Product Added', description: `A new product, "${product.name}", is now available.`});
+            toast({ title: "Product Added", description: "The new product has been added to the inventory." });
         }
         setEditingProduct(undefined);
     };
 
     const handleDeleteProduct = (product: Product) => {
         setProducts(products.filter(p => p.id !== product.id));
+        addLog('WARN', `Product "${product.name}" was deleted.`);
+        addNotification({ type: 'system_update', title: 'Product Deleted', description: `Product "${product.name}" has been removed from inventory.`});
+        toast({ variant: 'destructive', title: "Product Deleted", description: "The product has been removed." });
         setDeletingProduct(undefined);
         setIsDeleteConfirmOpen(false);
     }

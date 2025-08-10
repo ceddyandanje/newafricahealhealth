@@ -15,6 +15,9 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { addLog } from '@/lib/logs';
+import { addNotification } from '@/lib/notifications';
 
 type BlogPost = {
     slug: string;
@@ -104,18 +107,29 @@ export default function BlogAdminPage() {
     const [editingPost, setEditingPost] = useState<BlogPost | undefined>(undefined);
     const [deletingPost, setDeletingPost] = useState<BlogPost | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+    const { toast } = useToast();
 
     const handleSavePost = (post: BlogPost) => {
-        if (editingPost) {
+        const isEditing = !!editingPost;
+        if (isEditing) {
             setPosts(posts.map(p => (p.slug === post.slug ? post : p)));
+            addLog('INFO', `Blog post "${post.title}" was updated.`);
+            addNotification({ type: 'system_update', title: 'Blog Post Updated', description: `The post "${post.title}" has been successfully updated.`});
+            toast({ title: "Post Updated", description: "The blog post has been saved." });
         } else {
             setPosts([post, ...posts]);
+            addLog('INFO', `New blog post "${post.title}" was created.`);
+            addNotification({ type: 'system_update', title: 'New Blog Post', description: `A new post titled "${post.title}" has been published.`});
+            toast({ title: "Post Created", description: "The new blog post has been published." });
         }
         setEditingPost(undefined);
     };
 
     const handleDeletePost = (post: BlogPost) => {
         setPosts(posts.filter(p => p.slug !== post.slug));
+        addLog('WARN', `Blog post "${post.title}" was deleted.`);
+        addNotification({ type: 'system_update', title: 'Blog Post Deleted', description: `The post "${post.title}" has been removed.`});
+        toast({ variant: 'destructive', title: "Post Deleted", description: "The blog post has been removed." });
         setDeletingPost(undefined);
         setIsDeleteConfirmOpen(false);
     };

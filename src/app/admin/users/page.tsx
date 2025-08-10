@@ -20,6 +20,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { addLog } from '@/lib/logs';
+import { addNotification } from '@/lib/notifications';
 
 const userSchema = z.object({
     name: z.string().min(2, 'Name is required'),
@@ -154,7 +156,10 @@ export default function UsersPage() {
         const newUser = createUser(userData);
         const updatedUsers = [...users, newUser];
         setUsers(updatedUsers);
-        saveAllUsers(updatedUsers);
+        // No need to call saveAllUsers here, createUser does it.
+
+        addLog('INFO', `New user created: ${newUser.name} (${newUser.email}) with role ${newUser.role}.`);
+        addNotification({ type: 'new_appointment', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
         toast({ title: "User Created", description: `Account for ${newUser.name} has been created.`});
     };
     
@@ -163,6 +168,17 @@ export default function UsersPage() {
         const updatedUsers = users.map(u => u.id === selectedUser.id ? { ...u, ...updates } : u);
         setUsers(updatedUsers);
         saveAllUsers(updatedUsers);
+        
+        let updateMessage = `User ${selectedUser.name}'s details were updated.`;
+        if (updates.role && updates.role !== selectedUser.role) {
+            updateMessage += ` Role changed to ${updates.role}.`;
+        }
+        if (updates.status && updates.status !== selectedUser.status) {
+            updateMessage += ` Status changed to ${updates.status}.`;
+        }
+
+        addLog('INFO', updateMessage);
+        addNotification({ type: 'system_update', title: 'User Updated', description: `Details for ${selectedUser.name} have been updated.`});
         toast({ title: "User Updated", description: `Details for ${selectedUser.name} have been saved.`});
         setSelectedUser(undefined);
     }
@@ -174,10 +190,14 @@ export default function UsersPage() {
             toast({ variant: 'destructive', title: "Action Forbidden", description: "You cannot delete the last user."});
             return;
         }
-        const updatedUsers = users.filter(u => u.id !== selectedUser.id);
+        const userToDelete = selectedUser;
+        const updatedUsers = users.filter(u => u.id !== userToDelete.id);
         setUsers(updatedUsers);
         saveAllUsers(updatedUsers);
-        toast({ title: "User Deleted", description: `Account for ${selectedUser.name} has been removed.`});
+
+        addLog('WARN', `User ${userToDelete.name} (${userToDelete.email}) was deleted.`);
+        addNotification({ type: 'system_update', title: 'User Deleted', description: `The account for ${userToDelete.name} has been removed.`});
+        toast({ title: "User Deleted", description: `Account for ${userToDelete.name} has been removed.`});
         setSelectedUser(undefined);
     };
 
