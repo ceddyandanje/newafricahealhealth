@@ -1,0 +1,28 @@
+
+.patient-dashboard-layout {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.patient-sidebar {
+    grid-column: 1;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+}
+
+.patient-main-content {
+    grid-column: 2;
+    overflow-y: auto;
+    padding: 0 2rem;
+}
+
+.patient-actions {
+    grid-column: 3;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 300px;
+}
