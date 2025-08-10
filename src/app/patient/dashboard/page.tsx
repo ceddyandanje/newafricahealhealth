@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -15,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Line, LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell } from "recharts"
+import { Area, Line, LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell } from "recharts"
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
@@ -157,17 +158,25 @@ export default function PatientDashboardPage() {
                         {isMetricsLoading ? <Loader2 className="animate-spin" /> :
                         <ChartContainer config={{}} className="h-[250px] w-full">
                             <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                <defs>
+                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                    </linearGradient>
+                                </defs>
                                 <ChartTooltip 
                                     content={<ChartTooltipContent indicator="dot" />} 
                                     formatter={(value) => value === null ? 'No Data' : value}
                                 />
-                                <Line 
-                                    type="monotone" 
-                                    dataKey="value" 
-                                    stroke="hsl(var(--primary))" 
-                                    strokeWidth={2} 
+                                <Area
+                                    dataKey="value"
+                                    type="monotone"
+                                    fill="url(#colorValue)"
+                                    fillOpacity={0.4}
+                                    stroke="hsl(var(--primary))"
+                                    strokeWidth={2}
                                     dot={{ r: 4, fill: 'hsl(var(--primary))' }} 
-                                    connectNulls={false} // This creates gaps for days with no data
+                                    connectNulls={false}
                                 />
                             </LineChartComponent>
                         </ChartContainer>
