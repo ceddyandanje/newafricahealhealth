@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type RefillRequest } from '@/lib/refillRequests';
 import { User, Pill, Calendar, Shield, DollarSign, Check, X } from 'lucide-react';
+import { Label } from '../ui/label';
 
 interface RefillRequestDialogProps {
     request: RefillRequest;
