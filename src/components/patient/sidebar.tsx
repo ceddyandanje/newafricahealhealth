@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { LayoutGrid, Calendar, Mail, FileText, Pill, Phone, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const navItems = [
     { href: '/patient/dashboard', icon: LayoutGrid, label: 'Dashboard' },
@@ -19,36 +18,55 @@ const navItems = [
 
 export default function PatientSidebar() {
     const [isExpanded, setIsExpanded] = useState(false);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    const handleMouseEnter = () => {
+        timerRef.current = setTimeout(() => {
+            setIsExpanded(true);
+        }, 1500);
+    };
+
+    const handleMouseLeave = () => {
+        if (timerRef.current) {
+            clearTimeout(timerRef.current);
+        }
+        setIsExpanded(false);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current);
+            }
+        };
+    }, []);
 
     return (
-        <TooltipProvider>
-            <aside
-                className={cn(
-                    'fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-center gap-1 py-3 px-1.5 rounded-full transition-all duration-300',
-                    'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10'
-                )}
-            >
-                {navItems.map((item, index) => (
-                    <Tooltip key={item.label}>
-                        <TooltipTrigger asChild>
-                            <Link
-                                href={item.href}
-                                onClick={index === 0 ? () => setIsExpanded(!isExpanded) : undefined}
-                                className={cn(
-                                    'h-10 w-10 flex items-center justify-center rounded-full transition-colors',
-                                    'hover:bg-black/10 dark:hover:bg-white/10',
-                                    index === 0 && 'bg-black/10 dark:bg-white/20'
-                                )}
-                            >
-                                <item.icon className="h-5 w-5" />
-                            </Link>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">
-                            <p>{item.label}</p>
-                        </TooltipContent>
-                    </Tooltip>
-                ))}
-            </aside>
-        </TooltipProvider>
+        <aside
+            className={cn(
+                'fixed left-4 top-1/2 -translate-y-1/2 z-50 flex flex-col items-start gap-1 py-3 rounded-full transition-all duration-300',
+                'bg-green-100/30 dark:bg-green-900/40 backdrop-blur-md border border-white/30 dark:border-white/10',
+                isExpanded ? 'w-48 px-3' : 'w-14 items-center px-1.5'
+            )}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            {navItems.map((item, index) => (
+                <Link
+                    key={item.label}
+                    href={item.href}
+                    className={cn(
+                        'h-10 flex items-center justify-start rounded-full transition-colors w-full',
+                        'hover:bg-black/10 dark:hover:bg-white/10',
+                        index === 0 && 'bg-black/10 dark:bg-white/20'
+                    )}
+                >
+                    <div className="h-10 w-10 flex-shrink-0 flex items-center justify-center">
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    {isExpanded && <span className="ml-2 text-sm font-medium whitespace-nowrap">{item.label}</span>}
+                </Link>
+            ))}
+        </aside>
     );
 }
