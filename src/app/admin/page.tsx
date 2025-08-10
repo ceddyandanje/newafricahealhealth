@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRequests, type RefillRequest } from "@/lib/refillRequests";
 import RefillRequestDialog from "@/components/admin/refill-request-dialog";
+import { useUsers } from "@/lib/users";
 
 const revenueChartData = [
     { name: '10 May', income: 80, expense: 40 },
@@ -32,28 +33,36 @@ const availableDoctors = [
 export default function AdminDashboardPage() {
     const [isClient, setIsClient] = useState(false);
     const [requests] = useRequests();
+    const [users] = useUsers();
     const [selectedRequest, setSelectedRequest] = useState<RefillRequest | null>(null);
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
+    const patients = users.filter(u => u.role === 'user');
+    const patientCount = patients.length;
 
     const summaryData = [
-        { title: "Patients", value: "1,421", icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
+        { title: "Patients", value: patientCount.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
         { title: "Pending Requests", value: pendingRequests.length.toString(), icon: ClipboardList, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-900/50", clickable: true },
-        { title: "Rooms", value: "2,415", icon: Hospital, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
+        { title: "Staff", value: (users.length - patientCount).toString(), icon: Users, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
         { title: "Ambulance", value: "15", icon: Truck, color: "text-cyan-500", bgColor: "bg-cyan-100 dark:bg-cyan-900/50" },
     ];
     
+    // Note: The breakdown is illustrative. In a real app, this would come from patient status data.
+    const newPatients = Math.round(patientCount * 0.1);
+    const recoveredPatients = Math.round(patientCount * 0.6);
+    const inTreatmentPatients = patientCount - newPatients - recoveredPatients > 0 ? patientCount - newPatients - recoveredPatients : 0;
+
     const patientsChartData = [
-        { name: 'Total', value: 145212, fill: '#6B7280' },
-        { name: 'New', value: 64, fill: '#3B82F6' },
-        { name: 'Recovered', value: 73, fill: '#F59E0B' },
-        { name: 'In Treatment', value: 48, fill: '#EF4444' },
+        { name: 'Total', value: patientCount, fill: '#6B7280' },
+        { name: 'New', value: newPatients, fill: '#3B82F6' },
+        { name: 'Recovered', value: recoveredPatients, fill: '#10B981' },
+        { name: 'In Treatment', value: inTreatmentPatients, fill: '#F59E0B' },
     ];
     const a_patientsChartData = [
-        { name: 'New', value: 64, fill: '#3B82F6' },
-        { name: 'Recovered', value: 73, fill: '#F59E0B' },
-        { name: 'In Treatment', value: 48, fill: '#EF4444' },
-        { name: 'Other', value: 145212 - 64 - 73 - 48, fill: '#e5e7eb' },
+        { name: 'New', value: newPatients, fill: '#3B82F6' },
+        { name: 'Recovered', value: recoveredPatients, fill: '#10B981' },
+        { name: 'In Treatment', value: inTreatmentPatients, fill: '#F59E0B' },
+        { name: 'Other', value: Math.max(0, patientCount - newPatients - recoveredPatients - inTreatmentPatients), fill: '#e5e7eb' },
     ];
   
     useEffect(() => {
@@ -103,12 +112,12 @@ export default function AdminDashboardPage() {
                             </PieChartComponent>
                             <div className="absolute inset-0 flex flex-col items-center justify-center">
                                 <p className="text-muted-foreground text-sm">Total</p>
-                                <p className="font-bold text-2xl">145,212</p>
+                                <p className="font-bold text-2xl">{patientCount}</p>
                             </div>
                         </div>
                         <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
                             {patientsChartData.slice(1).map(item => (
-                                <div key={item.name} className="flex items-center gap-2">
+                                 <div key={item.name} className="flex items-center gap-2">
                                     <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
                                     <span>{item.name}: {item.value}</span>
                                 </div>
