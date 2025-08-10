@@ -1,15 +1,30 @@
 
 'use client';
 
-import { Pill, RefreshCcw, Filter, Search } from 'lucide-react';
+import { useState } from 'react';
+import { Pill, RefreshCcw, Filter, Search, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { useToast } from '@/hooks/use-toast';
+import { addLog } from '@/lib/logs';
+import { addNotification } from '@/lib/notifications';
 
-const prescriptions = [
+type Prescription = {
+    id: string;
+    name: string;
+    date: string;
+    refillsLeft: number;
+    daysSupply: number;
+    daysLeft: number;
+    status: 'Active' | 'Needs Refill' | 'Expired' | 'Refill Requested';
+    isRequesting?: boolean;
+};
+
+const initialPrescriptions: Prescription[] = [
     { id: 'RX78901', name: 'Metformin 500mg', date: 'August 15, 2024', refillsLeft: 2, daysSupply: 30, daysLeft: 12, status: 'Active' },
     { id: 'RX78902', name: 'Lisinopril 10mg', date: 'August 15, 2024', refillsLeft: 5, daysSupply: 90, daysLeft: 72, status: 'Active' },
     { id: 'RX65432', name: 'Atorvastatin 20mg', date: 'May 10, 2024', refillsLeft: 0, daysSupply: 90, daysLeft: 0, status: 'Needs Refill' },
@@ -20,9 +35,38 @@ const statusVariant = {
     Active: 'default',
     'Needs Refill': 'destructive',
     Expired: 'secondary',
+    'Refill Requested': 'outline',
 } as const;
 
+
 export default function PatientPrescriptionsPage() {
+    const [prescriptions, setPrescriptions] = useState<Prescription[]>(initialPrescriptions);
+    const { toast } = useToast();
+
+    const handleRequestRefill = (rxId: string) => {
+        setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, isRequesting: true } : rx));
+
+        // Simulate API call
+        setTimeout(() => {
+            const prescription = prescriptions.find(rx => rx.id === rxId);
+            if (!prescription) return;
+
+            setPrescriptions(prev => prev.map(rx => rx.id === rxId ? { ...rx, status: 'Refill Requested', isRequesting: false } : rx));
+            
+            toast({
+                title: "Refill Requested",
+                description: `Your request for ${prescription.name} has been sent.`,
+            });
+            
+            addLog('INFO', `Patient requested refill for ${prescription.name} (ID: ${prescription.id})`);
+            addNotification({
+                type: 'info',
+                title: 'Refill Request',
+                description: `A patient has requested a refill for ${prescription.name}.`,
+            });
+        }, 1500);
+    }
+
     return (
         <div className="p-6">
             <header className="py-6">
@@ -59,17 +103,25 @@ export default function PatientPrescriptionsPage() {
                                         <p className="text-xs text-muted-foreground">Filled on {rx.date}</p>
                                     </TableCell>
                                     <TableCell>
-                                        <Badge variant={statusVariant[rx.status as keyof typeof statusVariant]}>{rx.status}</Badge>
+                                        <Badge variant={statusVariant[rx.status]}>{rx.status}</Badge>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Progress value={(rx.daysLeft / rx.daysSupply) * 100} className="w-24"/>
-                                            <span className="text-xs text-muted-foreground">{rx.daysLeft} days left</span>
+                                            <span className="text-xs text-muted-foreground">{rx.daysLeft > 0 ? `${rx.daysLeft} days left` : '-'}</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <Button disabled={rx.status !== 'Needs Refill'}>
-                                            <RefreshCcw className="mr-2 h-4 w-4"/> Request Refill
+                                        <Button 
+                                            disabled={rx.status !== 'Needs Refill' || rx.isRequesting}
+                                            onClick={() => handleRequestRefill(rx.id)}
+                                        >
+                                            {rx.isRequesting ? (
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                            ) : (
+                                                <RefreshCcw className="mr-2 h-4 w-4"/>
+                                            )}
+                                            {rx.status === 'Refill Requested' ? 'Requested' : 'Request Refill'}
                                         </Button>
                                     </TableCell>
                                 </TableRow>
