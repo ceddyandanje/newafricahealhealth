@@ -82,7 +82,7 @@ export default function PatientSidebar() {
                     </div>
 
                     <div className="flex-grow">
-                        <Collapsible defaultOpen>
+                        <Collapsible>
                             <CollapsibleTrigger className="w-full text-left font-semibold text-sm flex items-center gap-2 mb-2 text-foreground/80">
                                  <div className="w-1 h-4 bg-primary rounded-full" />
                                 Find Care
