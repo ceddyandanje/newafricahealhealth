@@ -15,6 +15,7 @@ import { Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { kenyanCounties } from "@/lib/counties";
 import Image from "next/image";
+import { useToast } from "@/hooks/use-toast";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -82,6 +83,7 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 
 function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     const { signup } = useAuth();
+    const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
 
     const form = useForm<z.infer<typeof signupSchema>>({
@@ -170,7 +172,7 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create an account
                         </Button>
-                         <Button variant="outline" className="w-full" size="lg" type="button">
+                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={() => toast({ title: "Feature Coming Soon" })}>
                              <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
                              Sign up with Google
                         </Button>
