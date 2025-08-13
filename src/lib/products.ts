@@ -1,10 +1,6 @@
-
 import { type Product } from "@/lib/types";
-import { db } from './firebase';
-import { collection, doc, getDoc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
-import { addLog } from './logs';
 
-const staticProducts: Product[] = [
+export const products: Product[] = [
   {
     id: "CC01",
     name: "Digital Blood Pressure Monitor",
@@ -271,60 +267,15 @@ const staticProducts: Product[] = [
   }
 ];
 
-const productsCollection = collection(db, 'products');
 
-// --- One-time Data Seeding ---
-const seedProducts = async () => {
-    const snapshot = await getDocs(productsCollection);
-    if (snapshot.empty) {
-        console.log('Products collection is empty. Seeding data...');
-        addLog('INFO', 'Products collection is empty. Seeding initial products.');
-        const batch = writeBatch(db);
-        staticProducts.forEach(product => {
-            const docRef = doc(productsCollection, product.id);
-            batch.set(docRef, product);
-        });
-        await batch.commit();
-        console.log('Products seeded successfully.');
-    } else {
-        console.log('Products collection already has data. No seeding needed.');
-    }
+export const getAllProducts = (): Product[] => {
+  return products;
 };
 
-// --- Server-side Data Fetching ---
-export const getAllProducts = async (): Promise<Product[]> => {
-    await seedProducts(); // Ensure data is seeded before fetching if needed
-    const snapshot = await getDocs(query(productsCollection, orderBy('name')));
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+export const getProduct = (id: string): Product | undefined => {
+  return products.find((product) => product.id === id);
 };
 
-export const getProduct = async (id: string): Promise<Product | null> => {
-    const docRef = doc(db, 'products', id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as Product;
-    }
-    return null;
-};
-
-
-// --- CRUD Functions for Admin Panel ---
-export const addProduct = async (product: Omit<Product, 'id'>) => {
-    return await addDoc(productsCollection, product);
-};
-
-export const updateProduct = async (id: string, updates: Partial<Product>) => {
-    const docRef = doc(db, 'products', id);
-    return await updateDoc(docRef, updates);
-};
-
-export const deleteProduct = async (id: string) => {
-    const docRef = doc(db, 'products', id);
-    return await deleteDoc(docRef);
-};
-
-
-// --- Helper Functions ---
 export const getBrands = (products: Product[]) => [...new Set(products.map(p => p.brand))];
 export const getCategories = (products: Product[]) => [...new Set(products.map(p => p.category))];
 export const getMaxPrice = (products: Product[]) => products.length > 0 ? Math.max(...products.map(p => p.price)) : 15000;

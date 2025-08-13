@@ -12,14 +12,14 @@ const formatPrice = (priceInCents: number) => {
     }).format(priceInCents / 100);
 };
 
-// Generate static paths for all products
-export async function generateStaticParams() {
-    const products = await getAllProducts();
+// This function can be removed if you switch to fully dynamic rendering
+export function generateStaticParams() {
+    const products = getAllProducts();
     return products.map(product => ({ id: product.id }));
 }
 
-export default async function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = await getProduct(params.id);
+export default function ProductDetailPage({ params }: { params: { id: string } }) {
+  const product = getProduct(params.id);
 
   if (!product) {
     notFound()
