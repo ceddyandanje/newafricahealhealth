@@ -1,7 +1,7 @@
 
 import { type BlogPost } from "@/lib/types";
 import { db } from './firebase';
-import { collection, doc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, getDoc } from 'firebase/firestore';
 import { addLog } from './logs';
 
 const staticBlogPosts: Omit<BlogPost, 'id'>[] = [

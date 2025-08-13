@@ -89,13 +89,13 @@ export default function BlogAdminPage() {
                 const postToUpdate = { ...postData, slug, date: editingPost!.date };
                 await updatePost(id, postToUpdate);
                 addLog('INFO', `Blog post "${postData.title}" was updated.`);
-                addNotification({ type: 'blog_update', title: 'Blog Post Updated', description: `The post "${postData.title}" has been successfully updated.`});
+                addNotification({ recipientId: 'admin_role', type: 'blog_update', title: 'Blog Post Updated', description: `The post "${postData.title}" has been successfully updated.`});
                 toast({ title: "Post Updated", description: "The blog post has been saved." });
             } else {
                  const newPost = { ...postData, slug, date: new Date().toISOString() };
                 await addPost(newPost);
                 addLog('INFO', `New blog post "${postData.title}" was created.`);
-                addNotification({ type: 'blog_update', title: 'New Blog Post', description: `A new post titled "${postData.title}" has been published.`});
+                addNotification({ recipientId: 'admin_role', type: 'blog_update', title: 'New Blog Post', description: `A new post titled "${postData.title}" has been published.`});
                 toast({ title: "Post Created", description: "The new blog post has been published." });
             }
             setEditingPost(undefined);
@@ -109,7 +109,7 @@ export default function BlogAdminPage() {
         try {
             await deletePost(post.id);
             addLog('WARN', `Blog post "${post.title}" was deleted.`);
-            addNotification({ type: 'blog_update', title: 'Blog Post Deleted', description: `The post "${post.title}" has been removed.`});
+            addNotification({ recipientId: 'admin_role', type: 'blog_update', title: 'Blog Post Deleted', description: `The post "${post.title}" has been removed.`});
             toast({ variant: 'destructive', title: "Post Deleted", description: "The blog post has been removed." });
         } catch (error) {
             console.error("Failed to delete post:", error);
