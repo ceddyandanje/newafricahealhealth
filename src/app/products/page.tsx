@@ -13,9 +13,9 @@ export default async function ProductsPage({
   const maxPrice = getMaxPrice(allProducts);
 
   // Parse searchParams on the server to pass to the client
-  const searchTerm = typeof searchParams?.search === 'string' ? searchParams.search : "";
+  const searchTerm = searchParams?.search as string || "";
   
-  const priceParam = typeof searchParams?.price === 'string' ? searchParams.price : `0-${maxPrice}`;
+  const priceParam = searchParams?.price as string || `0-${maxPrice}`;
   const priceRange = priceParam.split('-').map(Number) as [number, number];
 
   const categoryParams = searchParams?.category;
@@ -24,7 +24,7 @@ export default async function ProductsPage({
   const brandParams = searchParams?.brand;
   const selectedBrands = Array.isArray(brandParams) ? brandParams : typeof brandParams === 'string' ? [brandParams] : [];
   
-  const sortBy = typeof searchParams?.sortBy === 'string' ? searchParams.sortBy : "featured";
+  const sortBy = searchParams?.sortBy as string || "featured";
 
   return (
     <ProductsClient 
