@@ -1,12 +1,11 @@
 
 import { type BlogPost } from "@/lib/types";
 import { db } from './firebase';
-import { collection, doc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, getDoc } from 'firebase/firestore';
+import { collection, doc, getDocs, writeBatch, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, getDoc } from 'firebase/firestore';
 import { addLog } from './logs';
 
-const staticBlogPosts: Omit<BlogPost, 'id'>[] = [
+const staticBlogPosts: Omit<BlogPost, 'id' | 'slug'>[] = [
     {
-        slug: 'benefits-of-moringa',
         title: 'The Amazing Health Benefits of Moringa',
         description: 'Discover why this superfood is a game-changer for your health, packed with vitamins, minerals, and antioxidants.',
         image: 'https://placehold.co/1200x600.png',
@@ -32,7 +31,6 @@ const staticBlogPosts: Omit<BlogPost, 'id'>[] = [
 `
     },
     {
-        slug: 'natural-skincare-guide',
         title: 'A Guide to Natural Skincare with Shea Butter and Black Soap',
         description: 'Learn how to nourish your skin with traditional African ingredients for a radiant, healthy glow.',
         image: 'https://placehold.co/1200x600.png',
@@ -51,43 +49,45 @@ const staticBlogPosts: Omit<BlogPost, 'id'>[] = [
 
 const blogCollection = collection(db, 'blog');
 
-// --- One-time Data Seeding ---
-const seedPosts = async () => {
+// --- One-time Data Seeding (for Admin) ---
+export const seedPosts = async () => {
     const snapshot = await getDocs(blogCollection);
     if (snapshot.empty) {
         console.log('Blog collection is empty. Seeding data...');
         addLog('INFO', 'Blog collection is empty. Seeding initial posts.');
         const batch = writeBatch(db);
         staticBlogPosts.forEach(post => {
-            const docRef = doc(blogCollection); // Let Firestore generate ID
-            batch.set(docRef, post);
+            const docRef = doc(blogCollection); 
+            const slug = post.title.toLowerCase().replace(/\s+/g, '-').slice(0, 50);
+            batch.set(docRef, {...post, slug});
         });
         await batch.commit();
         console.log('Blog posts seeded successfully.');
+        return true;
     } else {
         console.log('Blog collection already has data. No seeding needed.');
+        return false;
     }
 };
 
-// --- Server-side Data Fetching ---
+// --- Static Data Fetching for Public Pages ---
+const allPosts: BlogPost[] = staticBlogPosts.map((post, index) => ({
+    id: `static-${index}`,
+    slug: post.title.toLowerCase().replace(/\s+/g, '-').slice(0, 50),
+    ...post,
+}));
+
 export const getAllPosts = async (): Promise<BlogPost[]> => {
-    await seedPosts(); // Ensure data is seeded before fetching if needed
-    const snapshot = await getDocs(query(blogCollection, orderBy('date', 'desc')));
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as BlogPost));
+    return allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
 export const getPostBySlug = async (slug: string): Promise<BlogPost | null> => {
-    await seedPosts(); // Ensure data is seeded before fetching
-    const q = query(blogCollection, where("slug", "==", slug), limit(1));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) {
-        return null;
-    }
-    const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as BlogPost;
+    const post = allPosts.find(p => p.slug === slug);
+    return post || null;
 };
 
-// --- CRUD Functions for Admin Panel ---
+
+// --- CRUD Functions for Admin Panel (interacting with Firestore) ---
 export const addPost = async (post: Omit<BlogPost, 'id'>) => {
     return await addDoc(blogCollection, post);
 };
