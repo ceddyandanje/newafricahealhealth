@@ -1,10 +1,7 @@
 
-'use client';
-
-import { useState, useEffect } from 'react';
 import { type BlogPost } from "@/lib/types";
 import { db } from './firebase';
-import { collection, doc, getDoc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit } from 'firebase/firestore';
 import { addLog } from './logs';
 
 const staticBlogPosts: Omit<BlogPost, 'id'>[] = [
@@ -80,6 +77,7 @@ export const getAllPosts = async (): Promise<BlogPost[]> => {
 };
 
 export const getPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+    await seedPosts(); // Ensure data is seeded before fetching
     const q = query(blogCollection, where("slug", "==", slug), limit(1));
     const snapshot = await getDocs(q);
     if (snapshot.empty) {
@@ -102,33 +100,4 @@ export const updatePost = async (id: string, updates: Partial<BlogPost>) => {
 export const deletePost = async (id: string) => {
     const docRef = doc(db, 'blog', id);
     return await deleteDoc(docRef);
-};
-
-
-// --- Client-side Hook for Real-time Updates (for Admin Panel) ---
-export const useBlogPosts = () => {
-    const [posts, setPosts] = useState<BlogPost[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const q = query(blogCollection, orderBy('date', 'desc'));
-        
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const postsData: BlogPost[] = [];
-            querySnapshot.forEach(doc => {
-                postsData.push({ id: doc.id, ...doc.data() } as BlogPost);
-            });
-            setPosts(postsData);
-            setIsLoading(false);
-        }, (error) => {
-            console.error("Error fetching blog posts:", error);
-            setIsLoading(false);
-        });
-
-        seedPosts();
-        
-        return () => unsubscribe();
-    }, []);
-
-    return { posts, isLoading };
 };

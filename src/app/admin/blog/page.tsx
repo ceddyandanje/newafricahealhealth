@@ -17,7 +17,8 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
-import { useBlogPosts, addPost, updatePost, deletePost } from '@/lib/blog';
+import { useBlogPosts } from '@/hooks/use-blog';
+import { addPost, updatePost, deletePost } from "@/lib/blog";
 import { type BlogPost } from '@/lib/types';
 
 
