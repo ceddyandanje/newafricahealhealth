@@ -4,7 +4,7 @@
 import Link from "next/link"
 import { Menu, ShoppingCart, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible"
@@ -126,6 +126,9 @@ export default function Header() {
                     </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="bg-background w-full max-w-xs flex flex-col">
+                    <SheetHeader>
+                        <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
+                    </SheetHeader>
                      <Link href="/" className="flex items-center space-x-2 mb-6">
                         <Image src={logoUrl} alt="Africa Heal Health Logo" width={32} height={32} className="rounded-full" />
                         <span className="font-bold text-gray-800 dark:text-white">Africa Heal Health</span>
