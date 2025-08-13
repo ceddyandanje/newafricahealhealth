@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useRoadmapTasks, updateTaskStatus, addTask, deleteTask } from "@/lib/roadmap";
 import { type RoadmapTask, RoadmapTaskStatus, RoadmapTaskCategory } from "@/lib/types";
-import { ListChecks, PlusCircle, Trash2, Loader2, CoreFeature, AiAutomation, UiUx, Security, Other } from 'lucide-react';
+import { ListChecks, PlusCircle, Trash2, Loader2, Bot, Palette, Shield, Files } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -22,11 +22,11 @@ import { addLog } from '@/lib/logs';
 
 // Manually map icons as they are components, not strings
 const categoryIcons: Record<RoadmapTaskCategory, React.ElementType> = {
-    'Core Feature': CoreFeature,
-    'AI & Automation': AiAutomation,
-    'UI/UX': UiUx,
-    'Security': Security,
-    'Other': Other,
+    'Core Feature': Files,
+    'AI & Automation': Bot,
+    'UI/UX': Palette,
+    'Security': Shield,
+    'Other': ListChecks,
 };
 
 const categoryColors: Record<RoadmapTaskCategory, string> = {
@@ -217,9 +217,3 @@ export default function RoadmapPage() {
         </div>
     );
 }
-
-const CoreFeature = (props: any) => <ListChecks {...props} />;
-const AiAutomation = (props: any) => <Loader2 {...props} />;
-const UiUx = (props: any) => <ListChecks {...props} />;
-const Security = (props: any) => <ListChecks {...props} />;
-const Other = (props: any) => <ListChecks {...props} />;
