@@ -12,14 +12,13 @@ const formatPrice = (priceInCents: number) => {
     }).format(priceInCents / 100);
 };
 
-// This function can be removed if you switch to fully dynamic rendering
-export function generateStaticParams() {
-    const products = getAllProducts();
+export async function generateStaticParams() {
+    const products = await getAllProducts();
     return products.map(product => ({ id: product.id }));
 }
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = getProduct(params.id);
+export default async function ProductDetailPage({ params }: { params: { id: string } }) {
+  const product = await getProduct(params.id);
 
   if (!product) {
     notFound()

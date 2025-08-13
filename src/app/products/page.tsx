@@ -1,13 +1,13 @@
 
-import { products, getBrands, getCategories, getMaxPrice } from "@/lib/products";
+import { getAllProducts, getBrands, getCategories, getMaxPrice } from "@/lib/products";
 import ProductsClient from "./products-client";
 
-export default function ProductsPage({ 
+export default async function ProductsPage({ 
   searchParams 
 }: { 
   searchParams?: { [key: string]: string | string[] | undefined } 
 }) {
-  const allProducts = products;
+  const allProducts = await getAllProducts();
   const brands = getBrands(allProducts);
   const categories = getCategories(allProducts);
   const maxPrice = getMaxPrice(allProducts);
