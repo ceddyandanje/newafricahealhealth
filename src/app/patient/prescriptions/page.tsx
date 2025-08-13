@@ -76,8 +76,9 @@ export default function PatientPrescriptionsPage() {
             // Add a generic log and notification for system-wide visibility
             addLog('INFO', `Patient ${user.name} requested refill for ${prescription.name} (ID: ${prescription.id})`);
             addNotification({
+                recipientId: 'admin_role', // Target all admins
                 type: 'info',
-                title: 'Refill Request',
+                title: 'New Refill Request',
                 description: `A new refill request from ${user.name} is pending approval.`,
             });
 

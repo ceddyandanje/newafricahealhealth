@@ -1,6 +1,7 @@
 
 
 
+
 export type Product = {
   id: string;
   name: string;
@@ -51,7 +52,8 @@ export type Log = {
 export type NotificationType = 'new_appointment' | 'message' | 'system_update' | 'lab_results' | 'info' | 'product_update' | 'blog_update' | 'service_update' | 'default';
 
 export type Notification = {
-    id: number;
+    id: string; // Firestore document ID
+    recipientId: string; // The ID of the user or role (e.g., 'admin_role') this is for
     type: NotificationType;
     title: string;
     description: string;
