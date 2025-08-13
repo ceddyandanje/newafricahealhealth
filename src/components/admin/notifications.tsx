@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Bell, Clock, UserPlus, MessageSquare, Cog, Info, Package, PenSquare, ShoppingBag, Trash2 } from 'lucide-react';
+import { Bell, Clock, UserPlus, MessageSquare, Cog, Info, Package, PenSquare, ShoppingBag, Trash2, Mail } from 'lucide-react';
 import { Badge } from '../ui/badge';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
