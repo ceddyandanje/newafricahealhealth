@@ -1,19 +1,25 @@
 
-import { products } from "@/lib/products"
+import { getProduct, getAllProducts } from "@/lib/products"
 import Image from "next/image"
 import { notFound } from "next/navigation"
 import AddToCartButton from "@/components/products/add-to-cart-button"
 import { Badge } from "@/components/ui/badge"
 
 const formatPrice = (priceInCents: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-KE", {
       style: "currency",
-      currency: "USD",
+      currency: "KES",
     }).format(priceInCents / 100);
 };
 
-export default function ProductDetailPage({ params }: { params: { id: string } }) {
-  const product = products.find(p => p.id === params.id)
+// Generate static paths for all products
+export async function generateStaticParams() {
+    const products = await getAllProducts();
+    return products.map(product => ({ id: product.id }));
+}
+
+export default async function ProductDetailPage({ params }: { params: { id: string } }) {
+  const product = await getProduct(params.id);
 
   if (!product) {
     notFound()

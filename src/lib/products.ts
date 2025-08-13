@@ -1,7 +1,13 @@
 
-import type { Product } from "@/lib/types"
+'use client';
 
-export const products: Product[] = [
+import { useState, useEffect } from 'react';
+import { type Product } from "@/lib/types";
+import { db } from './firebase';
+import { collection, doc, getDoc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
+import { addLog } from './logs';
+
+const staticProducts: Product[] = [
   {
     id: "CC01",
     name: "Digital Blood Pressure Monitor",
@@ -268,6 +274,91 @@ export const products: Product[] = [
   }
 ];
 
-export const getBrands = () => [...new Set(products.map(p => p.brand))];
-export const getCategories = () => [...new Set(products.map(p => p.category))];
-export const getMaxPrice = () => Math.max(...products.map(p => p.price));
+const productsCollection = collection(db, 'products');
+
+// --- One-time Data Seeding ---
+const seedProducts = async () => {
+    const snapshot = await getDocs(productsCollection);
+    if (snapshot.empty) {
+        console.log('Products collection is empty. Seeding data...');
+        addLog('INFO', 'Products collection is empty. Seeding initial products.');
+        const batch = writeBatch(db);
+        staticProducts.forEach(product => {
+            const docRef = doc(productsCollection, product.id);
+            batch.set(docRef, product);
+        });
+        await batch.commit();
+        console.log('Products seeded successfully.');
+    } else {
+        console.log('Products collection already has data. No seeding needed.');
+    }
+};
+
+// --- Client-side Hook for Real-time Updates ---
+export const useProducts = () => {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const seedAndFetch = async () => {
+            await seedProducts(); // Ensure data exists
+
+            const q = query(productsCollection, orderBy('name'));
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                const productsData: Product[] = [];
+                querySnapshot.forEach(doc => {
+                    productsData.push({ id: doc.id, ...doc.data() } as Product);
+                });
+                setProducts(productsData);
+                setIsLoading(false);
+            }, (error) => {
+                console.error("Error fetching products:", error);
+                setIsLoading(false);
+            });
+            return () => unsubscribe();
+        };
+
+        seedAndFetch();
+    }, []);
+
+    return { products, isLoading };
+};
+
+
+// --- Server-side Data Fetching ---
+export const getAllProducts = async (): Promise<Product[]> => {
+    await seedProducts(); // Ensure data is seeded before fetching if needed
+    const snapshot = await getDocs(query(productsCollection, orderBy('name')));
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+};
+
+export const getProduct = async (id: string): Promise<Product | null> => {
+    const docRef = doc(db, 'products', id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Product;
+    }
+    return null;
+};
+
+
+// --- CRUD Functions for Admin Panel ---
+export const addProduct = async (product: Omit<Product, 'id'>) => {
+    return await addDoc(productsCollection, product);
+};
+
+export const updateProduct = async (id: string, updates: Partial<Product>) => {
+    const docRef = doc(db, 'products', id);
+    return await updateDoc(docRef, updates);
+};
+
+export const deleteProduct = async (id: string) => {
+    const docRef = doc(db, 'products', id);
+    return await deleteDoc(docRef);
+};
+
+
+// --- Helper Functions ---
+export const getBrands = (products: Product[]) => [...new Set(products.map(p => p.brand))];
+export const getCategories = (products: Product[]) => [...new Set(products.map(p => p.category))];
+export const getMaxPrice = (products: Product[]) => products.length > 0 ? Math.max(...products.map(p => p.price)) : 15000;

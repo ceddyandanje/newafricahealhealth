@@ -1,5 +1,5 @@
 
-import { products, getBrands, getCategories, getMaxPrice } from "@/lib/products";
+import { getAllProducts, getBrands, getCategories, getMaxPrice } from "@/lib/products";
 import ProductsClient from "./products-client";
 
 export default async function ProductsPage({ 
@@ -7,10 +7,10 @@ export default async function ProductsPage({
 }: { 
   searchParams?: { [key: string]: string | string[] | undefined } 
 }) {
-  const allProducts = products;
-  const brands = getBrands();
-  const categories = getCategories();
-  const maxPrice = getMaxPrice();
+  const allProducts = await getAllProducts();
+  const brands = getBrands(allProducts);
+  const categories = getCategories(allProducts);
+  const maxPrice = getMaxPrice(allProducts);
 
   // Parse searchParams on the server to pass to the client
   const searchTerm = typeof searchParams?.search === 'string' ? searchParams.search : "";

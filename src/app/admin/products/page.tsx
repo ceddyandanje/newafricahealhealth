@@ -1,14 +1,14 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Package, PlusCircle, Search, Edit, Trash2 } from "lucide-react";
+import { Package, PlusCircle, Search, Edit, Trash2, Loader2 } from "lucide-react";
 import Image from 'next/image';
-import { products as initialProducts } from "@/lib/products";
+import { useProducts, addProduct, updateProduct, deleteProduct } from "@/lib/products";
 import { type Product } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
@@ -30,14 +30,14 @@ const productSchema = z.object({
     dataAiHint: z.string().min(2, 'AI hint is required'),
 });
 
-function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onSave: (data: Product) => void, onOpenChange: (open: boolean) => void }) {
+function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onSave: (data: z.infer<typeof productSchema>, id?: string) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof productSchema>>({
         resolver: zodResolver(productSchema),
-        defaultValues: product ? { ...product, price: product.price } : { name: '', description: '', price: 0, category: '', brand: '', image: 'https://placehold.co/600x400.png', dataAiHint: '' },
+        defaultValues: product ? { ...product, price: product.price / 100 } : { name: '', description: '', price: 0, category: '', brand: '', image: 'https://placehold.co/600x400.png', dataAiHint: '' },
     });
 
     const handleSubmit = (values: z.infer<typeof productSchema>) => {
-        onSave({ ...values, id: product?.id || Date.now().toString() });
+        onSave(values, product?.id);
         onOpenChange(false);
     };
 
@@ -51,7 +51,7 @@ function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onS
                     <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="price" render={({ field }) => (
-                    <FormItem><FormLabel>Price (in KES)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Price (in KES)</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="category" render={({ field }) => (
                     <FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
@@ -75,37 +75,49 @@ function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onS
 
 
 export default function ProductsAdminPage() {
-    const [products, setProducts] = useState<Product[]>(initialProducts);
+    const { products, isLoading } = useProducts();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<Product | undefined>(undefined);
     const [deletingProduct, setDeletingProduct] = useState<Product | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const { toast } = useToast();
     
-    const handleSaveProduct = (product: Product) => {
-        const isEditing = !!editingProduct;
-        const productWithPriceInCents = { ...product, price: product.price * 100 };
-        if (isEditing) {
-            setProducts(products.map(p => (p.id === product.id ? productWithPriceInCents : p)));
-            addLog('INFO', `Product "${product.name}" was updated.`);
-            addNotification({ type: 'product_update', title: 'Product Updated', description: `Product "${product.name}" was successfully updated.`});
-            toast({ title: "Product Saved", description: "Changes to the product have been saved." });
-        } else {
-            setProducts([productWithPriceInCents, ...products]);
-            addLog('INFO', `New product "${product.name}" was added.`);
-            addNotification({ type: 'product_update', title: 'Product Added', description: `A new product, "${product.name}", is now available.`});
-            toast({ title: "Product Added", description: "The new product has been added to the inventory." });
+    const handleSaveProduct = async (productData: z.infer<typeof productSchema>, id?: string) => {
+        const isEditing = !!id;
+        const productWithPriceInCents = { ...productData, price: Math.round(productData.price * 100) };
+
+        try {
+            if (isEditing) {
+                await updateProduct(id, productWithPriceInCents);
+                addLog('INFO', `Product "${productData.name}" was updated.`);
+                addNotification({ type: 'product_update', title: 'Product Updated', description: `Product "${productData.name}" was successfully updated.`});
+                toast({ title: "Product Saved", description: "Changes to the product have been saved." });
+            } else {
+                await addProduct(productWithPriceInCents);
+                addLog('INFO', `New product "${productData.name}" was added.`);
+                addNotification({ type: 'product_update', title: 'Product Added', description: `A new product, "${productData.name}", is now available.`});
+                toast({ title: "Product Added", description: "The new product has been added to the inventory." });
+            }
+            setEditingProduct(undefined);
+        } catch (error) {
+            console.error("Failed to save product:", error);
+            toast({ variant: 'destructive', title: 'Save Failed', description: 'Could not save product to the database.'});
         }
-        setEditingProduct(undefined);
     };
 
-    const handleDeleteProduct = (product: Product) => {
-        setProducts(products.filter(p => p.id !== product.id));
-        addLog('WARN', `Product "${product.name}" was deleted.`);
-        addNotification({ type: 'product_update', title: 'Product Deleted', description: `Product "${product.name}" has been removed from inventory.`});
-        toast({ variant: 'destructive', title: "Product Deleted", description: "The product has been removed." });
-        setDeletingProduct(undefined);
-        setIsDeleteConfirmOpen(false);
+    const handleDeleteProduct = async (product: Product) => {
+        try {
+            await deleteProduct(product.id);
+            addLog('WARN', `Product "${product.name}" was deleted.`);
+            addNotification({ type: 'product_update', title: 'Product Deleted', description: `Product "${product.name}" has been removed from inventory.`});
+            toast({ variant: 'destructive', title: "Product Deleted", description: "The product has been removed." });
+        } catch (error) {
+            console.error("Failed to delete product:", error);
+            toast({ variant: 'destructive', title: 'Delete Failed', description: 'Could not delete product from the database.'});
+        } finally {
+            setDeletingProduct(undefined);
+            setIsDeleteConfirmOpen(false);
+        }
     }
     
     return (
@@ -121,7 +133,11 @@ export default function ProductsAdminPage() {
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-lg">
                         <DialogHeader><DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle></DialogHeader>
-                        <ProductForm product={editingProduct ? {...editingProduct, price: editingProduct.price / 100} : undefined} onSave={handleSaveProduct} onOpenChange={setIsFormOpen} />
+                        <ProductForm 
+                            product={editingProduct} 
+                            onSave={handleSaveProduct} 
+                            onOpenChange={setIsFormOpen} 
+                        />
                     </DialogContent>
                 </Dialog>
             </div>
@@ -135,36 +151,42 @@ export default function ProductsAdminPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Product</TableHead>
-                                <TableHead>Category</TableHead>
-                                <TableHead>Brand</TableHead>
-                                <TableHead>Price</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {products.map((product) => (
-                                <TableRow key={product.id}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Image src={product.image} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
-                                            <p className="font-semibold">{product.name}</p>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{product.category}</TableCell>
-                                    <TableCell>{product.brand}</TableCell>
-                                    <TableCell>KES {product.price / 100}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => { setEditingProduct(product); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingProduct(product); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
-                                    </TableCell>
+                    {isLoading ? (
+                        <div className="flex items-center justify-center h-48">
+                           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Product</TableHead>
+                                    <TableHead>Category</TableHead>
+                                    <TableHead>Brand</TableHead>
+                                    <TableHead>Price</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {products.map((product) => (
+                                    <TableRow key={product.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Image src={product.image} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
+                                                <p className="font-semibold">{product.name}</p>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{product.category}</TableCell>
+                                        <TableCell>{product.brand}</TableCell>
+                                        <TableCell>KES {product.price / 100}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => { setEditingProduct(product); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingProduct(product); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
 
