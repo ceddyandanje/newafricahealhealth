@@ -8,7 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Package, PlusCircle, Search, Edit, Trash2, Loader2 } from "lucide-react";
 import Image from 'next/image';
-import { useProducts, addProduct, updateProduct, deleteProduct } from "@/lib/products";
+import { useProducts } from "@/hooks/use-products";
+import { addProduct, updateProduct, deleteProduct } from "@/lib/products";
 import { type Product } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';

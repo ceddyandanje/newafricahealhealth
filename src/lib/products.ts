@@ -1,7 +1,4 @@
 
-'use client';
-
-import { useState, useEffect } from 'react';
 import { type Product } from "@/lib/types";
 import { db } from './firebase';
 import { collection, doc, getDoc, getDocs, onSnapshot, writeBatch, addDoc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
@@ -293,37 +290,6 @@ const seedProducts = async () => {
         console.log('Products collection already has data. No seeding needed.');
     }
 };
-
-// --- Client-side Hook for Real-time Updates ---
-export const useProducts = () => {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const seedAndFetch = async () => {
-            await seedProducts(); // Ensure data exists
-
-            const q = query(productsCollection, orderBy('name'));
-            const unsubscribe = onSnapshot(q, (querySnapshot) => {
-                const productsData: Product[] = [];
-                querySnapshot.forEach(doc => {
-                    productsData.push({ id: doc.id, ...doc.data() } as Product);
-                });
-                setProducts(productsData);
-                setIsLoading(false);
-            }, (error) => {
-                console.error("Error fetching products:", error);
-                setIsLoading(false);
-            });
-            return () => unsubscribe();
-        };
-
-        seedAndFetch();
-    }, []);
-
-    return { products, isLoading };
-};
-
 
 // --- Server-side Data Fetching ---
 export const getAllProducts = async (): Promise<Product[]> => {
