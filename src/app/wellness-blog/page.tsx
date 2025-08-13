@@ -4,49 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
+import { getAllPosts, BlogPost } from "@/lib/blog";
 
-// This is still placeholder data. In a real app, you'd fetch this from a CMS or database.
-const blogPosts = [
-    {
-        slug: 'benefits-of-moringa',
-        title: 'The Amazing Health Benefits of Moringa',
-        description: 'Discover why this superfood is a game-changer for your health, packed with vitamins, minerals, and antioxidants.',
-        image: 'https://placehold.co/600x400.png',
-        dataAiHint: 'moringa leaves',
-        category: 'Superfoods',
-        date: 'October 26, 2023',
-    },
-    {
-        slug: 'natural-skincare-guide',
-        title: 'A Guide to Natural Skincare with Shea Butter and Black Soap',
-        description: 'Learn how to nourish your skin with traditional African ingredients for a radiant, healthy glow.',
-        image: 'https://placehold.co/600x400.png',
-        dataAiHint: 'shea butter skincare',
-        category: 'Skincare',
-        date: 'October 22, 2023',
-    },
-    {
-        slug: 'managing-diabetes-naturally',
-        title: '5 Tips for Managing Diabetes Naturally',
-        description: 'Explore lifestyle changes and natural supplements that can support your diabetes management plan.',
-        image: 'https://placehold.co/600x400.png',
-        dataAiHint: 'healthy food diabetes',
-        category: 'Health & Wellness',
-        date: 'October 18, 2023',
-    },
-     {
-        slug: 'rooibos-tea-for-relaxation',
-        title: 'Unwind and Relax with Caffeine-Free Rooibos Tea',
-        description: 'Find out why Rooibos tea is the perfect beverage to calm your mind and improve your sleep.',
-        image: 'https://placehold.co/600x400.png',
-        dataAiHint: 'tea cup relaxation',
-        category: 'Beverages',
-        date: 'October 15, 2023',
-    },
-];
+export default async function WellnessBlogPage() {
+    const blogPosts = await getAllPosts();
 
-
-export default function WellnessBlogPage() {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
@@ -74,7 +36,7 @@ export default function WellnessBlogPage() {
                             <h2 className="font-headline text-xl font-semibold mb-2 flex-grow">{post.title}</h2>
                             <p className="text-muted-foreground text-sm mb-4">{post.description}</p>
                             <div className="flex justify-between items-center text-sm text-muted-foreground mt-auto">
-                                <span>{post.date}</span>
+                                <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                                 <span className="flex items-center group-hover:text-primary">
                                     Read More <ArrowRight className="ml-1 h-4 w-4" />
                                 </span>

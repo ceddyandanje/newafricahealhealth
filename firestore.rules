@@ -1,12 +1,70 @@
 
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper function to check if the user is an admin
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Helper function to check if the user is the owner of the document
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Products: Public read, admin-only write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Blog: Public read, admin-only write
+    match /blog/{postId} {
+        allow read: if true;
+        allow write: if isAdmin();
+    }
+    
+    // Logs: Admin-only read, anyone can create
+    match /logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if false;
+    }
+
+    // Refill Requests: Admins can read/write, users can create
+    match /refillRequests/{requestId} {
+        allow read, write: if isAdmin();
+        allow create: if request.auth != null;
+    }
+
+    // Users: Users can manage their own data, admins can manage any
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId) || isAdmin();
+      allow create: if request.auth != null;
+      allow delete: if isAdmin();
+
+      // Subcollections for users
+      match /cart/{cartItemId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+      match /events/{eventId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+      match /healthMetrics/{metricId} {
+        allow read, write, delete: if isOwner(userId);
+      }
+      match /medicalProfile/{profileId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Default deny all other access
     match /{document=**} {
-      // Warning: This allows all reads and writes to your database.
-      // This is useful for development but you must secure your database
-      // before going to production.
-      allow read, write: if true;
+      allow read, write: if false;
     }
   }
 }

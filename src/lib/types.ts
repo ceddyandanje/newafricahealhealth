@@ -1,5 +1,6 @@
 
 
+
 export type Product = {
   id: string;
   name: string;
@@ -112,4 +113,16 @@ export type HealthMetric = {
     type: 'bloodSugar' | 'bloodPressure' | 'weight'; // Example types
     value: number;
     timestamp: string; // ISO 8601 string
+};
+
+export type BlogPost = {
+    id: string; // Firestore document ID
+    slug: string;
+    title: string;
+    description: string;
+    image: string;
+    dataAiHint: string;
+    category: string;
+    date: string; // ISO 8601 string
+    content: string; // HTML content
 };

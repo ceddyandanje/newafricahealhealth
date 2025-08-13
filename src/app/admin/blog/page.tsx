@@ -6,8 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { PenSquare, PlusCircle, Search, Edit, Trash2 } from "lucide-react";
-import Image from 'next/image';
+import { PenSquare, PlusCircle, Search, Edit, Trash2, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -18,37 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
+import { useBlogPosts, addPost, updatePost, deletePost } from '@/lib/blog';
+import { type BlogPost } from '@/lib/types';
 
-type BlogPost = {
-    slug: string;
-    title: string;
-    description: string;
-    image: string;
-    dataAiHint: string;
-    category: string;
-    date: string;
-};
-
-const initialBlogPosts: BlogPost[] = [
-    {
-        slug: 'benefits-of-moringa',
-        title: 'The Amazing Health Benefits of Moringa',
-        description: 'Discover why this superfood is a game-changer for your health, packed with vitamins, minerals, and antioxidants.',
-        image: 'https://placehold.co/600x400.png',
-        dataAiHint: 'moringa leaves',
-        category: 'Superfoods',
-        date: 'October 26, 2023',
-    },
-    {
-        slug: 'natural-skincare-guide',
-        title: 'A Guide to Natural Skincare with Shea Butter and Black Soap',
-        description: 'Learn how to nourish your skin with traditional African ingredients for a radiant, healthy glow.',
-        image: 'https://placehold.co/600x400.png',
-        dataAiHint: 'shea butter skincare',
-        category: 'Skincare',
-        date: 'October 22, 2023',
-    },
-];
 
 const postSchema = z.object({
     title: z.string().min(10, 'Title is too short'),
@@ -56,22 +27,18 @@ const postSchema = z.object({
     category: z.string().min(3, 'Category is required'),
     image: z.string().url('Must be a valid URL'),
     dataAiHint: z.string().min(2, 'AI hint is required'),
+    content: z.string().min(50, 'Content must be at least 50 characters long.'),
 });
 
 
-function PostForm({ post, onSave, onOpenChange }: { post?: BlogPost, onSave: (data: BlogPost) => void, onOpenChange: (open: boolean) => void }) {
+function PostForm({ post, onSave, onOpenChange }: { post?: BlogPost, onSave: (data: z.infer<typeof postSchema>, id?: string) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof postSchema>>({
         resolver: zodResolver(postSchema),
-        defaultValues: post || { title: '', description: '', category: '', image: 'https://placehold.co/600x400.png', dataAiHint: '' },
+        defaultValues: post || { title: '', description: '', category: '', image: 'https://placehold.co/600x400.png', dataAiHint: '', content: '' },
     });
 
     const handleSubmit = (values: z.infer<typeof postSchema>) => {
-        const slug = values.title.toLowerCase().replace(/\s+/g, '-').slice(0, 50);
-        onSave({ 
-            ...values,
-            slug: post?.slug || slug,
-            date: post?.date || new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-        });
+        onSave(values, post?.id);
         onOpenChange(false);
     };
 
@@ -82,7 +49,10 @@ function PostForm({ post, onSave, onOpenChange }: { post?: BlogPost, onSave: (da
                     <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="description" render={({ field }) => (
-                    <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Description (Short)</FormLabel><FormControl><Textarea {...field} rows={2} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="content" render={({ field }) => (
+                    <FormItem><FormLabel>Content (HTML)</FormLabel><FormControl><Textarea {...field} rows={8} /></FormControl><FormMessage /></FormItem>
                 )} />
                 <FormField control={form.control} name="category" render={({ field }) => (
                     <FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
@@ -102,36 +72,51 @@ function PostForm({ post, onSave, onOpenChange }: { post?: BlogPost, onSave: (da
 }
 
 export default function BlogAdminPage() {
-    const [posts, setPosts] = useState<BlogPost[]>(initialBlogPosts);
+    const { posts, isLoading } = useBlogPosts();
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [editingPost, setEditingPost] = useState<BlogPost | undefined>(undefined);
     const [deletingPost, setDeletingPost] = useState<BlogPost | undefined>(undefined);
     const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const { toast } = useToast();
 
-    const handleSavePost = (post: BlogPost) => {
-        const isEditing = !!editingPost;
-        if (isEditing) {
-            setPosts(posts.map(p => (p.slug === post.slug ? post : p)));
-            addLog('INFO', `Blog post "${post.title}" was updated.`);
-            addNotification({ type: 'blog_update', title: 'Blog Post Updated', description: `The post "${post.title}" has been successfully updated.`});
-            toast({ title: "Post Updated", description: "The blog post has been saved." });
-        } else {
-            setPosts([post, ...posts]);
-            addLog('INFO', `New blog post "${post.title}" was created.`);
-            addNotification({ type: 'blog_update', title: 'New Blog Post', description: `A new post titled "${post.title}" has been published.`});
-            toast({ title: "Post Created", description: "The new blog post has been published." });
+    const handleSavePost = async (postData: z.infer<typeof postSchema>, id?: string) => {
+        const isEditing = !!id;
+        const slug = postData.title.toLowerCase().replace(/\s+/g, '-').slice(0, 50);
+
+        try {
+            if (isEditing) {
+                const postToUpdate = { ...postData, slug, date: editingPost!.date };
+                await updatePost(id, postToUpdate);
+                addLog('INFO', `Blog post "${postData.title}" was updated.`);
+                addNotification({ type: 'blog_update', title: 'Blog Post Updated', description: `The post "${postData.title}" has been successfully updated.`});
+                toast({ title: "Post Updated", description: "The blog post has been saved." });
+            } else {
+                 const newPost = { ...postData, slug, date: new Date().toISOString() };
+                await addPost(newPost);
+                addLog('INFO', `New blog post "${postData.title}" was created.`);
+                addNotification({ type: 'blog_update', title: 'New Blog Post', description: `A new post titled "${postData.title}" has been published.`});
+                toast({ title: "Post Created", description: "The new blog post has been published." });
+            }
+            setEditingPost(undefined);
+        } catch (error) {
+            console.error("Failed to save post:", error);
+            toast({ variant: 'destructive', title: 'Save Failed', description: 'Could not save post to the database.'});
         }
-        setEditingPost(undefined);
     };
 
-    const handleDeletePost = (post: BlogPost) => {
-        setPosts(posts.filter(p => p.slug !== post.slug));
-        addLog('WARN', `Blog post "${post.title}" was deleted.`);
-        addNotification({ type: 'blog_update', title: 'Blog Post Deleted', description: `The post "${post.title}" has been removed.`});
-        toast({ variant: 'destructive', title: "Post Deleted", description: "The blog post has been removed." });
-        setDeletingPost(undefined);
-        setIsDeleteConfirmOpen(false);
+    const handleDeletePost = async (post: BlogPost) => {
+        try {
+            await deletePost(post.id);
+            addLog('WARN', `Blog post "${post.title}" was deleted.`);
+            addNotification({ type: 'blog_update', title: 'Blog Post Deleted', description: `The post "${post.title}" has been removed.`});
+            toast({ variant: 'destructive', title: "Post Deleted", description: "The blog post has been removed." });
+        } catch (error) {
+            console.error("Failed to delete post:", error);
+            toast({ variant: 'destructive', title: 'Delete Failed', description: 'Could not delete post from the database.'});
+        } finally {
+            setDeletingPost(undefined);
+            setIsDeleteConfirmOpen(false);
+        }
     };
     
     return (
@@ -143,7 +128,7 @@ export default function BlogAdminPage() {
                 </h1>
                 <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
                     <DialogTrigger asChild>
-                        <Button onClick={() => setEditingPost(undefined)}><PlusCircle className="mr-2 h-4 w-4" /> New Post</Button>
+                        <Button onClick={() => { setEditingPost(undefined); setIsFormOpen(true); }}><PlusCircle className="mr-2 h-4 w-4" /> New Post</Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-lg">
                         <DialogHeader><DialogTitle>{editingPost ? 'Edit Post' : 'Create New Post'}</DialogTitle></DialogHeader>
@@ -161,29 +146,35 @@ export default function BlogAdminPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Title</TableHead>
-                                <TableHead>Category</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {posts.map((post) => (
-                                <TableRow key={post.slug}>
-                                    <TableCell className="font-semibold">{post.title}</TableCell>
-                                    <TableCell><Badge variant="secondary">{post.category}</Badge></TableCell>
-                                    <TableCell>{post.date}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="icon" onClick={() => { setEditingPost(post); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
-                                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingPost(post); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
-                                    </TableCell>
+                    {isLoading ? (
+                        <div className="flex items-center justify-center h-48">
+                           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                        </div>
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Title</TableHead>
+                                    <TableHead>Category</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {posts.map((post) => (
+                                    <TableRow key={post.id}>
+                                        <TableCell className="font-semibold">{post.title}</TableCell>
+                                        <TableCell><Badge variant="secondary">{post.category}</Badge></TableCell>
+                                        <TableCell>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="icon" onClick={() => { setEditingPost(post); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
+                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingPost(post); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
                 </CardContent>
             </Card>
 
