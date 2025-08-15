@@ -66,10 +66,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleRedirect = (user: User | null) => {
-    if (user?.role === 'admin') {
-      router.push('/admin');
-    } else {
-      router.push('/patient/dashboard');
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+    switch (user.role) {
+      case 'admin':
+        router.push('/admin');
+        break;
+      case 'doctor':
+        router.push('/doctor/dashboard');
+        break;
+      default:
+        router.push('/patient/dashboard');
+        break;
     }
   };
 
