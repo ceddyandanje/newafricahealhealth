@@ -6,10 +6,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, LayoutDashboard, ListOrdered, Repeat, Heart } from "lucide-react";
+import { User, LogOut, LayoutDashboard, ListOrdered, Repeat, Heart, Stethoscope } from "lucide-react";
 
 export default function AuthButton() {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout } = useAuth();
 
   if (!user) {
     return (
@@ -39,12 +39,34 @@ export default function AuthButton() {
           </div>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/patient/dashboard">
-            <Heart className="mr-2 h-4 w-4" />
-            <span>Patient Dashboard</span>
-          </Link>
-        </DropdownMenuItem>
+        
+        {user.role === 'user' && (
+            <DropdownMenuItem asChild>
+            <Link href="/patient/dashboard">
+                <Heart className="mr-2 h-4 w-4" />
+                <span>Patient Dashboard</span>
+            </Link>
+            </DropdownMenuItem>
+        )}
+
+        {user.role === 'doctor' && (
+            <DropdownMenuItem asChild>
+                <Link href="/doctor/dashboard">
+                    <Stethoscope className="mr-2 h-4 w-4" />
+                    <span>Doctor Dashboard</span>
+                </Link>
+            </DropdownMenuItem>
+        )}
+
+        {user.role === 'admin' && (
+            <DropdownMenuItem asChild>
+                <Link href="/admin">
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Admin Dashboard</span>
+                </Link>
+            </DropdownMenuItem>
+        )}
+
         <DropdownMenuItem asChild>
           <Link href="/patient/settings">
             <User className="mr-2 h-4 w-4" />
@@ -63,14 +85,6 @@ export default function AuthButton() {
             <span>My Subscriptions</span>
           </Link>
         </DropdownMenuItem>
-        {isAdmin && (
-            <DropdownMenuItem asChild>
-                <Link href="/admin">
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Admin Dashboard</span>
-                </Link>
-            </DropdownMenuItem>
-        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={logout}>
           <LogOut className="mr-2 h-4 w-4" />
