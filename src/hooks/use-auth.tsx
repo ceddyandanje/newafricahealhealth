@@ -23,6 +23,7 @@ import { addLog } from "@/lib/logs";
 
 interface AuthContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   firebaseUser: FirebaseUser | null;
   isAdmin: boolean;
   login: (credentials: LoginCredentials) => Promise<boolean>;
@@ -192,7 +193,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, firebaseUser, isAdmin, login, signup, logout, reauthenticateAndChangePassword, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, logout, reauthenticateAndChangePassword, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

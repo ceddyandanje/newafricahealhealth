@@ -2,6 +2,7 @@
 
 
 
+
 export type Product = {
   id: string;
   name: string;
@@ -34,6 +35,7 @@ export type User = {
     location?: string;
     age?: string;
     phone?: string;
+    specialty?: string; // For doctors
 };
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;

@@ -59,8 +59,8 @@
     {
         "id": "task-8",
         "title": "Develop Doctor/Driver Dashboards",
-        "description": "Create specialized, secure dashboard views for users with 'Doctor' or 'Delivery Driver' roles to manage their specific tasks (e.g., view assigned appointments, see delivery routes). \n\n**Data Handling:** This involves creating new pages and components that conditionally render based on the user's role.",
-        "status": "Todo",
+        "description": "Create specialized, secure dashboard views for users with 'Doctor' or 'Delivery Driver' roles to manage their specific tasks (e.g., view assigned appointments, see delivery routes).",
+        "status": "In Progress",
         "category": "Core Feature",
         "createdAt": "2023-10-28T10:07:00Z"
     },
@@ -87,5 +87,37 @@
         "status": "Todo",
         "category": "UI/UX",
         "createdAt": "2023-10-29T11:00:00Z"
+    },
+    {
+        "id": "task-12",
+        "title": "Build Doctor Patient Management",
+        "description": "Implement the 'My Patients' section for doctors, including a secure patient roster and a detailed patient file view with demographics, medical history, appointment logs, and clinical notes.",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-30T10:00:00Z"
+    },
+    {
+        "id": "task-13",
+        "title": "Implement Doctor Scheduling Calendar",
+        "description": "Create the full calendar view for doctors to manage their weekly/monthly schedules, confirm/reschedule appointments, and set their availability.",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-30T10:01:00Z"
+    },
+    {
+        "id": "task-14",
+        "title": "Develop Secure Doctor-Patient Messaging",
+        "description": "Build the secure, HIPAA-compliant messaging interface for doctors to communicate with their assigned patients.",
+        "status": "Todo",
+        "category": "UI/UX",
+        "createdAt": "2023-10-30T10:02:00Z"
+    },
+    {
+        "id": "task-15",
+        "title": "Integrate GenAI Clinical Tools for Doctors",
+        "description": "Develop and integrate AI-powered tools such as an AI Scribe for transcribing consultations, a Lab Result Summarizer, and a Prescription Pre-check to assist doctors and reduce administrative workload.",
+        "status": "Todo",
+        "category": "AI & Automation",
+        "createdAt": "2023-10-30T10:03:00Z"
     }
 ]
