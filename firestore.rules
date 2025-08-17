@@ -4,67 +4,119 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper function to check if a user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
     // Helper function to check if the user is an admin
     function isAdmin() {
-      return exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     // Helper function to check if the user is the owner of the document
     function isOwner(userId) {
-      return request.auth != null && request.auth.uid == userId;
+      return request.auth.uid == userId;
     }
 
-    // Products: Public read, admin-only write
+    // Default deny all reads and writes
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      // Anyone can create their own user document (signup)
+      allow create: if isSignedIn() && isOwner(userId);
+      // Only the owner or an admin can read/update their own profile
+      allow read, update: if isSignedIn() && (isOwner(userId) || isAdmin());
+      // Only admins can delete user documents
+      allow delete: if isAdmin();
+    }
+    
+    // Medical Profile subcollection rules
+    match /users/{userId}/medicalProfile/{docId} {
+        // Only the owner or an admin can create/update/read the medical profile
+        allow read, write: if isSignedIn() && (isOwner(userId) || isAdmin());
+    }
+
+    // Health Metrics subcollection rules
+    match /users/{userId}/healthMetrics/{metricId} {
+       // A user can create their own metrics.
+       allow create: if isSignedIn() && isOwner(userId);
+       // Only owner or admin can read the metrics
+       allow read: if isSignedIn() && (isOwner(userId) || isAdmin());
+       // Metrics should be immutable
+       allow update, delete: if false;
+    }
+    
+    // Events subcollection rules
+     match /users/{userId}/events/{eventId} {
+       // Only admins can create events for users (e.g. from system)
+       allow create: if isAdmin();
+       // Only owner can read events
+       allow read: if isSignedIn() && isOwner(userId);
+       allow update, delete: if isAdmin();
+    }
+
+    // Availability subcollection rules
+    match /users/{doctorId}/availability/{date} {
+        // Only the doctor themselves can create/update their own availability
+        allow write: if isSignedIn() && isOwner(doctorId);
+        // Any signed-in user can read a doctor's availability to book an appointment
+        allow read: if isSignedIn();
+    }
+
+
+    // Products collection rules
     match /products/{productId} {
-      allow read: if true;
-      allow write: if isAdmin();
+        // Anyone can read products
+        allow read: if true;
+        // Only admins can create, update, or delete products
+        allow write: if isAdmin();
     }
 
-    // Blog: Public read, admin-only write
+    // Blog collection rules
     match /blog/{postId} {
+        // Anyone can read blog posts
         allow read: if true;
+        // Only admins can create, update, or delete posts
         allow write: if isAdmin();
     }
     
-    // Logs: Admin-only read, anyone can create
-    match /logs/{logId} {
-      allow read: if isAdmin();
-      allow create: if true;
-      allow update, delete: if false;
-    }
-
-    // Refill Requests: Admins can read/write, users can create
-    match /refillRequests/{requestId} {
+    // Roadmap collection rules
+    match /roadmap/{taskId} {
+        // Only admins can read/write roadmap tasks
         allow read, write: if isAdmin();
-        allow create: if request.auth != null;
     }
 
-    // Users: Users can manage their own data, admins can manage any
-    match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
-      allow update: if isOwner(userId) || isAdmin();
-      allow create: if request.auth != null;
-      allow delete: if isAdmin();
-
-      // Subcollections for users
-      match /cart/{cartItemId} {
-        allow read, write, delete: if isOwner(userId);
-      }
-      match /events/{eventId} {
-        allow read, write, delete: if isOwner(userId);
-      }
-      match /healthMetrics/{metricId} {
-        allow read, write, delete: if isOwner(userId);
-      }
-      match /medicalProfile/{profileId} {
-        allow read, write: if isOwner(userId);
-      }
+    // Logs collection rules
+    match /logs/{logId} {
+        // Only admins can read logs
+        allow read: if isAdmin();
+        // Any authenticated user/service can create logs
+        allow create: if true;
+        // Logs are immutable
+        allow update, delete: if false;
     }
-    
-    // Default deny all other access
-    match /{document=**} {
-      allow read, write: if false;
+
+    // Refill Requests collection rules
+    match /refillRequests/{requestId} {
+        // Authenticated users can create requests
+        allow create: if isSignedIn();
+        // Only admins can read/update requests
+        allow read, update: if isAdmin();
+        allow delete: if isAdmin();
+    }
+
+    // Notifications collection rules
+    match /notifications/{notificationId} {
+      // Authenticated users can create notifications
+      allow create: if isSignedIn();
+      // Users can only read notifications intended for them (either by ID or role)
+      allow read, update: if isSignedIn() && (resource.data.recipientId == request.auth.uid || resource.data.recipientId == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role + '_role');
+      // Users can delete their own notifications
+      allow delete: if isSignedIn() && resource.data.recipientId == request.auth.uid;
     }
   }
 }
