@@ -19,12 +19,24 @@ export default function PatientLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (isLoading) return;
+
+    if (!user) {
       router.push('/login');
+    } else if (user.role !== 'user') {
+      // If user is not a 'user' (e.g., admin or doctor), redirect them away
+      if (user.role === 'admin') {
+        router.push('/admin');
+      } else if (user.role === 'doctor') {
+        router.push('/doctor/dashboard');
+      } else {
+        // Fallback for other roles
+        router.push('/login');
+      }
     }
   }, [user, isLoading, router]);
 
-  if (isLoading || !user) {
+  if (isLoading || !user || user.role !== 'user') {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Loader2 className="h-16 w-16 animate-spin text-primary" />

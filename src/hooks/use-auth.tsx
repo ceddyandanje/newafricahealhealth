@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { 
     createUserWithEmailAndPassword, 
@@ -41,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -66,20 +67,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const handleRedirect = (user: User | null) => {
-    if (!user) {
-      router.push('/login');
-      return;
+  const handleRedirect = (loggedInUser: User) => {
+    // If the user is already on a dashboard, don't redirect
+    if (pathname.startsWith('/admin') || pathname.startsWith('/doctor') || pathname.startsWith('/patient')) {
+        return;
     }
-    switch (user.role) {
+
+    switch (loggedInUser.role) {
       case 'admin':
         router.push('/admin');
         break;
       case 'doctor':
         router.push('/doctor/dashboard');
         break;
-      default:
+      case 'user':
         router.push('/patient/dashboard');
+        break;
+      default:
+        router.push('/login');
         break;
     }
   };
