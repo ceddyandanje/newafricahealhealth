@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Edit, FileText, ListTodo, Users, MessageSquare, Pill, HandHeart } from 'lucide-react';
+import { Calendar, Clock, Edit, FileText, ListTodo, Users, MessageSquare, Pill, HandHeart, Bot, UserCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -21,9 +21,11 @@ import AvailabilityDialog from '@/components/doctor/availability-dialog';
 
 // Mock data - replace with real data fetching
 const agenda = [
-    { time: '09:00 AM', patient: 'John Doe', type: 'Virtual Consultation' },
-    { time: '10:30 AM', patient: 'Jane Smith', type: 'Follow-up' },
-    { time: '02:00 PM', patient: 'Peter Pan', type: 'New Patient Assessment' },
+    { time: '09:00', patient: 'John Doe', type: 'Virtual Consultation', status: 'Confirmed' },
+    { time: '10:30', patient: 'Jane Smith', type: 'Follow-up', status: 'Confirmed' },
+    { time: '11:15', patient: 'Alex Johnson', type: 'New Patient Assessment', status: 'Arrived' },
+    { time: '14:00', patient: 'Peter Pan', type: 'Lab Results Review', status: 'Confirmed' },
+    { time: '15:30', patient: 'Mary Poppins', type: 'Post-Op Check-in', status: 'Confirmed' },
 ];
 
 const actionItems = [
@@ -86,6 +88,28 @@ function WelcomeDialog({ user, onSave }: { user: any; onSave: (specialty: string
     );
 }
 
+function AgendaTimeline() {
+    // This would be dynamically generated from agenda data
+    const hours = Array.from({ length: 9 }, (_, i) => i + 9); // 9 AM to 5 PM
+    return (
+        <div className="relative w-full h-10 bg-muted rounded-full">
+            {agenda.map(item => {
+                const [hour, minute] = item.time.split(':').map(Number);
+                const totalMinutes = (hour * 60) + minute;
+                const startMinute = 9 * 60;
+                const endMinute = 17 * 60;
+                const percentage = ((totalMinutes - startMinute) / (endMinute - startMinute)) * 100;
+                
+                return (
+                    <div key={item.time} className="absolute h-full flex items-center" style={{ left: `${percentage}%`}}>
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
+                    </div>
+                )
+            })}
+        </div>
+    )
+}
+
 export default function DoctorDashboardPage() {
     const { user, setUser } = useAuth();
     const [showWelcome, setShowWelcome] = useState(false);
@@ -93,7 +117,6 @@ export default function DoctorDashboardPage() {
     const { toast } = useToast();
 
     useEffect(() => {
-        // Check if the user object is loaded and if their specialty is missing
         if (user && !user.specialty) {
             setShowWelcome(true);
         }
@@ -105,7 +128,6 @@ export default function DoctorDashboardPage() {
         const success = await updateUserInFirestore(user.id, { specialty });
 
         if (success) {
-            // Optimistically update local user state to close the dialog
             setUser(prevUser => prevUser ? { ...prevUser, specialty } : null);
             setShowWelcome(false);
             toast({
@@ -144,21 +166,32 @@ export default function DoctorDashboardPage() {
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5"/> Today's Agenda</CardTitle>
+                                <CardTitle className="flex items-center gap-2"><Calendar className="w-5 h-5"/> Today's Smart Agenda</CardTitle>
+                                <CardDescription>A summary of your confirmed appointments for today.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                               <ul className="space-y-4">
+                                <AgendaTimeline />
+                               <ul className="space-y-2 mt-4">
                                     {agenda.map(item => (
-                                        <li key={item.time} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted">
-                                            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
-                                                <Clock className="w-4 h-4"/>
-                                                {item.time}
+                                        <li key={item.time} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border transition-all">
+                                            <div className="flex flex-col items-center w-20">
+                                                <div className="flex items-center gap-1 text-sm font-semibold text-primary">
+                                                    <Clock className="w-4 h-4"/>
+                                                    {item.time}
+                                                </div>
+                                                {item.status === 'Arrived' && (
+                                                    <div className="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-full mt-1">ARRIVED</div>
+                                                )}
                                             </div>
+                                            <div className="w-px bg-border h-10"></div>
                                             <div className="flex-grow">
                                                 <p className="font-semibold">{item.patient}</p>
                                                 <p className="text-sm text-muted-foreground">{item.type}</p>
                                             </div>
-                                            <Button variant="ghost" size="sm">View Patient</Button>
+                                            <div className="flex items-center gap-2">
+                                                <Button variant="outline" size="sm"><Bot className="mr-2 h-4 w-4"/> AI Briefing</Button>
+                                                <Button variant="secondary" size="sm"><UserCheck className="mr-2 h-4 w-4"/> Open File</Button>
+                                            </div>
                                         </li>
                                     ))}
                                </ul>
@@ -236,3 +269,5 @@ export default function DoctorDashboardPage() {
         </>
     );
 }
+
+    
