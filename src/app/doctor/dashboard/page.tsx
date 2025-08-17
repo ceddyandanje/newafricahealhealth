@@ -17,6 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { updateUserInFirestore } from '@/lib/users';
 import { serviceCategories } from '@/lib/serviceCategories';
+import AvailabilityDialog from '@/components/doctor/availability-dialog';
 
 // Mock data - replace with real data fetching
 const agenda = [
@@ -88,6 +89,7 @@ function WelcomeDialog({ user, onSave }: { user: any; onSave: (specialty: string
 export default function DoctorDashboardPage() {
     const { user, setUser } = useAuth();
     const [showWelcome, setShowWelcome] = useState(false);
+    const [isAvailabilityOpen, setIsAvailabilityOpen] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -122,13 +124,16 @@ export default function DoctorDashboardPage() {
     return (
         <>
             {showWelcome && user && <WelcomeDialog user={user} onSave={handleSaveSpecialty} />}
+            
+            <AvailabilityDialog isOpen={isAvailabilityOpen} onOpenChange={setIsAvailabilityOpen} />
+
             <div className="p-6">
                 <header className="flex justify-between items-center mb-8">
                     <div>
                         <h1 className="text-3xl font-bold">Welcome back, {user?.name}</h1>
                         <p className="text-muted-foreground">Here’s what’s on your plate today. {user?.specialty && <span className="font-semibold text-primary">({user.specialty})</span>}</p>
                     </div>
-                    <Button>
+                    <Button onClick={() => setIsAvailabilityOpen(true)}>
                         <Edit className="mr-2 h-4 w-4" />
                         Set Availability
                     </Button>

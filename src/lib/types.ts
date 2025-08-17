@@ -3,6 +3,7 @@
 
 
 
+
 export type Product = {
   id: string;
   name: string;
@@ -78,8 +79,6 @@ export type RefillRequest = {
   };
 
 
-export type DayEventType = 'medication' | 'appointment' | 'measurement';
-
 export type DayEvent = {
     id: string;
     type: DayEventType;
@@ -129,4 +128,14 @@ export type BlogPost = {
     category: string;
     date: string; // ISO 8601 string
     content: string; // HTML content
+};
+
+export type DayEventType = 'medication' | 'appointment' | 'measurement';
+
+export type Availability = {
+    id: string; // e.g., '2024-10-28'
+    doctorId: string;
+    isAvailable: boolean;
+    slots: { startTime: string; endTime: string }[]; // e.g., { startTime: '09:00', endTime: '17:00' }
+    breaks: { startTime: string; endTime: string }[];
 };
