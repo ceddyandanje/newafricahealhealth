@@ -255,25 +255,7 @@ export default function PatientDashboardPage() {
                     <CardContent>
                          {isMetricsLoading ? (
                             <div className="h-[250px] w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>
-                         ) : !hasChartData ? (
-                            <div className="relative h-[250px] w-full rounded-lg overflow-hidden bg-muted/50">
-                                <Image 
-                                    src="https://images.unsplash.com/photo-1676291920753-dd019397927a?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                                    alt="Abstract health data visualization"
-                                    fill
-                                    className="object-cover opacity-45 blur-sm z-0"
-                                    data-ai-hint="health data visualization"
-                                />
-                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-foreground p-4">
-                                    <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
-                                    <h3 className="font-semibold">Track Your Health</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">Fill in metrics to see your trends visualized here.</p>
-                                    <Button onClick={handleAddMetric}>
-                                        <Plus className="mr-2 h-4 w-4"/> Add Your First Metric
-                                    </Button>
-                                </div>
-                            </div>
-                         ) : (
+                         ) : hasChartData ? (
                             <ChartContainer config={{}} className="h-[250px] w-full">
                                 {chartType === 'line' ? (
                                     <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -307,6 +289,15 @@ export default function PatientDashboardPage() {
                                     </BarChartComponent>
                                 )}
                             </ChartContainer>
+                         ) : (
+                            <div className="h-[250px] w-full rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center text-foreground p-4">
+                                <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
+                                <h3 className="font-semibold">Track Your Health</h3>
+                                <p className="text-sm text-muted-foreground mb-4">Fill in metrics to see your trends visualized here.</p>
+                                <Button onClick={handleAddMetric}>
+                                    <Plus className="mr-2 h-4 w-4"/> Add Your First Metric
+                                </Button>
+                            </div>
                          )}
                     </CardContent>
                 </Card>
