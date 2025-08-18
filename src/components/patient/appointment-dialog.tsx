@@ -13,14 +13,16 @@ import { type User } from '@/lib/types';
 import { type Availability, getDoctorAvailability } from '@/lib/availability';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { type ServiceCategory } from '@/lib/serviceCategories';
 
 interface AppointmentDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   doctors: User[];
+  initialSpecialty?: ServiceCategory | null;
 }
 
-export default function AppointmentDialog({ isOpen, onOpenChange, doctors }: AppointmentDialogProps) {
+export default function AppointmentDialog({ isOpen, onOpenChange, doctors, initialSpecialty }: AppointmentDialogProps) {
   const [step, setStep] = useState(1);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -29,16 +31,28 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors }: App
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const { toast } = useToast();
 
+  const filteredDoctors = initialSpecialty 
+    ? doctors.filter(d => d.specialty === initialSpecialty.name)
+    : doctors;
+
   useEffect(() => {
-    // Reset state when dialog is closed
+    // Reset state when dialog is closed or specialty changes
     if (!isOpen) {
       setStep(1);
       setSelectedDoctorId(null);
       setSelectedDate(new Date());
       setAvailability(null);
       setSelectedTime(null);
+    } else {
+        // If an initial specialty is provided, start at step 2 if there's only one doctor
+        if (initialSpecialty && filteredDoctors.length === 1) {
+            setSelectedDoctorId(filteredDoctors[0].id);
+            setStep(2);
+        } else {
+            setStep(1);
+        }
     }
-  }, [isOpen]);
+  }, [isOpen, initialSpecialty, filteredDoctors]);
 
   useEffect(() => {
     if (selectedDoctorId && selectedDate) {
@@ -79,6 +93,7 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors }: App
         <DialogHeader>
           <DialogTitle className="font-headline text-2xl">Book an Appointment</DialogTitle>
           <DialogDescription>
+            {initialSpecialty ? `Booking for ${initialSpecialty.name}. ` : ''}
             {step === 1 ? "Select a doctor to see their schedule." : `Booking with ${doctorName}.`}
           </DialogDescription>
         </DialogHeader>
@@ -87,16 +102,22 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors }: App
           {step === 1 && (
             <div>
               <Label htmlFor="doctor-select" className="font-semibold mb-2 block">1. Choose your Doctor</Label>
-              <Select onValueChange={setSelectedDoctorId}>
-                <SelectTrigger id="doctor-select">
-                  <SelectValue placeholder="Select a doctor..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {doctors.map(doctor => (
-                    <SelectItem key={doctor.id} value={doctor.id}>{doctor.name} ({doctor.specialty || 'General'})</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+               {filteredDoctors.length > 0 ? (
+                    <Select onValueChange={setSelectedDoctorId}>
+                        <SelectTrigger id="doctor-select">
+                        <SelectValue placeholder="Select a doctor..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                        {filteredDoctors.map(doctor => (
+                            <SelectItem key={doctor.id} value={doctor.id}>{doctor.name}</SelectItem>
+                        ))}
+                        </SelectContent>
+                    </Select>
+               ) : (
+                <div className="text-center text-muted-foreground p-4 border rounded-md">
+                    No doctors are available for this specialty right now. Please check back later.
+                </div>
+               )}
             </div>
           )}
 
@@ -137,8 +158,8 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors }: App
         </div>
         
         <DialogFooter>
-          {step === 1 && <Button onClick={() => setStep(2)} disabled={!selectedDoctorId}>Next <ArrowRight className="ml-2"/></Button>}
-          {step === 2 && <Button onClick={() => setStep(1)} variant="outline">Back</Button>}
+          {step === 1 && <Button onClick={() => setStep(2)} disabled={!selectedDoctorId || filteredDoctors.length === 0}>Next <ArrowRight className="ml-2"/></Button>}
+          {step === 2 && (filteredDoctors.length > 1 || !initialSpecialty) && <Button onClick={() => setStep(1)} variant="outline">Back</Button>}
           {step === 2 && <Button onClick={handleSubmit} disabled={!selectedTime || !selectedDate}>Confirm Appointment</Button>}
         </DialogFooter>
       </DialogContent>

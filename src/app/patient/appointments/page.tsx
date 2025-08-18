@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar, ChevronDown, Filter, Plus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AppointmentDialog from '@/components/patient/appointment-dialog';
 import { useUsers } from '@/lib/users';
+import { useBookingStore } from '@/hooks/use-booking-store';
 
 const appointments = [
     { id: 'APT2301', date: 'October 30, 2024', time: '11:00 AM', doctor: 'Dr. Chen', type: 'Virtual Consultation', status: 'Upcoming' },
@@ -25,16 +26,27 @@ const statusVariant = {
 } as const;
 
 export default function PatientAppointmentsPage() {
-    const [isBookingOpen, setIsBookingOpen] = useState(false);
     const { users } = useUsers();
     const doctors = users.filter(u => u.role === 'doctor');
+    const { isDialogOpen, openDialog, closeDialog, specialty } = useBookingStore();
+
+    useEffect(() => {
+        // This effect handles opening the dialog if the state indicates it should be open
+        // (e.g., after redirect from services page).
+        // The actual state change to open is done on the services page.
+    }, [isDialogOpen]);
 
     return (
         <>
             <AppointmentDialog 
-                isOpen={isBookingOpen} 
-                onOpenChange={setIsBookingOpen} 
+                isOpen={isDialogOpen} 
+                onOpenChange={(open) => {
+                    if (!open) {
+                        closeDialog();
+                    }
+                }}
                 doctors={doctors} 
+                initialSpecialty={specialty}
             />
             <div className="p-6">
                 <header className="py-6 flex justify-between items-center">
@@ -44,7 +56,7 @@ export default function PatientAppointmentsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                         <Button variant="outline"><Filter className="mr-2 h-4 w-4"/> Filter</Button>
-                        <Button onClick={() => setIsBookingOpen(true)}><Plus className="mr-2 h-4 w-4"/> Book New</Button>
+                        <Button onClick={openDialog}><Plus className="mr-2 h-4 w-4"/> Book New</Button>
                     </div>
                 </header>
                 <Card>

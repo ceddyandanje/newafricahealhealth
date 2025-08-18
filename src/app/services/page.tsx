@@ -5,10 +5,36 @@ import { useState } from 'react';
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { ServiceCategoryDialog } from "@/components/health/service-category-dialog";
-import { serviceCategories, ServiceCategory } from '@/lib/serviceCategories';
+import { serviceCategories, type ServiceCategory } from '@/lib/serviceCategories';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { useBookingStore } from '@/hooks/use-booking-store';
 
 export default function ServicesPage() {
-    const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
+    const { user } = useAuth();
+    const router = useRouter();
+    const { toast } = useToast();
+    const { setSpecialty, openDialog } = useBookingStore();
+
+    const handleServiceClick = (category: ServiceCategory) => {
+        if (!user) {
+            // Not logged in: remember specialty and redirect to login
+            setSpecialty(category);
+            router.push('/login');
+        } else if (user.role === 'user') {
+            // Logged in as patient: remember specialty and go to appointments page
+            setSpecialty(category);
+            openDialog();
+            router.push('/patient/appointments');
+        } else {
+            // Logged in as doctor, admin, etc.
+            toast({
+                title: "Action Not Allowed",
+                description: `Users with the "${user.role}" role cannot book appointments. Please use a patient account.`,
+            });
+        }
+    };
 
     return (
         <div className="bg-background">
@@ -43,7 +69,7 @@ export default function ServicesPage() {
                         <Card
                             key={category.id}
                             className="glassmorphic p-4 text-center group cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all"
-                            onClick={() => setSelectedCategory(category)}
+                            onClick={() => handleServiceClick(category)}
                         >
                             <CardContent className="p-2 flex flex-col items-center justify-center h-full">
                                  <div className="p-3 bg-primary/10 rounded-full mb-3 text-primary">
@@ -55,13 +81,7 @@ export default function ServicesPage() {
                     ))}
                 </div>
             </div>
-             {selectedCategory && (
-                <ServiceCategoryDialog
-                    category={selectedCategory}
-                    isOpen={!!selectedCategory}
-                    onClose={() => setSelectedCategory(null)}
-                />
-            )}
+            {/* The dialog is now managed globally and opened on the appointments page */}
         </div>
     );
 }
