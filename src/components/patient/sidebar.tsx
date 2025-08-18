@@ -60,13 +60,23 @@ export default function PatientSidebar() {
             {isExpanded ? (
                 // Expanded View
                 <div className="w-full flex flex-col h-full overflow-y-auto">
+                     <Link
+                        href="/patient/dashboard"
+                        className={cn(
+                            'p-3 mb-2 col-span-2 flex items-center justify-center rounded-lg transition-colors text-foreground',
+                             pathname.startsWith('/patient/dashboard') ? 'bg-black/10 dark:bg-white/20' : 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'
+                        )}
+                    >
+                        <LayoutGrid className="h-5 w-5 mr-2" />
+                        <span className="text-sm font-semibold">Dashboard</span>
+                    </Link>
                     <div className="grid grid-cols-2 gap-2 mb-4">
                         {mainNavItems.map(item => (
                              <Link
                                 key={item.label}
                                 href={item.href}
                                 className={cn(
-                                    'p-2 flex flex-col items-center justify-center rounded-lg transition-colors text-foreground',
+                                    'p-2 flex flex-col items-center justify-center rounded-lg transition-colors text-foreground h-[70px]',
                                     pathname.startsWith(item.href) ? 'bg-black/10 dark:bg-white/20' : 'bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10'
                                 )}
                             >
@@ -118,6 +128,13 @@ export default function PatientSidebar() {
             ) : (
                 // Collapsed View
                  <div className="flex flex-col gap-2 h-full">
+                     <Link
+                        href={'/patient/dashboard'}
+                        title={'Dashboard'}
+                        className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/dashboard') && 'bg-black/10 dark:bg-white/20' )}
+                    >
+                        <LayoutGrid className="h-5 w-5" />
+                    </Link>
                     {mainNavItems.map((item) => (
                         <Link
                             key={item.label}
