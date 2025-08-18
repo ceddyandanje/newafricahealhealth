@@ -14,11 +14,13 @@ import {
   Heart,
   Weight,
   HeartPulse,
+  BarChart3,
+  LineChart,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Area, Line, LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell } from "recharts"
+import { Area, LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell, Bar, BarChart as BarChartComponent, XAxis, YAxis, CartesianGrid, Legend } from "recharts"
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
@@ -44,9 +46,9 @@ const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
 
 const metricOptions: { value: HealthMetricType, label: string, icon: React.ElementType }[] = [
     { value: 'bloodSugar', label: 'Blood Sugar', icon: Droplets },
+    { value: 'bloodPressure', label: 'Blood Pressure', icon: Heart },
     { value: 'weight', label: 'Weight', icon: Weight },
     { value: 'heartRate', label: 'Heart Rate', icon: HeartPulse },
-    { value: 'bloodPressure', label: 'Blood Pressure', icon: Heart },
 ];
 
 
@@ -109,6 +111,7 @@ export default function PatientDashboardPage() {
     const router = useRouter();
     const [greeting, setGreeting] = useState('Good morning');
     const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('bloodSugar');
+    const [chartType, setChartType] = useState<'line' | 'bar'>('line');
     
     useEffect(() => {
         if (!isAuthLoading && !user) {
@@ -132,12 +135,20 @@ export default function PatientDashboardPage() {
         const filteredMetrics = metrics.filter(m => m.type === selectedMetric);
 
         return last7Days.map(day => {
-            const dayMetrics = filteredMetrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'));
-            const avgValue = dayMetrics.length > 0 ? dayMetrics.reduce((sum, m) => sum + m.value, 0) / dayMetrics.length : 0;
+            const dayString = format(day, 'yyyy-MM-dd');
+            const dayMetrics = filteredMetrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === dayString);
             
+            if (dayMetrics.length === 0) {
+                return { date: format(day, 'MMM d'), value: null, value2: null };
+            }
+
+            const avgValue = dayMetrics.reduce((sum, m) => sum + m.value, 0) / dayMetrics.length;
+            const avgValue2 = selectedMetric === 'bloodPressure' ? dayMetrics.reduce((sum, m) => sum + (m.value2 || 0), 0) / dayMetrics.length : null;
+
             return {
                 date: format(day, 'MMM d'),
-                value: avgValue > 0 ? avgValue : null, // Use null for days with no data to create gaps in the chart
+                value: avgValue > 0 ? avgValue : null,
+                value2: avgValue2 && avgValue2 > 0 ? avgValue2 : null,
             };
         });
     }, [metrics, selectedMetric]);
@@ -147,6 +158,8 @@ export default function PatientDashboardPage() {
         // This would open a dialog in a real app to get user input
         // For now, we add a random value for the selected metric
         let randomValue: number;
+        let randomValue2: number | undefined;
+
         switch(selectedMetric) {
             case 'bloodSugar':
                 randomValue = Math.floor(Math.random() * (180 - 80 + 1)) + 80;
@@ -157,6 +170,10 @@ export default function PatientDashboardPage() {
             case 'heartRate':
                  randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
                  break;
+            case 'bloodPressure':
+                 randomValue = Math.floor(Math.random() * (140 - 110 + 1)) + 110; // Systolic
+                 randomValue2 = Math.floor(Math.random() * (90 - 70 + 1)) + 70; // Diastolic
+                 break;
             default:
                 randomValue = 0;
         }
@@ -164,6 +181,7 @@ export default function PatientDashboardPage() {
         await addHealthMetric(user.id, {
             type: selectedMetric,
             value: randomValue,
+            value2: randomValue2,
             timestamp: new Date().toISOString()
         });
     };
@@ -192,7 +210,7 @@ export default function PatientDashboardPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
                 <Card className="lg:col-span-3 bg-background">
-                    <CardHeader className="flex flex-row justify-between items-center">
+                    <CardHeader className="flex flex-row justify-between items-center flex-wrap gap-2">
                         <div className="flex items-center gap-2">
                             <CardTitle>Health Trends</CardTitle>
                              <Select value={selectedMetric} onValueChange={(val) => setSelectedMetric(val as HealthMetricType)}>
@@ -211,33 +229,48 @@ export default function PatientDashboardPage() {
                                 </SelectContent>
                             </Select>
                         </div>
-                        <Button size="sm" onClick={handleAddMetric}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center rounded-md bg-muted p-0.5">
+                                <Button size="icon" variant={chartType === 'line' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}><LineChart className="h-4 w-4"/></Button>
+                                <Button size="icon" variant={chartType === 'bar' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}><BarChart3 className="h-4 w-4"/></Button>
+                            </div>
+                            <Button size="sm" onClick={handleAddMetric}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         {isMetricsLoading ? <Loader2 className="animate-spin" /> :
                         <ChartContainer config={{}} className="h-[250px] w-full">
-                            <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                <defs>
-                                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                    </linearGradient>
-                                </defs>
-                                <ChartTooltip 
-                                    content={<ChartTooltipContent indicator="dot" />} 
-                                    formatter={(value) => value === null ? 'No Data' : value}
-                                />
-                                <Area
-                                    dataKey="value"
-                                    type="monotone"
-                                    fill="url(#colorValue)"
-                                    fillOpacity={0.4}
-                                    stroke="hsl(var(--primary))"
-                                    strokeWidth={2}
-                                    dot={{ r: 4, fill: 'hsl(var(--primary))' }} 
-                                    connectNulls={false}
-                                />
-                            </LineChartComponent>
+                            {chartType === 'line' ? (
+                                <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                    <defs>
+                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                        </linearGradient>
+                                         <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                    <ChartTooltip content={<ChartTooltipContent />} />
+                                    <Area dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" fill="url(#colorValue)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} />
+                                    {selectedMetric === 'bloodPressure' && <Area dataKey="value2" name="Diastolic" type="monotone" fill="url(#colorValue2)" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} />}
+                                    <Legend />
+                                </LineChartComponent>
+                            ) : (
+                                <BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                    <ChartTooltip content={<ChartTooltipContent />} />
+                                    <Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                    {selectedMetric === 'bloodPressure' && <Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} />}
+                                    <Legend />
+                                </BarChartComponent>
+                            )}
                         </ChartContainer>
                         }
                     </CardContent>
@@ -304,3 +337,5 @@ export default function PatientDashboardPage() {
         </div>
     );
 }
+
+    

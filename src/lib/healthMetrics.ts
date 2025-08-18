@@ -18,6 +18,9 @@ const sampleMetrics: Omit<HealthMetric, 'id'>[] = [
     { type: "weight", value: 85, timestamp: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString() },
     { type: "weight", value: 85.5, timestamp: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString() },
     { type: "weight", value: 84, timestamp: new Date().toISOString() },
+    { type: "bloodPressure", value: 120, value2: 80, timestamp: new Date(new Date().setDate(new Date().getDate() - 6)).toISOString() },
+    { type: "bloodPressure", value: 122, value2: 81, timestamp: new Date(new Date().setDate(new Date().getDate() - 4)).toISOString() },
+    { type: "bloodPressure", value: 125, value2: 85, timestamp: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString() },
 ];
 
 // Function to seed metrics for a specific user IF they don't have any
@@ -86,3 +89,5 @@ export const addHealthMetric = async (userId: string, metric: Omit<HealthMetric,
         console.error("Error adding health metric:", error);
     }
 };
+
+    

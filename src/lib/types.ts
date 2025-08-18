@@ -115,8 +115,8 @@ export type HealthMetricType = 'bloodSugar' | 'bloodPressure' | 'weight' | 'hear
 export type HealthMetric = {
     id: string;
     type: HealthMetricType; 
-    value: number;
-    value2?: number; // For diastolic blood pressure
+    value: number; // For single-value metrics or systolic BP
+    value2?: number; // For diastolic BP
     timestamp: string; // ISO 8601 string
 };
 
@@ -141,3 +141,5 @@ export type Availability = {
     slots: string[];
 };
 
+
+    
