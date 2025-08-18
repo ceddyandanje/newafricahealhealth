@@ -18,7 +18,8 @@ import Image from "next/image"
 const dropdownCategories = [
     ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory'].includes(c.id)),
     { id: 'medical-tourism', name: 'Medical Tourism' },
-    { id: 'organ-transplants', name: 'Organ Transplants' }
+    { id: 'organ-transplants', name: 'Organ Transplants' },
+    { id: 'emergency-services', name: 'Emergency Services' }
 ];
 
 function CategoriesDropdown() {
