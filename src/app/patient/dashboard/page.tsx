@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -12,6 +11,9 @@ import {
   UploadCloud,
   MessageSquare,
   Plus,
+  Heart,
+  Weight,
+  HeartPulse,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -26,6 +28,8 @@ import { useEvents, type DayEvent } from '@/lib/events';
 import Link from 'next/link';
 import { useHealthMetrics, addHealthMetric } from '@/lib/healthMetrics';
 import { format, subDays } from 'date-fns';
+import { type HealthMetricType } from '@/lib/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const subscriptionData = [
   { name: 'Active', value: 3, fill: 'hsl(var(--primary))' },
@@ -37,6 +41,14 @@ const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
     measurement: Droplets,
     appointment: Video,
 };
+
+const metricOptions: { value: HealthMetricType, label: string, icon: React.ElementType }[] = [
+    { value: 'bloodSugar', label: 'Blood Sugar', icon: Droplets },
+    { value: 'weight', label: 'Weight', icon: Weight },
+    { value: 'heartRate', label: 'Heart Rate', icon: HeartPulse },
+    { value: 'bloodPressure', label: 'Blood Pressure', icon: Heart },
+];
+
 
 function EmptyState() {
     return (
@@ -96,6 +108,7 @@ export default function PatientDashboardPage() {
     const { metrics, isLoading: isMetricsLoading } = useHealthMetrics(user?.id);
     const router = useRouter();
     const [greeting, setGreeting] = useState('Good morning');
+    const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('bloodSugar');
     
     useEffect(() => {
         if (!isAuthLoading && !user) {
@@ -116,9 +129,10 @@ export default function PatientDashboardPage() {
 
     const healthTrendData = useMemo(() => {
         const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
-        
+        const filteredMetrics = metrics.filter(m => m.type === selectedMetric);
+
         return last7Days.map(day => {
-            const dayMetrics = metrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'));
+            const dayMetrics = filteredMetrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'));
             const avgValue = dayMetrics.length > 0 ? dayMetrics.reduce((sum, m) => sum + m.value, 0) / dayMetrics.length : 0;
             
             return {
@@ -126,13 +140,29 @@ export default function PatientDashboardPage() {
                 value: avgValue > 0 ? avgValue : null, // Use null for days with no data to create gaps in the chart
             };
         });
-    }, [metrics]);
+    }, [metrics, selectedMetric]);
 
     const handleAddMetric = async () => {
         if (!user) return;
-        const randomValue = Math.floor(Math.random() * (180 - 80 + 1)) + 80; // Random blood sugar between 80-180
+        // This would open a dialog in a real app to get user input
+        // For now, we add a random value for the selected metric
+        let randomValue: number;
+        switch(selectedMetric) {
+            case 'bloodSugar':
+                randomValue = Math.floor(Math.random() * (180 - 80 + 1)) + 80;
+                break;
+            case 'weight':
+                randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
+                break;
+            case 'heartRate':
+                 randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
+                 break;
+            default:
+                randomValue = 0;
+        }
+
         await addHealthMetric(user.id, {
-            type: 'bloodSugar',
+            type: selectedMetric,
             value: randomValue,
             timestamp: new Date().toISOString()
         });
@@ -163,7 +193,24 @@ export default function PatientDashboardPage() {
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
                 <Card className="lg:col-span-3 bg-background">
                     <CardHeader className="flex flex-row justify-between items-center">
-                        <CardTitle>Health Trends (Blood Sugar)</CardTitle>
+                        <div className="flex items-center gap-2">
+                            <CardTitle>Health Trends</CardTitle>
+                             <Select value={selectedMetric} onValueChange={(val) => setSelectedMetric(val as HealthMetricType)}>
+                                <SelectTrigger className="w-[180px] h-9">
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {metricOptions.map(opt => (
+                                        <SelectItem key={opt.value} value={opt.value}>
+                                            <div className="flex items-center gap-2">
+                                                <opt.icon className="w-4 h-4"/>
+                                                {opt.label}
+                                            </div>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                         <Button size="sm" onClick={handleAddMetric}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
                     </CardHeader>
                     <CardContent>

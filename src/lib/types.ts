@@ -33,9 +33,10 @@ export type User = {
     age?: string;
     phone?: string;
     specialty?: string; // For doctors
-    vehicleType?: string; // For delivery drivers
-    labSpecialty?: string; // For lab technicians
+    vehicleType?: 'motorbike' | 'car' | 'van' | 'bicycle' | 'other'; // For delivery drivers
+    labSpecialty?: 'Hematology' | 'Microbiology' | 'Biochemistry' | 'Pathology'; // For lab technicians
     emergencyUnit?: string; // For emergency services
+    certificationLevel?: 'EMT' | 'Paramedic' | 'First Responder';
 };
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;
@@ -109,11 +110,13 @@ export type RoadmapTask = {
     createdAt: string; // ISO 8601 string
 };
 
+export type HealthMetricType = 'bloodSugar' | 'bloodPressure' | 'weight' | 'heartRate';
 
 export type HealthMetric = {
     id: string;
-    type: 'bloodSugar' | 'bloodPressure' | 'weight'; // Example types
+    type: HealthMetricType; 
     value: number;
+    value2?: number; // For diastolic blood pressure
     timestamp: string; // ISO 8601 string
 };
 

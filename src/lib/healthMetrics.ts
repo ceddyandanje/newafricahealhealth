@@ -15,6 +15,9 @@ const sampleMetrics: Omit<HealthMetric, 'id'>[] = [
     { type: "bloodSugar", value: 160, timestamp: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString() },
     { type: "bloodSugar", value: 155, timestamp: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString() },
     { type: "bloodSugar", value: 148, timestamp: new Date().toISOString() },
+    { type: "weight", value: 85, timestamp: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString() },
+    { type: "weight", value: 85.5, timestamp: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString() },
+    { type: "weight", value: 84, timestamp: new Date().toISOString() },
 ];
 
 // Function to seed metrics for a specific user IF they don't have any
