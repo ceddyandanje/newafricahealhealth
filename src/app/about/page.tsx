@@ -19,11 +19,11 @@ export default function AboutUsPage() {
           <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
             <div className="relative h-96 rounded-2xl overflow-hidden">
                 <Image
-                    src="https://placehold.co/600x450.png"
-                    alt="Team of smiling healthcare professionals"
+                    src="https://images.unsplash.com/photo-1476304884326-cd2c88572c5f?q=80&w=869&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    alt="First aid kit on a beach"
                     fill
                     className="object-cover"
-                    data-ai-hint="healthcare professionals team"
+                    data-ai-hint="first-aid kit"
                 />
             </div>
             <div className="space-y-8">
