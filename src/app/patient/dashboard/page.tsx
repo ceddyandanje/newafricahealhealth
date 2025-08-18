@@ -16,6 +16,7 @@ import {
   HeartPulse,
   BarChart3,
   LineChart,
+  GitGraph,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,6 +33,7 @@ import { useHealthMetrics, addHealthMetric } from '@/lib/healthMetrics';
 import { format, subDays } from 'date-fns';
 import { type HealthMetricType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Image from 'next/image';
 
 const subscriptionData = [
   { name: 'Active', value: 3, fill: 'hsl(var(--primary))' },
@@ -152,6 +154,8 @@ export default function PatientDashboardPage() {
             };
         });
     }, [metrics, selectedMetric]);
+    
+    const hasChartData = useMemo(() => healthTrendData.some(d => d.value !== null), [healthTrendData]);
 
     const handleAddMetric = async () => {
         if (!user) return;
@@ -238,41 +242,61 @@ export default function PatientDashboardPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        {isMetricsLoading ? <Loader2 className="animate-spin" /> :
-                        <ChartContainer config={{}} className="h-[250px] w-full">
-                            {chartType === 'line' ? (
-                                <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                    <defs>
-                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                        </linearGradient>
-                                         <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
-                                            <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                    <ChartTooltip content={<ChartTooltipContent />} />
-                                    <Area dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" fill="url(#colorValue)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} />
-                                    {selectedMetric === 'bloodPressure' && <Area dataKey="value2" name="Diastolic" type="monotone" fill="url(#colorValue2)" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} />}
-                                    <Legend />
-                                </LineChartComponent>
-                            ) : (
-                                <BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                    <ChartTooltip content={<ChartTooltipContent />} />
-                                    <Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                    {selectedMetric === 'bloodPressure' && <Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} />}
-                                    <Legend />
-                                </BarChartComponent>
-                            )}
-                        </ChartContainer>
-                        }
+                         {isMetricsLoading ? (
+                            <div className="h-[250px] w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+                         ) : !hasChartData ? (
+                            <div className="h-[250px] w-full relative flex flex-col items-center justify-center rounded-lg overflow-hidden bg-muted/50">
+                                <Image 
+                                    src="https://images.unsplash.com/photo-1649073586751-695a1f9f76de?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                                    alt="Abstract health data visualization"
+                                    layout="fill"
+                                    className="object-cover opacity-45 blur-sm"
+                                    data-ai-hint="health data visualization"
+                                />
+                                <div className="z-10 text-center text-foreground p-4">
+                                    <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
+                                    <h3 className="font-semibold">Track Your Health</h3>
+                                    <p className="text-sm text-muted-foreground mb-4">Add a metric to see your trends visualized here.</p>
+                                    <Button onClick={handleAddMetric}>
+                                        <Plus className="mr-2 h-4 w-4"/> Add Your First Metric
+                                    </Button>
+                                </div>
+                            </div>
+                         ) : (
+                            <ChartContainer config={{}} className="h-[250px] w-full">
+                                {chartType === 'line' ? (
+                                    <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                        <defs>
+                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                            </linearGradient>
+                                            <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
+                                                <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                        <ChartTooltip content={<ChartTooltipContent />} />
+                                        <Area dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" fill="url(#colorValue)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} />
+                                        {selectedMetric === 'bloodPressure' && <Area dataKey="value2" name="Diastolic" type="monotone" fill="url(#colorValue2)" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} />}
+                                        <Legend />
+                                    </LineChartComponent>
+                                ) : (
+                                    <BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                        <ChartTooltip content={<ChartTooltipContent />} />
+                                        <Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                        {selectedMetric === 'bloodPressure' && <Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} />}
+                                        <Legend />
+                                    </BarChartComponent>
+                                )}
+                            </ChartContainer>
+                         )}
                     </CardContent>
                 </Card>
 
