@@ -31,7 +31,7 @@ const userSchema = z.object({
     name: z.string().min(2, 'Name is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(8, 'Password must be at least 8 characters'),
-    role: z.enum(['admin', 'user', 'delivery-driver', 'emergency-services', 'doctor']),
+    role: z.enum(['admin', 'user', 'delivery-driver', 'emergency-services', 'doctor', 'lab-technician']),
 });
 
 function AddUserForm({ onSave, onOpenChange }: { onSave: (data: z.infer<typeof userSchema>) => void, onOpenChange: (open: boolean) => void }) {
@@ -66,9 +66,10 @@ function AddUserForm({ onSave, onOpenChange }: { onSave: (data: z.infer<typeof u
                             <SelectContent>
                                 <SelectItem value="user">User</SelectItem>
                                 <SelectItem value="admin">Admin</SelectItem>
-                                <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
-                                <SelectItem value="emergency-services">Emergency Services</SelectItem>
                                 <SelectItem value="doctor">Doctor</SelectItem>
+                                <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
+                                <SelectItem value="lab-technician">Lab Technician</SelectItem>
+                                <SelectItem value="emergency-services">Emergency Services</SelectItem>
                             </SelectContent>
                         </Select>
                         <FormMessage />
@@ -131,9 +132,10 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
                                 <SelectContent>
                                     <SelectItem value="user">User</SelectItem>
                                     <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
-                                    <SelectItem value="emergency-services">Emergency Services</SelectItem>
                                     <SelectItem value="doctor">Doctor</SelectItem>
+                                    <SelectItem value="delivery-driver">Delivery Driver</SelectItem>
+                                    <SelectItem value="lab-technician">Lab Technician</SelectItem>
+                                    <SelectItem value="emergency-services">Emergency Services</SelectItem>
                                 </SelectContent>
                             </Select>
                             {isEditingSelf && <p className="text-xs text-muted-foreground mt-1">You cannot change your own role.</p>}

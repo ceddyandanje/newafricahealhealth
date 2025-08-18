@@ -68,24 +68,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleRedirect = (loggedInUser: User) => {
-    // If the user is already on a dashboard, don't redirect
-    if (pathname.startsWith('/admin') || pathname.startsWith('/doctor') || pathname.startsWith('/patient')) {
-        return;
+    const currentBase = pathname.split('/')[1];
+    
+    const roleMap: { [key in User['role']]: string } = {
+        'admin': 'admin',
+        'doctor': 'doctor',
+        'user': 'patient',
+        'delivery-driver': 'delivery',
+        'lab-technician': 'labs',
+        'emergency-services': 'emergency'
     }
 
-    switch (loggedInUser.role) {
-      case 'admin':
-        router.push('/admin');
-        break;
-      case 'doctor':
-        router.push('/doctor/dashboard');
-        break;
-      case 'user':
-        router.push('/patient/dashboard');
-        break;
-      default:
-        router.push('/login');
-        break;
+    const destination = roleMap[loggedInUser.role];
+    const dashboardPath = `/${destination}`;
+
+    if (currentBase !== destination) {
+        router.push(dashboardPath);
     }
   };
 

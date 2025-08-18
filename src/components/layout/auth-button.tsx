@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, LogOut, LayoutDashboard, ListOrdered, Repeat, Heart, Stethoscope } from "lucide-react";
+import { User, LogOut, LayoutDashboard, ListOrdered, Repeat, Heart, Stethoscope, Ambulance, FlaskConical, Truck } from "lucide-react";
 
 export default function AuthButton() {
   const { user, logout } = useAuth();
@@ -54,6 +54,33 @@ export default function AuthButton() {
                 <Link href="/doctor/dashboard">
                     <Stethoscope className="mr-2 h-4 w-4" />
                     <span>Doctor Dashboard</span>
+                </Link>
+            </DropdownMenuItem>
+        )}
+
+        {user.role === 'delivery-driver' && (
+            <DropdownMenuItem asChild>
+                <Link href="/delivery/dashboard">
+                    <Truck className="mr-2 h-4 w-4" />
+                    <span>Delivery Dashboard</span>
+                </Link>
+            </DropdownMenuItem>
+        )}
+
+        {user.role === 'lab-technician' && (
+            <DropdownMenuItem asChild>
+                <Link href="/labs/dashboard">
+                    <FlaskConical className="mr-2 h-4 w-4" />
+                    <span>Lab Dashboard</span>
+                </Link>
+            </DropdownMenuItem>
+        )}
+
+         {user.role === 'emergency-services' && (
+            <DropdownMenuItem asChild>
+                <Link href="/emergency/dashboard">
+                    <Ambulance className="mr-2 h-4 w-4" />
+                    <span>Emergency Dashboard</span>
                 </Link>
             </DropdownMenuItem>
         )}

@@ -1,10 +1,5 @@
 
 
-
-
-
-
-
 export type Product = {
   id: string;
   name: string;
@@ -22,7 +17,7 @@ export type CartItem = {
   quantity: number;
 };
 
-export type UserRole = 'admin' | 'user' | 'delivery-driver' | 'emergency-services' | 'doctor';
+export type UserRole = 'admin' | 'user' | 'delivery-driver' | 'emergency-services' | 'doctor' | 'lab-technician';
 export type UserStatus = 'active' | 'inactive' | 'on-hold';
 
 export type User = {
@@ -38,6 +33,9 @@ export type User = {
     age?: string;
     phone?: string;
     specialty?: string; // For doctors
+    vehicleType?: string; // For delivery drivers
+    labSpecialty?: string; // For lab technicians
+    emergencyUnit?: string; // For emergency services
 };
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;
