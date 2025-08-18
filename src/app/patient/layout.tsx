@@ -45,9 +45,9 @@ export default function PatientLayout({
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-muted/40">
+    <div className="min-h-screen bg-muted/40">
         <PatientSidebar />
-        <main className="pl-20 transition-all duration-300">
+        <main className="pl-20 transition-all duration-300 pb-24">
           {children}
         </main>
     </div>

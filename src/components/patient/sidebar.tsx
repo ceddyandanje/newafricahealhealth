@@ -52,7 +52,7 @@ export default function PatientSidebar() {
             className={cn(
                 'fixed left-4 top-20 bottom-4 z-50 flex flex-col items-start transition-all duration-300',
                 'bg-gradient-to-br from-blue-200 to-green-300 dark:from-blue-900/70 dark:to-green-800/70 backdrop-blur-lg border border-white/30 dark:border-white/10 rounded-2xl shadow-lg',
-                isExpanded ? 'w-72 p-4' : 'w-14 p-2 items-center',
+                isExpanded ? 'w-72 p-4' : 'w-14 p-1 items-center',
             )}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
@@ -127,11 +127,11 @@ export default function PatientSidebar() {
                 </div>
             ) : (
                 // Collapsed View
-                 <div className="flex flex-col gap-2 h-full">
+                 <div className="flex flex-col gap-1 h-full w-full">
                      <Link
                         href={'/patient/dashboard'}
                         title={'Dashboard'}
-                        className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/dashboard') && 'bg-black/10 dark:bg-white/20' )}
+                        className={cn( 'h-10 w-full flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/dashboard') && 'bg-black/10 dark:bg-white/20' )}
                     >
                         <LayoutGrid className="h-5 w-5" />
                     </Link>
@@ -141,7 +141,7 @@ export default function PatientSidebar() {
                             href={item.href}
                             title={item.label}
                             className={cn(
-                                'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground',
+                                'h-10 w-full flex items-center justify-center rounded-lg transition-colors text-foreground',
                                 'hover:bg-black/10 dark:hover:bg-white/10',
                                 pathname.startsWith(item.href) && 'bg-black/10 dark:bg-white/20'
                             )}
@@ -151,22 +151,22 @@ export default function PatientSidebar() {
                     ))}
                     <div className="my-1 h-px w-full bg-border/50" />
                     
-                    <Link href={'#'} title="Search" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                    <Link href={'#'} title="Search" className={cn( 'h-10 w-full flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
                         <Search className="h-5 w-5" />
                     </Link>
-                    <Link href={'/patient/messages'} title="Communications" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                    <Link href={'/patient/messages'} title="Communications" className={cn( 'h-10 w-full flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
                         <Mail className="h-5 w-5" />
                     </Link>
-                    <Link href={'/patient/documents'} title="My Record" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                    <Link href={'/patient/documents'} title="My Record" className={cn( 'h-10 w-full flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
                         <FileText className="h-5 w-5" />
                     </Link>
-                    <Link href={'#'} title="Find Care" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
+                    <Link href={'#'} title="Find Care" className={cn( 'h-10 w-full flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10' )}>
                         <LifeBuoy className="h-5 w-5" />
                     </Link>
                     
                     <div className="mt-auto">
                         <div className="my-1 h-px w-full bg-border/50" />
-                         <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-10 flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
+                         <Link href={'/patient/settings'} title="Settings" className={cn( 'h-10 w-full flex items-center justify-center rounded-lg transition-colors text-foreground', 'hover:bg-black/10 dark:hover:bg-white/10', pathname.startsWith('/patient/settings') && 'bg-black/10 dark:bg-white/20' )}>
                             <Settings className="h-5 w-5" />
                         </Link>
                     </div>
