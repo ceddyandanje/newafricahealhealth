@@ -256,7 +256,7 @@ export default function PatientDashboardPage() {
                                 <div className="z-10 text-center text-foreground p-4">
                                     <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
                                     <h3 className="font-semibold">Track Your Health</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">Add a metric to see your trends visualized here.</p>
+                                    <p className="text-sm text-muted-foreground mb-4">Fill in metrics to see your trends visualized here.</p>
                                     <Button onClick={handleAddMetric}>
                                         <Plus className="mr-2 h-4 w-4"/> Add Your First Metric
                                     </Button>
