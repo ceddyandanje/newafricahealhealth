@@ -117,12 +117,12 @@ export default function PatientDashboardPage() {
     const router = useRouter();
     const [greeting, setGreeting] = useState('Good morning');
     const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('weight');
-    const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+    const [chartType, setChartType] = useState&lt;'line' | 'bar'&gt;('line');
     const [isAddMetricOpen, setIsAddMetricOpen] = useState(false);
-    const [medicalProfile, setMedicalProfile] = useState<MedicalProfile | null>(null);
+    const [medicalProfile, setMedicalProfile] = useState&lt;MedicalProfile | null&gt;(null);
     
     useEffect(() => {
-        if (!isAuthLoading && !user) {
+        if (!isAuthLoading &amp;&amp; !user) {
           router.push("/login");
         } else if (user) {
             getMedicalProfile(user.id).then(setMedicalProfile);
@@ -131,9 +131,9 @@ export default function PatientDashboardPage() {
 
     useEffect(() => {
         const hour = new Date().getHours();
-        if (hour < 12) {
+        if (hour &lt; 12) {
             setGreeting('Good morning');
-        } else if (hour < 17) {
+        } else if (hour &lt; 17) {
             setGreeting('Good afternoon');
         } else {
             setGreeting('Good evening');
@@ -176,21 +176,21 @@ export default function PatientDashboardPage() {
 
             return {
                 date: format(day, 'MMM d'),
-                value: avgValue > 0 ? avgValue : null,
-                value2: avgValue2 && avgValue2 > 0 ? avgValue2 : null,
+                value: avgValue &gt; 0 ? avgValue : null,
+                value2: avgValue2 &amp;&amp; avgValue2 &gt; 0 ? avgValue2 : null,
             };
         });
     }, [metrics, selectedMetric, medicalProfile]);
     
     const hasChartData = useMemo(() => {
         if (selectedMetric === 'bmi') {
-            return metrics.some(m => m.type === 'weight') && !!medicalProfile?.height;
+            return metrics.some(m => m.type === 'weight') &amp;&amp; !!medicalProfile?.height;
         }
         return metrics.some(m => m.type === selectedMetric);
     }, [metrics, selectedMetric, medicalProfile]);
 
 
-    const handleAddMetric = async (metricData: Omit<HealthMetric, 'id' | 'timestamp'>) => {
+    const handleAddMetric = async (metricData: Omit&lt;HealthMetric, 'id' | 'timestamp'&gt;) => {
         if (!user) return;
         
         await addHealthMetric(user.id, {
@@ -205,175 +205,167 @@ export default function PatientDashboardPage() {
 
     if (isLoading || !user) {
         return (
-          <div className="flex h-screen w-full items-center justify-center bg-background">
-            <Loader2 className="h-16 w-16 animate-spin text-primary" />
-          </div>
+          &lt;div className="flex h-screen w-full items-center justify-center bg-background"&gt;
+            &lt;Loader2 className="h-16 w-16 animate-spin text-primary" /&gt;
+          &lt;/div&gt;
         );
     }
 
     return (
-        <>
-            <AddMetricDialog 
+        &lt;&gt;
+            &lt;AddMetricDialog 
                 isOpen={isAddMetricOpen}
                 onOpenChange={setIsAddMetricOpen}
                 metricType={selectedMetric}
                 onSave={handleAddMetric}
                 userId={user.id}
-            />
-            <div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10 dark:to-green-900/10">
-                <header className="py-6">
-                    <h1 className="text-3xl font-bold">{greeting}, {user?.name.split(' ')[0]}</h1>
-                    <p className="text-muted-foreground">Here’s what your day looks like.</p>
-                </header>
+            /&gt;
+            &lt;div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10 dark:to-green-900/10"&gt;
+                &lt;header className="py-6"&gt;
+                    &lt;h1 className="text-3xl font-bold"&gt;{greeting}, {user?.name.split(' ')[0]}&lt;/h1&gt;
+                    &lt;p className="text-muted-foreground"&gt;Here’s what your day looks like.&lt;/p&gt;
+                &lt;/header&gt;
 
-                <section>
-                    <h2 className="text-xl font-semibold mb-4">Your day at a glance</h2>
-                    {isEventsLoading ? <Loader2 className="animate-spin" /> : <DailyGlance events={events} />}
-                </section>
+                &lt;section&gt;
+                    &lt;h2 className="text-xl font-semibold mb-4"&gt;Your day at a glance&lt;/h2&gt;
+                    {isEventsLoading ? &lt;Loader2 className="animate-spin" /&gt; : &lt;DailyGlance events={events} /&gt;}
+                &lt;/section&gt;
 
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-                    <Card className="lg:col-span-3 bg-background">
-                        <CardHeader className="flex flex-row justify-between items-center flex-wrap gap-2">
-                            <div className="flex items-center gap-2">
-                                <CardTitle>Health Trends</CardTitle>
-                                <Select value={selectedMetric} onValueChange={(val) => setSelectedMetric(val as HealthMetricType)}>
-                                    <SelectTrigger className="w-[180px] h-9">
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {metricOptions.map(opt => (
-                                            <SelectItem key={opt.value} value={opt.value}>
-                                                <div className="flex items-center gap-2">
-                                                    <opt.icon className="w-4 h-4"/>
+                &lt;div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6"&gt;
+                    &lt;Card className="lg:col-span-3 bg-background"&gt;
+                        &lt;CardHeader className="flex flex-row justify-between items-center flex-wrap gap-2"&gt;
+                            &lt;div className="flex items-center gap-2"&gt;
+                                &lt;CardTitle&gt;Health Trends&lt;/CardTitle&gt;
+                                &lt;Select value={selectedMetric} onValueChange={(val) =&gt; setSelectedMetric(val as HealthMetricType)}&gt;
+                                    &lt;SelectTrigger className="w-[180px] h-9"&gt;
+                                        &lt;SelectValue /&gt;
+                                    &lt;/SelectTrigger&gt;
+                                    &lt;SelectContent&gt;
+                                        {metricOptions.map(opt =&gt; (
+                                            &lt;SelectItem key={opt.value} value={opt.value}&gt;
+                                                &lt;div className="flex items-center gap-2"&gt;
+                                                    &lt;opt.icon className="w-4 h-4"/&gt;
                                                     {opt.label}
-                                                </div>
-                                            </SelectItem>
+                                                &lt;/div&gt;
+                                            &lt;/SelectItem&gt;
                                         ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className="flex items-center rounded-md bg-muted p-0.5">
-                                    <Button size="icon" variant={chartType === 'line' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}><LineChart className="h-4 w-4"/></Button>
-                                    <Button size="icon" variant={chartType === 'bar' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}><BarChart3 className="h-4 w-4"/></Button>
-                                </div>
-                                {!isMetricCalculated && (
-                                    <Button size="sm" onClick={() => setIsAddMetricOpen(true)}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
+                                    &lt;/SelectContent&gt;
+                                &lt;/Select&gt;
+                            &lt;/div&gt;
+                            &lt;div className="flex items-center gap-2"&gt;
+                                &lt;div className="flex items-center rounded-md bg-muted p-0.5"&gt;
+                                    &lt;Button size="icon" variant={chartType === 'line' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() =&gt; setChartType('line')}&gt;&lt;LineChart className="h-4 w-4"/&gt;&lt;/Button&gt;
+                                    &lt;Button size="icon" variant={chartType === 'bar' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() =&gt; setChartType('bar')}&gt;&lt;BarChart3 className="h-4 w-4"/&gt;&lt;/Button&gt;
+                                &lt;/div&gt;
+                                {!isMetricCalculated &amp;&amp; (
+                                    &lt;Button size="sm" onClick={() =&gt; setIsAddMetricOpen(true)}&gt;&lt;Plus className="mr-2 h-4 w-4"/&gt; Add Metric&lt;/Button&gt;
                                 )}
-                            </div>
-                        </CardHeader>
-                        <CardContent>
+                            &lt;/div&gt;
+                        &lt;/CardHeader&gt;
+                        &lt;CardContent&gt;
                             {isMetricsLoading ? (
-                                <div className="h-[250px] w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+                                &lt;div className="h-[250px] w-full flex items-center justify-center"&gt;&lt;Loader2 className="animate-spin" /&gt;&lt;/div&gt;
                             ) : hasChartData ? (
-                                <ChartContainer config={{}} className="h-[250px] w-full">
+                                &lt;ChartContainer config={{}} className="h-[250px] w-full"&gt;
                                     {chartType === 'line' ? (
-                                        <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                            <defs>
-                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                                                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                                </linearGradient>
-                                                <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
-                                                    <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
-                                                    <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
-                                                </linearGradient>
-                                            </defs>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                            <ChartTooltip content={<ChartTooltipContent />} />
-                                            <Area dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" fill="url(#colorValue)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} />
-                                            {selectedMetric === 'bloodPressure' && <Area dataKey="value2" name="Diastolic" type="monotone" fill="url(#colorValue2)" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} />}
-                                            <Legend />
-                                        </LineChartComponent>
+                                        &lt;LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}&gt;
+                                            &lt;CartesianGrid strokeDasharray="3 3" vertical={false} /&gt;
+                                            &lt;XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} /&gt;
+                                            &lt;YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/&gt;
+                                            &lt;ChartTooltip content={&lt;ChartTooltipContent /&gt;} /&gt;
+                                            &lt;Line dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} /&gt;
+                                            {selectedMetric === 'bloodPressure' &amp;&amp; &lt;Line dataKey="value2" name="Diastolic" type="monotone" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} /&gt;}
+                                            &lt;Legend /&gt;
+                                        &lt;/LineChartComponent&gt;
                                     ) : (
-                                        <BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                            <ChartTooltip content={<ChartTooltipContent />} />
-                                            <Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                            {selectedMetric === 'bloodPressure' && <Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} />}
-                                            <Legend />
-                                        </BarChartComponent>
+                                        &lt;BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}&gt;
+                                            &lt;CartesianGrid strokeDasharray="3 3" vertical={false} /&gt;
+                                            &lt;XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} /&gt;
+                                            &lt;YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/&gt;
+                                            &lt;ChartTooltip content={&lt;ChartTooltipContent /&gt;} /&gt;
+                                            &lt;Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} /&gt;
+                                            {selectedMetric === 'bloodPressure' &amp;&amp; &lt;Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} /&gt;}
+                                            &lt;Legend /&gt;
+                                        &lt;/BarChartComponent&gt;
                                     )}
-                                </ChartContainer>
+                                &lt;/ChartContainer&gt;
                             ) : (
-                                <div className="h-[250px] w-full rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center text-foreground p-4">
-                                    <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
-                                    <h3 className="font-semibold">Track Your Health</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">
-                                        {isMetricCalculated ? "Add required data like weight and height to see this trend." : `Fill in metrics to see your ${metricOptions.find(m => m.value === selectedMetric)?.label.toLowerCase()} trends visualized here.`}
-                                    </p>
-                                    <Button onClick={() => isMetricCalculated ? router.push('/patient/settings') : setIsAddMetricOpen(true)}>
-                                        <Plus className="mr-2 h-4 w-4"/>
+                                &lt;div className="h-[250px] w-full rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center text-foreground p-4"&gt;
+                                    &lt;GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/&gt;
+                                    &lt;h3 className="font-semibold"&gt;Track Your Health&lt;/h3&gt;
+                                    &lt;p className="text-sm text-muted-foreground mb-4"&gt;
+                                        {isMetricCalculated ? "Add required data like weight and height to see this trend." : `Fill in metrics to see your ${metricOptions.find(m =&gt; m.value === selectedMetric)?.label.toLowerCase()} trends visualized here.`}
+                                    &lt;/p&gt;
+                                    &lt;Button onClick={() =&gt; isMetricCalculated ? router.push('/patient/settings') : setIsAddMetricOpen(true)}&gt;
+                                        &lt;Plus className="mr-2 h-4 w-4"/&gt;
                                         {isMetricCalculated ? "Update Profile" : "Add Your First Metric"}
-                                    </Button>
-                                </div>
+                                    &lt;/Button&gt;
+                                &lt;/div&gt;
                             )}
-                        </CardContent>
-                    </Card>
+                        &lt;/CardContent&gt;
+                    &lt;/Card&gt;
 
-                    <Card className="lg:col-span-2 bg-background flex flex-col">
-                        <CardHeader>
-                            <CardTitle>Your Subscription</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-grow flex items-center justify-center">
-                            <ChartContainer config={{}} className="h-[200px] w-full">
-                                <PieChartComponent>
-                                <Pie
+                    &lt;Card className="lg:col-span-2 bg-background flex flex-col"&gt;
+                        &lt;CardHeader&gt;
+                            &lt;CardTitle&gt;Your Subscription&lt;/CardTitle&gt;
+                        &lt;/CardHeader&gt;
+                        &lt;CardContent className="flex-grow flex items-center justify-center"&gt;
+                            &lt;ChartContainer config={{}} className="h-[200px] w-full"&gt;
+                                &lt;PieChartComponent&gt;
+                                &lt;Pie
                                     data={subscriptionData}
                                     cx="50%"
                                     cy="50%"
                                     labelLine={false}
                                     outerRadius={80}
                                     dataKey="value"
-                                >
-                                    {subscriptionData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
+                                &gt;
+                                    {subscriptionData.map((entry, index) =&gt; (
+                                    &lt;Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} /&gt;
                                     ))}
-                                </Pie>
-                                <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                                </PieChartComponent>
-                            </ChartContainer>
-                        </CardContent>
-                        <div className="flex justify-center gap-4 p-4 text-sm">
-                            <div className="flex items-center gap-2">
-                                <span className="h-3 w-3 rounded-full bg-primary"></span>
-                                <span>Active ({subscriptionData[0].value})</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <span className="h-3 w-3 rounded-full bg-muted"></span>
-                                <span>Paused ({subscriptionData[1].value})</span>
-                            </div>
-                        </div>
-                    </Card>
-                </div>
+                                &lt;/Pie&gt;
+                                &lt;ChartTooltip content={&lt;ChartTooltipContent nameKey="name" /&gt;} /&gt;
+                                &lt;/PieChartComponent&gt;
+                            &lt;/ChartContainer&gt;
+                        &lt;/CardContent&gt;
+                        &lt;div className="flex justify-center gap-4 p-4 text-sm"&gt;
+                            &lt;div className="flex items-center gap-2"&gt;
+                                &lt;span className="h-3 w-3 rounded-full bg-primary"&gt;&lt;/span&gt;
+                                &lt;span&gt;Active ({subscriptionData[0].value})&lt;/span&gt;
+                            &lt;/div&gt;
+                            &lt;div className="flex items-center gap-2"&gt;
+                                &lt;span className="h-3 w-3 rounded-full bg-muted"&gt;&lt;/span&gt;
+                                &lt;span&gt;Paused ({subscriptionData[1].value})&lt;/span&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/Card&gt;
+                &lt;/div&gt;
 
-                <section className="mt-6">
-                    <Card className="bg-background">
-                        <CardHeader className="flex flex-row items-center justify-between">
-                            <CardTitle>Your Care Team</CardTitle>
-                            <Button variant="ghost" size="sm">View All</Button>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="flex items-center justify-between p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                                <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-red-500/20 text-red-500 rounded-full">
-                                        <Flag className="h-5 w-5" />
-                                    </div>
-                                    <div>
-                                        <p className="font-semibold text-red-600">Open Issue</p>
-                                        <p className="text-sm text-red-500">Your latest lab results are ready for review.</p>
-                                    </div>
-                                </div>
-                                <Button variant="ghost" size="icon"><ChevronRight/></Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </section>
-            </div>
-        </>
+                &lt;section className="mt-6"&gt;
+                    &lt;Card className="bg-background"&gt;
+                        &lt;CardHeader className="flex flex-row items-center justify-between"&gt;
+                            &lt;CardTitle&gt;Your Care Team&lt;/CardTitle&gt;
+                            &lt;Button variant="ghost" size="sm"&gt;View All&lt;/Button&gt;
+                        &lt;/CardHeader&gt;
+                        &lt;CardContent&gt;
+                            &lt;div className="flex items-center justify-between p-4 rounded-lg bg-red-500/10 border border-red-500/20"&gt;
+                                &lt;div className="flex items-center gap-3"&gt;
+                                    &lt;div className="p-2 bg-red-500/20 text-red-500 rounded-full"&gt;
+                                        &lt;Flag className="h-5 w-5" /&gt;
+                                    &lt;/div&gt;
+                                    &lt;div&gt;
+                                        &lt;p className="font-semibold text-red-600"&gt;Open Issue&lt;/p&gt;
+                                        &lt;p className="text-sm text-red-500"&gt;Your latest lab results are ready for review.&lt;/p&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                &lt;Button variant="ghost" size="icon"&gt;&lt;ChevronRight/&gt;&lt;/Button&gt;
+                            &lt;/div&gt;
+                        &lt;/CardContent&gt;
+                    &lt;/Card&gt;
+                &lt;/section&gt;
+            &lt;/div&gt;
+        &lt;/&gt;
     );
 }
+
+    
