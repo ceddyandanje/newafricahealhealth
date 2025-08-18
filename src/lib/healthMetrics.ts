@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, query, onSnapshot, orderBy, doc, getDocs, writeBatch, addDoc } from 'firebase/firestore';
-import { type HealthMetric } from './types';
+import { collection, query, onSnapshot, orderBy, doc, getDocs, writeBatch, addDoc, getDoc } from 'firebase/firestore';
+import { type HealthMetric, type MedicalProfile } from './types';
 
 // Hardcoded sample metrics for blood sugar
 const sampleMetrics: Omit<HealthMetric, 'id'>[] = [
@@ -90,4 +90,17 @@ export const addHealthMetric = async (userId: string, metric: Omit<HealthMetric,
     }
 };
 
-    
+// Gets the medical profile for a specific user
+export const getMedicalProfile = async (userId: string): Promise<MedicalProfile | null> => {
+    try {
+        const profileDocRef = doc(db, 'users', userId, 'medicalProfile', 'details');
+        const docSnap = await getDoc(profileDocRef);
+        if (docSnap.exists()) {
+            return docSnap.data() as MedicalProfile;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching medical profile:", error);
+        return null;
+    }
+}

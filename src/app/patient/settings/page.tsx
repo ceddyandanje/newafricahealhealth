@@ -37,6 +37,7 @@ export default function PatientSettingsPage() {
     const [address, setAddress] = useState('');
     
     // State for medical form
+    const [height, setHeight] = useState<number | ''>('');
     const [bloodType, setBloodType] = useState('');
     const [allergies, setAllergies] = useState('');
     const [primaryPhysician, setPrimaryPhysician] = useState('');
@@ -66,6 +67,7 @@ export default function PatientSettingsPage() {
                     setEmergencyName(profile.emergencyContact.name);
                     setEmergencyPhone(profile.emergencyContact.phone);
                     setAddress(profile.address || '');
+                    setHeight(profile.height || '');
                 }
             }
             fetchProfile();
@@ -100,6 +102,7 @@ export default function PatientSettingsPage() {
             allergies,
             primaryPhysician,
             address,
+            height: Number(height) || undefined,
             emergencyContact: {
                 name: emergencyName,
                 phone: emergencyPhone
@@ -238,7 +241,7 @@ export default function PatientSettingsPage() {
                                 <Label htmlFor="address">Shipping Address</Label>
                                 <Textarea id="address" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Health St, Nairobi, Kenya" />
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="blood-type">Blood Type</Label>
                                      <Select value={bloodType} onValueChange={setBloodType}>
@@ -256,6 +259,10 @@ export default function PatientSettingsPage() {
                                             <SelectItem value="O-">O-</SelectItem>
                                         </SelectContent>
                                     </Select>
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="height">Height (cm)</Label>
+                                    <Input id="height" type="number" value={height} onChange={(e) => setHeight(e.target.value === '' ? '' : Number(e.target.value))} placeholder="e.g., 175" />
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="primary-physician">Primary Physician</Label>

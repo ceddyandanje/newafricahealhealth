@@ -92,6 +92,7 @@ export type MedicalProfile = {
   allergies: string;
   primaryPhysician: string;
   address: string;
+  height?: number; // Height in cm
   emergencyContact: {
     name: string;
     phone: string;
@@ -110,7 +111,7 @@ export type RoadmapTask = {
     createdAt: string; // ISO 8601 string
 };
 
-export type HealthMetricType = 'bloodSugar' | 'bloodPressure' | 'weight' | 'heartRate';
+export type HealthMetricType = 'bloodSugar' | 'bloodPressure' | 'weight' | 'heartRate' | 'oxygenSaturation' | 'bmi';
 
 export type HealthMetric = {
     id: string;

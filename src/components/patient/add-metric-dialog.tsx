@@ -57,7 +57,7 @@ export default function AddMetricDialog({ isOpen, onOpenChange, metricType, onSa
             type: metricType,
             value: values.value,
         };
-        if (metricType === 'bloodPressure') {
+        if (metricType === 'bloodPressure' && values.value2) {
             payload.value2 = values.value2;
         }
 
@@ -99,7 +99,11 @@ export default function AddMetricDialog({ isOpen, onOpenChange, metricType, onSa
                         <FormItem><FormLabel>Diastolic (Bottom #)</FormLabel><FormControl><Input type="number" {...field} placeholder="e.g. 80" /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
-            ) : (
+            ) : metricType === 'oxygenSaturation' ? (
+                 <FormField control={form.control} name="value" render={({ field }) => (
+                    <FormItem><FormLabel>Value (%)</FormLabel><FormControl><Input type="number" {...field} placeholder="e.g. 98" /></FormControl><FormMessage /></FormItem>
+                )} />
+            ): (
                 <FormField control={form.control} name="value" render={({ field }) => (
                     <FormItem><FormLabel>Value</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
@@ -116,4 +120,3 @@ export default function AddMetricDialog({ isOpen, onOpenChange, metricType, onSa
     </Dialog>
   );
 }
-

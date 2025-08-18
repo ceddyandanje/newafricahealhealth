@@ -17,6 +17,8 @@ import {
   BarChart3,
   LineChart,
   GitGraph,
+  Thermometer,
+  Gauge,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,9 +31,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useEvents, type DayEvent } from '@/lib/events';
 import Link from 'next/link';
-import { useHealthMetrics, addHealthMetric } from '@/lib/healthMetrics';
+import { useHealthMetrics, addHealthMetric, getMedicalProfile } from '@/lib/healthMetrics';
 import { format, subDays } from 'date-fns';
-import { type HealthMetric, type HealthMetricType } from '@/lib/types';
+import { type HealthMetric, type HealthMetricType, type MedicalProfile } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AddMetricDialog from '@/components/patient/add-metric-dialog';
 
@@ -46,11 +48,13 @@ const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
     appointment: Video,
 };
 
-export const metricOptions: { value: HealthMetricType, label: string, icon: React.ElementType }[] = [
+export const metricOptions: { value: HealthMetricType, label: string, icon: React.ElementType, isCalculated?: boolean }[] = [
     { value: 'weight', label: 'Weight', icon: Weight },
     { value: 'heartRate', label: 'Heart Rate', icon: HeartPulse },
     { value: 'bloodSugar', label: 'Blood Sugar', icon: Droplets },
     { value: 'bloodPressure', label: 'Blood Pressure', icon: Heart },
+    { value: 'oxygenSaturation', label: 'Oxygen Saturation', icon: Thermometer },
+    { value: 'bmi', label: 'BMI (Calculated)', icon: Gauge, isCalculated: true },
 ];
 
 
@@ -115,10 +119,13 @@ export default function PatientDashboardPage() {
     const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('weight');
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
     const [isAddMetricOpen, setIsAddMetricOpen] = useState(false);
+    const [medicalProfile, setMedicalProfile] = useState<MedicalProfile | null>(null);
     
     useEffect(() => {
         if (!isAuthLoading && !user) {
           router.push("/login");
+        } else if (user) {
+            getMedicalProfile(user.id).then(setMedicalProfile);
         }
     }, [user, isAuthLoading, router]);
 
@@ -135,6 +142,25 @@ export default function PatientDashboardPage() {
 
     const healthTrendData = useMemo(() => {
         const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
+        
+        if (selectedMetric === 'bmi') {
+            const heightM = (medicalProfile?.height || 0) / 100;
+            if (heightM === 0) return [];
+            
+            const weightMetrics = metrics.filter(m => m.type === 'weight');
+
+            return last7Days.map(day => {
+                const dayString = format(day, 'yyyy-MM-dd');
+                const dayMetrics = weightMetrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === dayString);
+                
+                if (dayMetrics.length === 0) return { date: format(day, 'MMM d'), value: null };
+
+                const avgWeight = dayMetrics.reduce((sum, m) => sum + m.value, 0) / dayMetrics.length;
+                const bmi = avgWeight / (heightM * heightM);
+                return { date: format(day, 'MMM d'), value: parseFloat(bmi.toFixed(2)) };
+            });
+        }
+        
         const filteredMetrics = metrics.filter(m => m.type === selectedMetric);
 
         return last7Days.map(day => {
@@ -154,11 +180,14 @@ export default function PatientDashboardPage() {
                 value2: avgValue2 && avgValue2 > 0 ? avgValue2 : null,
             };
         });
-    }, [metrics, selectedMetric]);
+    }, [metrics, selectedMetric, medicalProfile]);
     
     const hasChartData = useMemo(() => {
+        if (selectedMetric === 'bmi') {
+            return metrics.some(m => m.type === 'weight') && !!medicalProfile?.height;
+        }
         return metrics.some(m => m.type === selectedMetric);
-    }, [metrics, selectedMetric]);
+    }, [metrics, selectedMetric, medicalProfile]);
 
 
     const handleAddMetric = async (metricData: Omit<HealthMetric, 'id' | 'timestamp'>) => {
@@ -169,6 +198,8 @@ export default function PatientDashboardPage() {
             timestamp: new Date().toISOString()
         });
     };
+
+    const isMetricCalculated = metricOptions.find(opt => opt.value === selectedMetric)?.isCalculated || false;
 
     const isLoading = isAuthLoading || isEventsLoading || isMetricsLoading;
 
@@ -226,7 +257,9 @@ export default function PatientDashboardPage() {
                                     <Button size="icon" variant={chartType === 'line' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}><LineChart className="h-4 w-4"/></Button>
                                     <Button size="icon" variant={chartType === 'bar' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}><BarChart3 className="h-4 w-4"/></Button>
                                 </div>
-                                <Button size="sm" onClick={() => setIsAddMetricOpen(true)}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
+                                {!isMetricCalculated && (
+                                    <Button size="sm" onClick={() => setIsAddMetricOpen(true)}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
+                                )}
                             </div>
                         </CardHeader>
                         <CardContent>
@@ -270,9 +303,12 @@ export default function PatientDashboardPage() {
                                 <div className="h-[250px] w-full rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center text-foreground p-4">
                                     <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
                                     <h3 className="font-semibold">Track Your Health</h3>
-                                    <p className="text-sm text-muted-foreground mb-4">Fill in metrics to see your trends visualized here.</p>
-                                    <Button onClick={() => setIsAddMetricOpen(true)}>
-                                        <Plus className="mr-2 h-4 w-4"/> Add Your First Metric
+                                    <p className="text-sm text-muted-foreground mb-4">
+                                        {isMetricCalculated ? "Add required data like weight and height to see this trend." : `Fill in metrics to see your ${metricOptions.find(m => m.value === selectedMetric)?.label.toLowerCase()} trends visualized here.`}
+                                    </p>
+                                    <Button onClick={() => isMetricCalculated ? router.push('/patient/settings') : setIsAddMetricOpen(true)}>
+                                        <Plus className="mr-2 h-4 w-4"/>
+                                        {isMetricCalculated ? "Update Profile" : "Add Your First Metric"}
                                     </Button>
                                 </div>
                             )}
