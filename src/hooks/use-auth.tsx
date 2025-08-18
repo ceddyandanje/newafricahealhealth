@@ -21,8 +21,9 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase
 
 import { type User, type LoginCredentials, type SignUpCredentials } from "@/lib/types";
 import { useToast } from "./use-toast";
-import { createUserInFirestore } from "@/lib/users";
+import { createUserInFirestore, updateUserInFirestore } from "@/lib/users";
 import { addLog } from "@/lib/logs";
+import OnboardingDialog from "@/components/auth/onboarding-dialog";
 
 interface AuthContextType {
   user: User | null;
@@ -39,10 +40,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const isProfileComplete = (user: User) => {
+    return !!user.phone && !!user.age && !!user.location;
+}
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
   
   const router = useRouter();
   const pathname = usePathname();
@@ -58,12 +65,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (userDoc.exists()) {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
+                if (!isProfileComplete(userData) && userData.role === 'user') {
+                    setShowOnboarding(true);
+                } else {
+                    setShowOnboarding(false);
+                }
             } else {
                  setUser(null);
             }
         } else {
             setFirebaseUser(null);
             setUser(null);
+            setShowOnboarding(false);
         }
         setIsLoading(false);
     });
@@ -72,6 +85,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleRedirect = (loggedInUser: User) => {
+    if (!isProfileComplete(loggedInUser) && loggedInUser.role === 'user') {
+        setShowOnboarding(true);
+    } else {
+        setShowOnboarding(false);
+    }
+
     const roleMap: { [key: string]: string | undefined } = {
         'admin': 'admin',
         'doctor': 'doctor/dashboard',
@@ -165,31 +184,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const result = await signInWithPopup(auth, provider);
         const googleUser = result.user;
         
-        // Check if the user exists in Firestore
         const userDocRef = doc(db, "users", googleUser.uid);
         const userDoc = await getDoc(userDocRef);
 
+        let userData: User | null;
+
         if (userDoc.exists()) {
-            // User exists, log them in
-            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+            userData = { id: userDoc.id, ...userDoc.data() } as User;
             toast({ title: "Login Successful", description: `Welcome back, ${userData.name}!` });
-            handleRedirect(userData);
         } else {
-            // New user, create a profile
-            const newUser = await createUserInFirestore({
+            userData = await createUserInFirestore({
                 name: googleUser.displayName || 'New User',
                 email: googleUser.email!,
                 avatarUrl: googleUser.photoURL
             }, googleUser.uid);
             
-            if (newUser) {
-                toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
-                handleRedirect(newUser);
+            if (userData) {
+                toast({ title: "Signup Successful", description: `Welcome, ${userData.name}!` });
             } else {
                 throw new Error("Could not create user document after Google Sign-In.");
             }
         }
-        return true;
+        
+        if (userData) {
+            handleRedirect(userData);
+            return true;
+        }
+        return false;
     } catch (error: any) {
         if (error.code === 'auth/account-exists-with-different-credential') {
              toast({ variant: 'destructive', title: "Account Exists", description: "An account already exists with this email address using a different sign-in method. Please sign in with your password to link your Google account." });
@@ -241,6 +262,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return false;
     }
   };
+
+  const handleSaveOnboarding = async (data: { name: string, phone: string, ageRange: string, location: string }) => {
+    if (!user) return;
+    setIsSavingOnboarding(true);
+    const updates = { name: data.name, phone: data.phone, age: data.ageRange, location: data.location };
+    const success = await updateUserInFirestore(user.id, updates);
+
+    if (success) {
+        const updatedUser = { ...user, ...updates };
+        setUser(updatedUser);
+        setShowOnboarding(false);
+        addLog("INFO", `User ${user.email} completed their profile onboarding.`);
+        toast({ title: "Profile Complete!", description: "Thank you for completing your profile." });
+    } else {
+        toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your profile. Please try again." });
+    }
+    setIsSavingOnboarding(false);
+  }
   
 
   const isAdmin = user?.role === 'admin';
@@ -248,6 +287,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, logout, signInWithGoogle, reauthenticateAndChangePassword, isLoading }}>
       {children}
+      {user && showOnboarding && (
+        <OnboardingDialog 
+            user={user} 
+            isOpen={showOnboarding} 
+            onSave={handleSaveOnboarding}
+            isSaving={isSavingOnboarding}
+        />
+      )}
     </AuthContext.Provider>
   );
 };
