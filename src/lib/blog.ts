@@ -8,8 +8,8 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Cardiovascular diseases',
         description: 'An overview of cardiovascular diseases (CVDs), the leading cause of death globally. Learn about risk factors and prevention.',
-        image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'healthy heart illustration',
+        image: 'https://images.unsplash.com/photo-1549033992-2632295b9b46?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        dataAiHint: 'healthy heart',
         category: 'Heart Health',
         date: '2024-05-17T10:00:00Z',
         externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds)'
@@ -17,7 +17,7 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Diabetes',
         description: 'Understand the different types of diabetes, its health impact, and key strategies for prevention and management.',
-        image: 'https://placehold.co/1200x600.png',
+        image: 'https://images.unsplash.com/photo-1542732924-15367f8157e1?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
         dataAiHint: 'blood sugar test',
         category: 'Diabetes Care',
         date: '2024-04-05T10:00:00Z',
@@ -26,8 +26,8 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Chronic respiratory diseases',
         description: 'Learn about chronic respiratory diseases like COPD and asthma, which affect hundreds of millions of people worldwide.',
-        image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'person breathing fresh air',
+        image: 'https://images.unsplash.com/photo-1627733529399-52d43b2f5670?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        dataAiHint: 'person breathing',
         category: 'Respiratory Health',
         date: '2024-05-16T10:00:00Z',
         externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/chronic-respiratory-diseases'
@@ -35,8 +35,8 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
      {
         title: 'Chronic kidney disease',
         description: 'An in-depth look at chronic kidney disease, its causes, and how it can be managed to improve patient outcomes.',
-        image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'kidney medical illustration',
+        image: 'https://images.unsplash.com/photo-1605330366472-35a0e5c9b9a6?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        dataAiHint: 'kidney medical',
         category: 'Kidney Health',
         date: '2024-03-14T10:00:00Z',
         externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/chronic-kidney-disease'
@@ -44,8 +44,8 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Neurological disorders',
         description: 'Neurological disorders are diseases of the central and peripheral nervous system. Learn more about these complex conditions.',
-        image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'brain activity scan',
+        image: 'https://images.unsplash.com/photo-1559757175-245135b9915e?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        dataAiHint: 'brain scan',
         category: 'Neurology',
         date: '2024-04-25T10:00:00Z',
         externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/neurological-disorders'
@@ -53,8 +53,8 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Fact sheet on Organ Transplantation',
         description: 'Key facts about organ transplantation from WHO, covering global practices, safety, and ethical considerations.',
-        image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'surgical team operation',
+        image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1034&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        dataAiHint: 'surgical team',
         category: 'Transplants',
         date: '2023-07-26T10:00:00Z',
         externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/organ-transplantation'
@@ -62,8 +62,8 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Healthy diet',
         description: 'A healthy diet is essential for good health and nutrition. It protects you against many chronic noncommunicable diseases.',
-        image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'healthy food variety',
+        image: 'https://images.unsplash.com/photo-1498837167922-ddd27525d352?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        dataAiHint: 'healthy food',
         category: 'General Wellness',
         date: '2024-04-28T10:00:00Z',
         externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/healthy-diet'
@@ -71,8 +71,8 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Physical activity',
         description: 'Regular physical activity is proven to help prevent and manage noncommunicable diseases such as heart disease and diabetes.',
-        image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'person jogging park',
+        image: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+        dataAiHint: 'person jogging',
         category: 'Fitness',
         date: '2023-10-05T10:00:00Z',
         externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/physical-activity'
