@@ -15,10 +15,10 @@ import {
   Weight,
   HeartPulse,
   BarChart3,
-  LineChart,
   GitGraph,
   Thermometer,
   Gauge,
+  LineChart as LineChartIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -230,10 +230,7 @@ export default function PatientDashboardPage() {
             ...metricData,
             timestamp: new Date().toISOString()
         };
-        // Ensure value2 is not undefined for non-BP metrics
-        if (payload.type !== 'bloodPressure') {
-            delete payload.value2;
-        }
+        
         await addHealthMetric(user.id, payload);
     };
 
@@ -296,8 +293,16 @@ export default function PatientDashboardPage() {
                                         <Button key={range} size="sm" variant={timeRange === range ? 'secondary': 'ghost'} className="h-7 capitalize" onClick={() => setTimeRange(range)}>{range}</Button>
                                     ))}
                                 </div>
+                                <div className="flex items-center rounded-md bg-muted p-0.5 text-sm font-medium">
+                                    <Button size="icon" variant={chartType === 'line' ? 'secondary' : 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}>
+                                        <LineChartIcon className="h-4 w-4"/>
+                                    </Button>
+                                    <Button size="icon" variant={chartType === 'bar' ? 'secondary' : 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}>
+                                        <BarChart3 className="h-4 w-4"/>
+                                    </Button>
+                                </div>
                                 {!isMetricCalculated && (
-                                    <Button size="sm" onClick={() => setIsAddMetricOpen(true)}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
+                                    <Button size="sm" onClick={() => setIsAddMetricOpen(true)}><Plus className="mr-2 h-4 w-4"/> Add</Button>
                                 )}
                             </div>
                         </CardHeader>
@@ -404,5 +409,7 @@ export default function PatientDashboardPage() {
                 </section>
             </div>
         </>
-    );
+    ];
 }
+
+    
