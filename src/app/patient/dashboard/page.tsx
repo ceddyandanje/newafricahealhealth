@@ -258,7 +258,7 @@ export default function PatientDashboardPage() {
                          ) : !hasChartData ? (
                             <div className="relative h-[250px] w-full rounded-lg overflow-hidden bg-muted/50">
                                 <Image 
-                                    src="https://images.unsplash.com/photo-1649073586751-695a1f9f76de?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                                    src="https://images.unsplash.com/photo-1676291920753-dd019397927a?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                     alt="Abstract health data visualization"
                                     fill
                                     className="object-cover opacity-45 blur-sm z-0"
@@ -372,6 +372,3 @@ export default function PatientDashboardPage() {
         </div>
     );
 }
-
-    
-    
