@@ -40,7 +40,7 @@ export default function Home() {
                         Your dedicated partner for managing chronic illness and accessing immediate medical services. We deliver wellness and peace of mind.
                     </p>
                     <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 py-3">
-                        <Link href="/about">Learn More <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                        <Link href="/services">Learn More <ArrowRight className="ml-2 h-5 w-5" /></Link>
                     </Button>
                 </div>
             </div>
