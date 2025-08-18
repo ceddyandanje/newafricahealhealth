@@ -155,7 +155,11 @@ export default function PatientDashboardPage() {
         });
     }, [metrics, selectedMetric]);
     
-    const hasChartData = useMemo(() => healthTrendData.some(d => d.value !== null), [healthTrendData]);
+    const hasChartData = useMemo(() => {
+        // Check if there's any data for the *selected* metric
+        return metrics.some(m => m.type === selectedMetric);
+    }, [metrics, selectedMetric]);
+
 
     const handleAddMetric = async () => {
         if (!user) return;
@@ -182,11 +186,21 @@ export default function PatientDashboardPage() {
                  metricPayload = { type: selectedMetric, value: systolic, value2: diastolic, timestamp: new Date().toISOString() };
                  break;
             default:
-                // Fallback, though UI should prevent this
+                // This case should ideally not be reached due to UI constraints
                 metricPayload = { type: 'weight', value: 0, timestamp: new Date().toISOString() };
         }
+        
+        const finalPayload: any = {
+            type: metricPayload.type,
+            value: metricPayload.value,
+            timestamp: metricPayload.timestamp
+        };
 
-        await addHealthMetric(user.id, metricPayload);
+        if (metricPayload.type === 'bloodPressure' && metricPayload.value2 !== undefined) {
+            finalPayload.value2 = metricPayload.value2;
+        }
+
+        await addHealthMetric(user.id, finalPayload);
     };
 
     const isLoading = isAuthLoading || isEventsLoading || isMetricsLoading;
@@ -249,7 +263,7 @@ export default function PatientDashboardPage() {
                                     src="https://images.unsplash.com/photo-1649073586751-695a1f9f76de?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                     alt="Abstract health data visualization"
                                     fill
-                                    className="object-cover opacity-45 blur-sm"
+                                    className="object-cover opacity-45 blur-sm z-0"
                                     data-ai-hint="health data visualization"
                                 />
                                 <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-foreground p-4">
