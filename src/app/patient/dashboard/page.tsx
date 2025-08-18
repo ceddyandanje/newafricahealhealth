@@ -23,7 +23,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell, Bar, BarChart as BarChartComponent, XAxis, YAxis, CartesianGrid, Legend } from "recharts"
+import { LineChart as LineChartComponent, Pie, PieChart as PieChartComponent, Cell, Bar, BarChart as BarChartComponent, XAxis, YAxis, CartesianGrid, Legend, Line } from "recharts"
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
@@ -193,7 +193,7 @@ export default function PatientDashboardPage() {
     const handleAddMetric = async (metricData: Omit<HealthMetric, 'id' | 'timestamp'>) => {
         if (!user) return;
         
-        const payload = {
+        const payload: Omit<HealthMetric, 'id' | 'timestamp'> = {
             ...metricData,
             timestamp: new Date().toISOString()
         };
@@ -372,5 +372,3 @@ export default function PatientDashboardPage() {
         </>
     );
 }
-
-    
