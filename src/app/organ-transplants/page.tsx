@@ -9,7 +9,7 @@ export default function OrganTransplantsPage() {
       <div className="bg-background">
          <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-                src="https://images.unsplash.com/photo-1683093123606-d9d574600918?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                src="https://images.unsplash.com/photo-1579154289468-505f534a743b?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="Surgical team performing a procedure"
                 fill
                 className="object-cover"
@@ -29,7 +29,7 @@ export default function OrganTransplantsPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://images.unsplash.com/photo-1682706841291-d4aadc6fde6c?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                        src="https://images.unsplash.com/photo-1621876599139-f9c9f0a2d4c9?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                         alt="Heart illustration with technology elements"
                         fill
                         className="object-cover rounded-xl"

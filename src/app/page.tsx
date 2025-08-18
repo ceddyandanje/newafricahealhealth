@@ -21,7 +21,7 @@ export default function Home() {
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
             <Image
-              src="https://images.unsplash.com/photo-1618498082410-b4aa22193b38?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="https://images.unsplash.com/photo-1476231682828-37e571bc172f?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Healthcare professional smiling"
               fill
               className="object-cover object-center"
@@ -164,7 +164,7 @@ export default function Home() {
         <section className="relative py-20 text-white">
           <div className="absolute inset-0">
             <Image 
-              src="https://images.unsplash.com/photo-1655313719493-16ebe4906441?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
               alt="Medical background"
               fill
               className="object-cover"
