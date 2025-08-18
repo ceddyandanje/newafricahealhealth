@@ -33,7 +33,6 @@ import { useHealthMetrics, addHealthMetric } from '@/lib/healthMetrics';
 import { format, subDays } from 'date-fns';
 import { type HealthMetricType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import Image from 'next/image';
 
 const subscriptionData = [
   { name: 'Active', value: 3, fill: 'hsl(var(--primary))' },
@@ -47,10 +46,10 @@ const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
 };
 
 const metricOptions: { value: HealthMetricType, label: string, icon: React.ElementType }[] = [
-    { value: 'bloodSugar', label: 'Blood Sugar', icon: Droplets },
-    { value: 'bloodPressure', label: 'Blood Pressure', icon: Heart },
     { value: 'weight', label: 'Weight', icon: Weight },
     { value: 'heartRate', label: 'Heart Rate', icon: HeartPulse },
+    { value: 'bloodSugar', label: 'Blood Sugar', icon: Droplets },
+    { value: 'bloodPressure', label: 'Blood Pressure', icon: Heart },
 ];
 
 
@@ -112,7 +111,7 @@ export default function PatientDashboardPage() {
     const { metrics, isLoading: isMetricsLoading } = useHealthMetrics(user?.id);
     const router = useRouter();
     const [greeting, setGreeting] = useState('Good morning');
-    const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('bloodSugar');
+    const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('weight');
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
     
     useEffect(() => {
@@ -194,7 +193,7 @@ export default function PatientDashboardPage() {
             timestamp: new Date().toISOString()
         };
 
-        if (metricPayload.type === 'bloodPressure' && metricPayload.value2 !== undefined) {
+        if (metricPayload.type === 'bloodPressure' && metricPayload.value2) {
             finalPayload.value2 = metricPayload.value2;
         }
 
