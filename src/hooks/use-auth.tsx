@@ -72,8 +72,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleRedirect = (loggedInUser: User) => {
-    const currentBase = pathname.split('/')[1];
-    
     const roleMap: { [key: string]: string | undefined } = {
         'admin': 'admin',
         'doctor': 'doctor/dashboard',
