@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import ConsultationForm from "@/components/forms/consultation-form"
+import GetStartedButton from "@/components/health/get-started-button"
 
 
 export default function Home() {
@@ -154,9 +155,7 @@ export default function Home() {
               </div>
             </div>
             <div className="mt-16">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 py-3" asChild>
-                <Link href="/products">Shop Products <ArrowRight className="ml-2 h-5 w-5" /></Link>
-              </Button>
+              <GetStartedButton className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 py-3" />
             </div>
           </div>
         </section>
