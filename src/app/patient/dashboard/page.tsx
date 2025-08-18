@@ -245,15 +245,15 @@ export default function PatientDashboardPage() {
                          {isMetricsLoading ? (
                             <div className="h-[250px] w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>
                          ) : !hasChartData ? (
-                            <div className="h-[250px] w-full relative flex flex-col items-center justify-center rounded-lg overflow-hidden bg-muted/50">
+                            <div className="h-[250px] w-full relative rounded-lg overflow-hidden bg-muted/50">
                                 <Image 
                                     src="https://images.unsplash.com/photo-1649073586751-695a1f9f76de?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                     alt="Abstract health data visualization"
-                                    layout="fill"
+                                    fill
                                     className="object-cover opacity-45 blur-sm"
                                     data-ai-hint="health data visualization"
                                 />
-                                <div className="z-10 text-center text-foreground p-4">
+                                <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center text-foreground p-4">
                                     <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
                                     <h3 className="font-semibold">Track Your Health</h3>
                                     <p className="text-sm text-muted-foreground mb-4">Fill in metrics to see your trends visualized here.</p>
@@ -361,7 +361,3 @@ export default function PatientDashboardPage() {
         </div>
     );
 }
-
-    
-
-    
