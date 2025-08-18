@@ -32,7 +32,7 @@ import { Loader2 } from 'lucide-react';
 import { useEvents, type DayEvent } from '@/lib/events';
 import Link from 'next/link';
 import { useHealthMetrics, addHealthMetric, getMedicalProfile } from '@/lib/healthMetrics';
-import { format, subDays } from 'date-fns';
+import { format, startOfWeek, startOfMonth, parseISO, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from 'date-fns';
 import { type HealthMetric, type HealthMetricType, type MedicalProfile } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AddMetricDialog from '@/components/patient/add-metric-dialog';
@@ -56,6 +56,8 @@ export const metricOptions: { value: HealthMetricType, label: string, icon: Reac
     { value: 'oxygenSaturation', label: 'Oxygen Saturation', icon: Thermometer },
     { value: 'bmi', label: 'BMI (Calculated)', icon: Gauge, isCalculated: true },
 ];
+
+type TimeRange = 'daily' | 'weekly' | 'monthly';
 
 
 function EmptyState() {
@@ -118,6 +120,7 @@ export default function PatientDashboardPage() {
     const [greeting, setGreeting] = useState('Good morning');
     const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('weight');
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+    const [timeRange, setTimeRange] = useState<TimeRange>('daily');
     const [isAddMetricOpen, setIsAddMetricOpen] = useState(false);
     const [medicalProfile, setMedicalProfile] = useState<MedicalProfile | null>(null);
     
@@ -141,46 +144,76 @@ export default function PatientDashboardPage() {
     }, []);
 
     const healthTrendData = useMemo(() => {
-        const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
-        
+        let relevantMetrics = metrics;
         if (selectedMetric === 'bmi') {
-            const heightM = (medicalProfile?.height || 0) / 100;
-            if (heightM === 0) return [];
-            
-            const weightMetrics = metrics.filter(m => m.type === 'weight');
-
-            return last7Days.map(day => {
-                const dayString = format(day, 'yyyy-MM-dd');
-                const dayMetrics = weightMetrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === dayString);
-                
-                if (dayMetrics.length === 0) return { date: format(day, 'MMM d'), value: null };
-
-                const avgWeight = dayMetrics.reduce((sum, m) => sum + m.value, 0) / dayMetrics.length;
-                const bmi = avgWeight / (heightM * heightM);
-                return { date: format(day, 'MMM d'), value: parseFloat(bmi.toFixed(2)) };
-            });
+            relevantMetrics = metrics.filter(m => m.type === 'weight');
+        } else {
+            relevantMetrics = metrics.filter(m => m.type === selectedMetric);
         }
-        
-        const filteredMetrics = metrics.filter(m => m.type === selectedMetric);
 
-        return last7Days.map(day => {
-            const dayString = format(day, 'yyyy-MM-dd');
-            const dayMetrics = filteredMetrics.filter(m => format(new Date(m.timestamp), 'yyyy-MM-dd') === dayString);
-            
+        if (relevantMetrics.length === 0) return [];
+
+        const sortedMetrics = relevantMetrics.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+        const firstDate = parseISO(sortedMetrics[0].timestamp);
+        const lastDate = new Date();
+        
+        let intervalGenerator;
+        let formatLabel: (date: Date) => string;
+        let getGroupId: (date: Date) => string;
+
+        switch (timeRange) {
+            case 'monthly':
+                intervalGenerator = eachMonthOfInterval({ start: firstDate, end: lastDate });
+                formatLabel = (d) => format(d, 'MMM yy');
+                getGroupId = (d) => format(startOfMonth(d), 'yyyy-MM');
+                break;
+            case 'weekly':
+                intervalGenerator = eachWeekOfInterval({ start: firstDate, end: lastDate }, { weekStartsOn: 1 });
+                formatLabel = (d) => format(d, 'dd MMM');
+                getGroupId = (d) => format(startOfWeek(d, { weekStartsOn: 1 }), 'yyyy-ww');
+                break;
+            case 'daily':
+            default:
+                intervalGenerator = eachDayOfInterval({ start: firstDate, end: lastDate });
+                formatLabel = (d) => format(d, 'MMM d');
+                getGroupId = (d) => format(d, 'yyyy-MM-dd');
+        }
+
+        const groupedMetrics = sortedMetrics.reduce((acc, metric) => {
+            const groupId = getGroupId(parseISO(metric.timestamp));
+            if (!acc[groupId]) {
+                acc[groupId] = [];
+            }
+            acc[groupId].push(metric);
+            return acc;
+        }, {} as Record<string, HealthMetric[]>);
+
+        return intervalGenerator.map(intervalDate => {
+            const groupId = getGroupId(intervalDate);
+            const dayMetrics = groupedMetrics[groupId] || [];
+
             if (dayMetrics.length === 0) {
-                return { date: format(day, 'MMM d'), value: null, value2: null };
+                return { date: formatLabel(intervalDate), value: null, value2: null };
             }
 
-            const avgValue = dayMetrics.reduce((sum, m) => sum + m.value, 0) / dayMetrics.length;
-            const avgValue2 = selectedMetric === 'bloodPressure' ? dayMetrics.reduce((sum, m) => sum + (m.value2 || 0), 0) / dayMetrics.length : null;
+            const totalValue = dayMetrics.reduce((sum, m) => sum + m.value, 0);
+            const totalValue2 = selectedMetric === 'bloodPressure' ? dayMetrics.reduce((sum, m) => sum + (m.value2 || 0), 0) : 0;
+            const count = dayMetrics.length;
+            
+            let finalValue = totalValue / count;
+            if (selectedMetric === 'bmi') {
+                 const heightM = (medicalProfile?.height || 0) / 100;
+                 finalValue = heightM > 0 ? (totalValue / count) / (heightM * heightM) : 0;
+            }
 
             return {
-                date: format(day, 'MMM d'),
-                value: avgValue > 0 ? avgValue : null,
-                value2: avgValue2 && avgValue2 > 0 ? avgValue2 : null,
+                date: formatLabel(intervalDate),
+                value: parseFloat(finalValue.toFixed(2)),
+                value2: selectedMetric === 'bloodPressure' ? parseFloat((totalValue2 / count).toFixed(2)) : null,
             };
         });
-    }, [metrics, selectedMetric, medicalProfile]);
+
+    }, [metrics, selectedMetric, medicalProfile, timeRange]);
     
     const hasChartData = useMemo(() => {
         if (selectedMetric === 'bmi') {
@@ -193,11 +226,11 @@ export default function PatientDashboardPage() {
     const handleAddMetric = async (metricData: Omit<HealthMetric, 'id' | 'timestamp'>) => {
         if (!user) return;
         
-        const payload: Omit<HealthMetric, 'id' | 'timestamp'> = {
+        const payload: Omit<HealthMetric, 'id'> = {
             ...metricData,
             timestamp: new Date().toISOString()
         };
-        // Ensure value2 is not undefined
+        // Ensure value2 is not undefined for non-BP metrics
         if (payload.type !== 'bloodPressure') {
             delete payload.value2;
         }
@@ -225,7 +258,7 @@ export default function PatientDashboardPage() {
                 onSave={handleAddMetric}
                 userId={user.id}
             />
-            <div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10 dark:to-green-900/10">
+            <div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10">
                 <header className="py-6">
                     <h1 className="text-3xl font-bold">{greeting}, {user?.name.split(' ')[0]}</h1>
                     <p className="text-muted-foreground">Here’s what your day looks like.</p>
@@ -258,9 +291,10 @@ export default function PatientDashboardPage() {
                                 </Select>
                             </div>
                             <div className="flex items-center gap-2">
-                                <div className="flex items-center rounded-md bg-muted p-0.5">
-                                    <Button size="icon" variant={chartType === 'line' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}><LineChart className="h-4 w-4"/></Button>
-                                    <Button size="icon" variant={chartType === 'bar' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}><BarChart3 className="h-4 w-4"/></Button>
+                                <div className="flex items-center rounded-md bg-muted p-0.5 text-sm font-medium">
+                                    {(['daily', 'weekly', 'monthly'] as TimeRange[]).map(range => (
+                                        <Button key={range} size="sm" variant={timeRange === range ? 'secondary': 'ghost'} className="h-7 capitalize" onClick={() => setTimeRange(range)}>{range}</Button>
+                                    ))}
                                 </div>
                                 {!isMetricCalculated && (
                                     <Button size="sm" onClick={() => setIsAddMetricOpen(true)}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
@@ -278,9 +312,9 @@ export default function PatientDashboardPage() {
                                             <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                                             <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
                                             <ChartTooltip content={<ChartTooltipContent />} />
+                                            <Legend />
                                             <Line dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} />
                                             {selectedMetric === 'bloodPressure' && <Line dataKey="value2" name="Diastolic" type="monotone" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} />}
-                                            <Legend />
                                         </LineChartComponent>
                                     ) : (
                                         <BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -288,9 +322,9 @@ export default function PatientDashboardPage() {
                                             <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                                             <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
                                             <ChartTooltip content={<ChartTooltipContent />} />
+                                            <Legend />
                                             <Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
                                             {selectedMetric === 'bloodPressure' && <Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} />}
-                                            <Legend />
                                         </BarChartComponent>
                                     )}
                                 </ChartContainer>
