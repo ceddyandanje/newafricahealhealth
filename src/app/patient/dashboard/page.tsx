@@ -159,35 +159,34 @@ export default function PatientDashboardPage() {
 
     const handleAddMetric = async () => {
         if (!user) return;
-        // This would open a dialog in a real app to get user input
-        // For now, we add a random value for the selected metric
+        
         let randomValue: number;
-        let randomValue2: number | undefined;
+        let metricPayload: { type: HealthMetricType; value: number; value2?: number; timestamp: string; };
 
         switch(selectedMetric) {
             case 'bloodSugar':
                 randomValue = Math.floor(Math.random() * (180 - 80 + 1)) + 80;
+                metricPayload = { type: selectedMetric, value: randomValue, timestamp: new Date().toISOString() };
                 break;
             case 'weight':
                 randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
+                metricPayload = { type: selectedMetric, value: randomValue, timestamp: new Date().toISOString() };
                 break;
             case 'heartRate':
                  randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
+                 metricPayload = { type: selectedMetric, value: randomValue, timestamp: new Date().toISOString() };
                  break;
             case 'bloodPressure':
-                 randomValue = Math.floor(Math.random() * (140 - 110 + 1)) + 110; // Systolic
-                 randomValue2 = Math.floor(Math.random() * (90 - 70 + 1)) + 70; // Diastolic
+                 const systolic = Math.floor(Math.random() * (140 - 110 + 1)) + 110;
+                 const diastolic = Math.floor(Math.random() * (90 - 70 + 1)) + 70;
+                 metricPayload = { type: selectedMetric, value: systolic, value2: diastolic, timestamp: new Date().toISOString() };
                  break;
             default:
-                randomValue = 0;
+                // Fallback, though UI should prevent this
+                metricPayload = { type: 'weight', value: 0, timestamp: new Date().toISOString() };
         }
 
-        await addHealthMetric(user.id, {
-            type: selectedMetric,
-            value: randomValue,
-            value2: randomValue2,
-            timestamp: new Date().toISOString()
-        });
+        await addHealthMetric(user.id, metricPayload);
     };
 
     const isLoading = isAuthLoading || isEventsLoading || isMetricsLoading;
@@ -245,7 +244,7 @@ export default function PatientDashboardPage() {
                          {isMetricsLoading ? (
                             <div className="h-[250px] w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>
                          ) : !hasChartData ? (
-                            <div className="h-[250px] w-full relative rounded-lg overflow-hidden bg-muted/50">
+                            <div className="relative h-[250px] w-full rounded-lg overflow-hidden bg-muted/50">
                                 <Image 
                                     src="https://images.unsplash.com/photo-1649073586751-695a1f9f76de?q=80&w=1032&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                                     alt="Abstract health data visualization"
@@ -361,3 +360,5 @@ export default function PatientDashboardPage() {
         </div>
     );
 }
+
+    
