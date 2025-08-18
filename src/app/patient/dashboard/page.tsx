@@ -31,8 +31,9 @@ import { useEvents, type DayEvent } from '@/lib/events';
 import Link from 'next/link';
 import { useHealthMetrics, addHealthMetric } from '@/lib/healthMetrics';
 import { format, subDays } from 'date-fns';
-import { type HealthMetricType } from '@/lib/types';
+import { type HealthMetric, type HealthMetricType } from '@/lib/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AddMetricDialog from '@/components/patient/add-metric-dialog';
 
 const subscriptionData = [
   { name: 'Active', value: 3, fill: 'hsl(var(--primary))' },
@@ -45,7 +46,7 @@ const iconMap: { [key in DayEvent['type']]: React.ElementType } = {
     appointment: Video,
 };
 
-const metricOptions: { value: HealthMetricType, label: string, icon: React.ElementType }[] = [
+export const metricOptions: { value: HealthMetricType, label: string, icon: React.ElementType }[] = [
     { value: 'weight', label: 'Weight', icon: Weight },
     { value: 'heartRate', label: 'Heart Rate', icon: HeartPulse },
     { value: 'bloodSugar', label: 'Blood Sugar', icon: Droplets },
@@ -113,6 +114,7 @@ export default function PatientDashboardPage() {
     const [greeting, setGreeting] = useState('Good morning');
     const [selectedMetric, setSelectedMetric] = useState<HealthMetricType>('weight');
     const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+    const [isAddMetricOpen, setIsAddMetricOpen] = useState(false);
     
     useEffect(() => {
         if (!isAuthLoading && !user) {
@@ -159,45 +161,13 @@ export default function PatientDashboardPage() {
     }, [metrics, selectedMetric]);
 
 
-    const handleAddMetric = async () => {
+    const handleAddMetric = async (metricData: Omit<HealthMetric, 'id' | 'timestamp'>) => {
         if (!user) return;
         
-        let randomValue: number;
-        let metricPayload: { type: HealthMetricType; value: number; value2?: number; };
-
-        switch(selectedMetric) {
-            case 'bloodSugar':
-                randomValue = Math.floor(Math.random() * (180 - 80 + 1)) + 80;
-                metricPayload = { type: selectedMetric, value: randomValue };
-                break;
-            case 'weight':
-                randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
-                metricPayload = { type: selectedMetric, value: randomValue };
-                break;
-            case 'heartRate':
-                 randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
-                 metricPayload = { type: selectedMetric, value: randomValue };
-                 break;
-            case 'bloodPressure':
-                 const systolic = Math.floor(Math.random() * (140 - 110 + 1)) + 110;
-                 const diastolic = Math.floor(Math.random() * (90 - 70 + 1)) + 70;
-                 metricPayload = { type: selectedMetric, value: systolic, value2: diastolic };
-                 break;
-            default:
-                return;
-        }
-        
-        const finalPayload: any = {
-            type: metricPayload.type,
-            value: metricPayload.value,
+        await addHealthMetric(user.id, {
+            ...metricData,
             timestamp: new Date().toISOString()
-        };
-
-        if (metricPayload.type === 'bloodPressure' && metricPayload.value2) {
-            finalPayload.value2 = metricPayload.value2;
-        }
-
-        await addHealthMetric(user.id, finalPayload);
+        });
     };
 
     const isLoading = isAuthLoading || isEventsLoading || isMetricsLoading;
@@ -211,154 +181,163 @@ export default function PatientDashboardPage() {
     }
 
     return (
-        <div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10 dark:to-green-900/10">
-            <header className="py-6">
-                <h1 className="text-3xl font-bold">{greeting}, {user?.name.split(' ')[0]}</h1>
-                <p className="text-muted-foreground">Here’s what your day looks like.</p>
-            </header>
+        <>
+            <AddMetricDialog 
+                isOpen={isAddMetricOpen}
+                onOpenChange={setIsAddMetricOpen}
+                metricType={selectedMetric}
+                onSave={handleAddMetric}
+                userId={user.id}
+            />
+            <div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10 dark:to-green-900/10">
+                <header className="py-6">
+                    <h1 className="text-3xl font-bold">{greeting}, {user?.name.split(' ')[0]}</h1>
+                    <p className="text-muted-foreground">Here’s what your day looks like.</p>
+                </header>
 
-            <section>
-                <h2 className="text-xl font-semibold mb-4">Your day at a glance</h2>
-                {isEventsLoading ? <Loader2 className="animate-spin" /> : <DailyGlance events={events} />}
-            </section>
+                <section>
+                    <h2 className="text-xl font-semibold mb-4">Your day at a glance</h2>
+                    {isEventsLoading ? <Loader2 className="animate-spin" /> : <DailyGlance events={events} />}
+                </section>
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
-                <Card className="lg:col-span-3 bg-background">
-                    <CardHeader className="flex flex-row justify-between items-center flex-wrap gap-2">
-                        <div className="flex items-center gap-2">
-                            <CardTitle>Health Trends</CardTitle>
-                             <Select value={selectedMetric} onValueChange={(val) => setSelectedMetric(val as HealthMetricType)}>
-                                <SelectTrigger className="w-[180px] h-9">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {metricOptions.map(opt => (
-                                        <SelectItem key={opt.value} value={opt.value}>
-                                            <div className="flex items-center gap-2">
-                                                <opt.icon className="w-4 h-4"/>
-                                                {opt.label}
-                                            </div>
-                                        </SelectItem>
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+                    <Card className="lg:col-span-3 bg-background">
+                        <CardHeader className="flex flex-row justify-between items-center flex-wrap gap-2">
+                            <div className="flex items-center gap-2">
+                                <CardTitle>Health Trends</CardTitle>
+                                <Select value={selectedMetric} onValueChange={(val) => setSelectedMetric(val as HealthMetricType)}>
+                                    <SelectTrigger className="w-[180px] h-9">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {metricOptions.map(opt => (
+                                            <SelectItem key={opt.value} value={opt.value}>
+                                                <div className="flex items-center gap-2">
+                                                    <opt.icon className="w-4 h-4"/>
+                                                    {opt.label}
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div className="flex items-center rounded-md bg-muted p-0.5">
+                                    <Button size="icon" variant={chartType === 'line' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}><LineChart className="h-4 w-4"/></Button>
+                                    <Button size="icon" variant={chartType === 'bar' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}><BarChart3 className="h-4 w-4"/></Button>
+                                </div>
+                                <Button size="sm" onClick={() => setIsAddMetricOpen(true)}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            {isMetricsLoading ? (
+                                <div className="h-[250px] w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>
+                            ) : hasChartData ? (
+                                <ChartContainer config={{}} className="h-[250px] w-full">
+                                    {chartType === 'line' ? (
+                                        <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                            <defs>
+                                                <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                                </linearGradient>
+                                                <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
+                                                    <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                            <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                            <ChartTooltip content={<ChartTooltipContent />} />
+                                            <Area dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" fill="url(#colorValue)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} />
+                                            {selectedMetric === 'bloodPressure' && <Area dataKey="value2" name="Diastolic" type="monotone" fill="url(#colorValue2)" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} />}
+                                            <Legend />
+                                        </LineChartComponent>
+                                    ) : (
+                                        <BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                            <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                            <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                            <ChartTooltip content={<ChartTooltipContent />} />
+                                            <Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                            {selectedMetric === 'bloodPressure' && <Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} />}
+                                            <Legend />
+                                        </BarChartComponent>
+                                    )}
+                                </ChartContainer>
+                            ) : (
+                                <div className="h-[250px] w-full rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center text-foreground p-4">
+                                    <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
+                                    <h3 className="font-semibold">Track Your Health</h3>
+                                    <p className="text-sm text-muted-foreground mb-4">Fill in metrics to see your trends visualized here.</p>
+                                    <Button onClick={() => setIsAddMetricOpen(true)}>
+                                        <Plus className="mr-2 h-4 w-4"/> Add Your First Metric
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card className="lg:col-span-2 bg-background flex flex-col">
+                        <CardHeader>
+                            <CardTitle>Your Subscription</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow flex items-center justify-center">
+                            <ChartContainer config={{}} className="h-[200px] w-full">
+                                <PieChartComponent>
+                                <Pie
+                                    data={subscriptionData}
+                                    cx="50%"
+                                    cy="50%"
+                                    labelLine={false}
+                                    outerRadius={80}
+                                    dataKey="value"
+                                >
+                                    {subscriptionData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
                                     ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <div className="flex items-center rounded-md bg-muted p-0.5">
-                                <Button size="icon" variant={chartType === 'line' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}><LineChart className="h-4 w-4"/></Button>
-                                <Button size="icon" variant={chartType === 'bar' ? 'secondary': 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}><BarChart3 className="h-4 w-4"/></Button>
-                            </div>
-                            <Button size="sm" onClick={handleAddMetric}><Plus className="mr-2 h-4 w-4"/> Add Metric</Button>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                         {isMetricsLoading ? (
-                            <div className="h-[250px] w-full flex items-center justify-center"><Loader2 className="animate-spin" /></div>
-                         ) : hasChartData ? (
-                            <ChartContainer config={{}} className="h-[250px] w-full">
-                                {chartType === 'line' ? (
-                                    <LineChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                        <defs>
-                                            <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                            </linearGradient>
-                                            <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
-                                                <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
-                                            </linearGradient>
-                                        </defs>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                        <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                        <ChartTooltip content={<ChartTooltipContent />} />
-                                        <Area dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} type="monotone" fill="url(#colorValue)" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} connectNulls={false} />
-                                        {selectedMetric === 'bloodPressure' && <Area dataKey="value2" name="Diastolic" type="monotone" fill="url(#colorValue2)" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} dot={{ r: 4 }} connectNulls={false} />}
-                                        <Legend />
-                                    </LineChartComponent>
-                                ) : (
-                                    <BarChartComponent data={healthTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                        <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                        <ChartTooltip content={<ChartTooltipContent />} />
-                                        <Bar dataKey="value" name={selectedMetric === 'bloodPressure' ? 'Systolic' : 'Value'} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                        {selectedMetric === 'bloodPressure' && <Bar dataKey="value2" name="Diastolic" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} />}
-                                        <Legend />
-                                    </BarChartComponent>
-                                )}
+                                </Pie>
+                                <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                                </PieChartComponent>
                             </ChartContainer>
-                         ) : (
-                            <div className="h-[250px] w-full rounded-lg bg-muted/50 flex flex-col items-center justify-center text-center text-foreground p-4">
-                                <GitGraph className="h-12 w-12 mx-auto mb-2 text-primary"/>
-                                <h3 className="font-semibold">Track Your Health</h3>
-                                <p className="text-sm text-muted-foreground mb-4">Fill in metrics to see your trends visualized here.</p>
-                                <Button onClick={handleAddMetric}>
-                                    <Plus className="mr-2 h-4 w-4"/> Add Your First Metric
-                                </Button>
+                        </CardContent>
+                        <div className="flex justify-center gap-4 p-4 text-sm">
+                            <div className="flex items-center gap-2">
+                                <span className="h-3 w-3 rounded-full bg-primary"></span>
+                                <span>Active ({subscriptionData[0].value})</span>
                             </div>
-                         )}
-                    </CardContent>
-                </Card>
+                            <div className="flex items-center gap-2">
+                                <span className="h-3 w-3 rounded-full bg-muted"></span>
+                                <span>Paused ({subscriptionData[1].value})</span>
+                            </div>
+                        </div>
+                    </Card>
+                </div>
 
-                <Card className="lg:col-span-2 bg-background flex flex-col">
-                    <CardHeader>
-                        <CardTitle>Your Subscription</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow flex items-center justify-center">
-                         <ChartContainer config={{}} className="h-[200px] w-full">
-                            <PieChartComponent>
-                            <Pie
-                                data={subscriptionData}
-                                cx="50%"
-                                cy="50%"
-                                labelLine={false}
-                                outerRadius={80}
-                                dataKey="value"
-                            >
-                                {subscriptionData.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
-                                ))}
-                            </Pie>
-                            <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
-                            </PieChartComponent>
-                        </ChartContainer>
-                    </CardContent>
-                    <div className="flex justify-center gap-4 p-4 text-sm">
-                        <div className="flex items-center gap-2">
-                            <span className="h-3 w-3 rounded-full bg-primary"></span>
-                            <span>Active ({subscriptionData[0].value})</span>
-                        </div>
-                         <div className="flex items-center gap-2">
-                            <span className="h-3 w-3 rounded-full bg-muted"></span>
-                            <span>Paused ({subscriptionData[1].value})</span>
-                        </div>
-                    </div>
-                </Card>
+                <section className="mt-6">
+                    <Card className="bg-background">
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <CardTitle>Your Care Team</CardTitle>
+                            <Button variant="ghost" size="sm">View All</Button>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex items-center justify-between p-4 rounded-lg bg-red-500/10 border border-red-500/20">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-red-500/20 text-red-500 rounded-full">
+                                        <Flag className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-red-600">Open Issue</p>
+                                        <p className="text-sm text-red-500">Your latest lab results are ready for review.</p>
+                                    </div>
+                                </div>
+                                <Button variant="ghost" size="icon"><ChevronRight/></Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </section>
             </div>
-
-            <section className="mt-6">
-                <Card className="bg-background">
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <CardTitle>Your Care Team</CardTitle>
-                         <Button variant="ghost" size="sm">View All</Button>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-between p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-red-500/20 text-red-500 rounded-full">
-                                    <Flag className="h-5 w-5" />
-                                </div>
-                                <div>
-                                    <p className="font-semibold text-red-600">Open Issue</p>
-                                    <p className="text-sm text-red-500">Your latest lab results are ready for review.</p>
-                                </div>
-                            </div>
-                            <Button variant="ghost" size="icon"><ChevronRight/></Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </section>
-        </div>
+        </>
     );
 }
