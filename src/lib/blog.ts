@@ -1,102 +1,122 @@
 
 import { type BlogPost } from "@/lib/types";
-import { db } from './firebase';
-import { collection, doc, getDocs, writeBatch, addDoc, updateDoc, deleteDoc, query, where, orderBy, limit, getDoc } from 'firebase/firestore';
-import { addLog } from './logs';
 
-const staticBlogPosts: Omit<BlogPost, 'id' | 'slug'>[] = [
+// Curated list of articles from the World Health Organization (WHO)
+// The local content and slug are no longer the primary focus.
+// The main functionality is linking out to the externalUrl.
+const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
-        title: 'The Amazing Health Benefits of Moringa',
-        description: 'Discover why this superfood is a game-changer for your health, packed with vitamins, minerals, and antioxidants.',
+        title: 'Cardiovascular diseases',
+        description: 'An overview of cardiovascular diseases (CVDs), the leading cause of death globally. Learn about risk factors and prevention.',
         image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'moringa leaves',
-        category: 'Superfoods',
-        date: '2023-10-26T10:00:00Z',
-        content: `
-<p>Moringa oleifera, often called the "drumstick tree" or "miracle tree," has been used for centuries for its medicinal properties and health benefits. Native to the sub-Himalayan areas of India, Pakistan, Bangladesh, and Afghanistan, it is now grown across the tropics.</p>
-<h3 class="font-headline text-xl font-semibold mt-6 mb-2">Rich in Nutrients</h3>
-<p>Moringa leaves are an excellent source of many vitamins and minerals. One cup of fresh, chopped leaves (21 grams) contains:</p>
-<ul class="list-disc list-inside my-4 space-y-1">
-  <li><strong>Protein:</strong> 2 grams</li>
-  <li><strong>Vitamin B6:</strong> 19% of the RDA</li>
-  <li><strong>Vitamin C:</strong> 12% of the RDA</li>
-  <li><strong>Iron:</strong> 11% of the RDA</li>
-  <li><strong>Riboflavin (B2):</strong> 11% of the RDA</li>
-  <li><strong>Vitamin A (from beta-carotene):</strong> 9% of the RDA</li>
-  <li><strong>Magnesium:</strong> 8% of the RDA</li>
-</ul>
-<p>The dried leaves are often sold as dietary supplements, either in powder or capsule form.</p>
-<h3 class="font-headline text-xl font-semibold mt-6 mb-2">Powerful Antioxidants</h3>
-<p>Antioxidants are compounds that act against free radicals in your body. High levels of free radicals may lead to oxidative stress, which is associated with chronic diseases like heart disease and type 2 diabetes. Several antioxidant plant compounds have been found in the leaves of Moringa oleifera. In addition to vitamin C and beta-carotene, these include Quercetin and Chlorogenic acid.</p>
-`
+        dataAiHint: 'healthy heart illustration',
+        category: 'Heart Health',
+        date: '2024-05-17T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds)'
     },
     {
-        title: 'A Guide to Natural Skincare with Shea Butter and Black Soap',
-        description: 'Learn how to nourish your skin with traditional African ingredients for a radiant, healthy glow.',
+        title: 'Diabetes',
+        description: 'Understand the different types of diabetes, its health impact, and key strategies for prevention and management.',
         image: 'https://placehold.co/1200x600.png',
-        dataAiHint: 'shea butter skincare',
-        category: 'Skincare',
-        date: '2023-10-22T10:00:00Z',
-        content: `
-<p>For generations, African ingredients like shea butter and black soap have been staples in beauty regimens. Their natural healing and moisturizing properties make them perfect for a simple, effective skincare routine.</p>
-<h3 class="font-headline text-xl font-semibold mt-6 mb-2">The Magic of Shea Butter</h3>
-<p>Shea butter is a fat extracted from the nuts of the shea tree. It's rich in vitamins A, E, and F, and offers UV protection (it is SPF ~6). It provides the skin with essential fatty acids and the nutrients necessary for collagen production.</p>
-<h3 class="font-headline text-xl font-semibold mt-6 mb-2">African Black Soap</h3>
-<p>Authentic African black soap is made from the ash of locally harvested plants and barks such as plantain, cocoa pods, palm tree leaves, and shea tree bark. It's known for its ability to cleanse, exfoliate, and fight acne without stripping the skin of its natural oils. It's a gentle, all-natural alternative to harsh chemical cleansers.</p>
-`
+        dataAiHint: 'blood sugar test',
+        category: 'Diabetes Care',
+        date: '2024-04-05T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/diabetes'
+    },
+    {
+        title: 'Chronic respiratory diseases',
+        description: 'Learn about chronic respiratory diseases like COPD and asthma, which affect hundreds of millions of people worldwide.',
+        image: 'https://placehold.co/1200x600.png',
+        dataAiHint: 'person breathing fresh air',
+        category: 'Respiratory Health',
+        date: '2024-05-16T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/chronic-respiratory-diseases'
+    },
+     {
+        title: 'Chronic kidney disease',
+        description: 'An in-depth look at chronic kidney disease, its causes, and how it can be managed to improve patient outcomes.',
+        image: 'https://placehold.co/1200x600.png',
+        dataAiHint: 'kidney medical illustration',
+        category: 'Kidney Health',
+        date: '2024-03-14T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/chronic-kidney-disease'
+    },
+    {
+        title: 'Neurological disorders',
+        description: 'Neurological disorders are diseases of the central and peripheral nervous system. Learn more about these complex conditions.',
+        image: 'https://placehold.co/1200x600.png',
+        dataAiHint: 'brain activity scan',
+        category: 'Neurology',
+        date: '2024-04-25T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/neurological-disorders'
+    },
+    {
+        title: 'Fact sheet on Organ Transplantation',
+        description: 'Key facts about organ transplantation from WHO, covering global practices, safety, and ethical considerations.',
+        image: 'https://placehold.co/1200x600.png',
+        dataAiHint: 'surgical team operation',
+        category: 'Transplants',
+        date: '2023-07-26T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/organ-transplantation'
+    },
+    {
+        title: 'Healthy diet',
+        description: 'A healthy diet is essential for good health and nutrition. It protects you against many chronic noncommunicable diseases.',
+        image: 'https://placehold.co/1200x600.png',
+        dataAiHint: 'healthy food variety',
+        category: 'General Wellness',
+        date: '2024-04-28T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/healthy-diet'
+    },
+    {
+        title: 'Physical activity',
+        description: 'Regular physical activity is proven to help prevent and manage noncommunicable diseases such as heart disease and diabetes.',
+        image: 'https://placehold.co/1200x600.png',
+        dataAiHint: 'person jogging park',
+        category: 'Fitness',
+        date: '2023-10-05T10:00:00Z',
+        externalUrl: 'https://www.who.int/news-room/fact-sheets/detail/physical-activity'
     },
 ];
 
-const blogCollection = collection(db, 'blog');
-
-// --- One-time Data Seeding (for Admin) ---
-export const seedPosts = async () => {
-    const snapshot = await getDocs(blogCollection);
-    if (snapshot.empty) {
-        console.log('Blog collection is empty. Seeding data...');
-        addLog('INFO', 'Blog collection is empty. Seeding initial posts.');
-        const batch = writeBatch(db);
-        staticBlogPosts.forEach(post => {
-            const docRef = doc(blogCollection); 
-            const slug = post.title.toLowerCase().replace(/\s+/g, '-').slice(0, 50);
-            batch.set(docRef, {...post, slug});
-        });
-        await batch.commit();
-        console.log('Blog posts seeded successfully.');
-        return true;
-    } else {
-        console.log('Blog collection already has data. No seeding needed.');
-        return false;
-    }
-};
-
-// --- Static Data Fetching for Public Pages ---
-const allPosts: BlogPost[] = staticBlogPosts.map((post, index) => ({
-    id: `static-${index}`,
-    slug: post.title.toLowerCase().replace(/\s+/g, '-').slice(0, 50),
-    ...post,
-}));
-
+// --- Static Data Provider ---
+// This function now prepares the articles with a unique ID and a placeholder slug/content.
 export const getAllPosts = async (): Promise<BlogPost[]> => {
-    return allPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    const processedPosts: BlogPost[] = whoArticles.map((post, index) => ({
+        ...post,
+        id: `who-${index}`,
+        slug: post.title.toLowerCase().replace(/\s+/g, '-').slice(0, 50),
+        content: post.description, // Placeholder content
+    }));
+    return processedPosts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
+// getPostBySlug is no longer needed for the new functionality but is kept to prevent build errors
+// in case it's referenced somewhere unexpectedly. It will not be used by the new blog page.
 export const getPostBySlug = async (slug: string): Promise<BlogPost | null> => {
-    const post = allPosts.find(p => p.slug === slug);
+    const posts = await getAllPosts();
+    const post = posts.find(p => p.slug === slug);
     return post || null;
 };
 
+// The Firestore-related functions are no longer needed for this implementation.
+// They can be removed or kept for a future 'internal blog' feature. For now, we'll keep them.
+import { db } from './firebase';
+import { collection, doc, writeBatch, addDoc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { addLog } from './logs';
 
-// --- CRUD Functions for Admin Panel (interacting with Firestore) ---
-export const addPost = async (post: Omit<BlogPost, 'id'>) => {
+const blogCollection = collection(db, 'blog');
+
+export const seedPosts = async () => {
+    // This seeding is now for internal posts, not the WHO feed.
+};
+export const addPost = async (post: Omit<BlogPost, 'id' | 'externalUrl'>) => {
     return await addDoc(blogCollection, post);
 };
-
 export const updatePost = async (id: string, updates: Partial<BlogPost>) => {
     const docRef = doc(db, 'blog', id);
     return await updateDoc(docRef, updates);
 };
-
 export const deletePost = async (id: string) => {
     const docRef = doc(db, 'blog', id);
     return await deleteDoc(docRef);

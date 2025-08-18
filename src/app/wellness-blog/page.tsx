@@ -12,16 +12,16 @@ export default async function WellnessBlogPage() {
     return (
       <div className="container mx-auto px-4 py-12">
         <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold font-headline text-primary">Wellness Blog</h1>
+            <h1 className="text-4xl md:text-5xl font-bold font-headline text-primary">Wellness Hub</h1>
             <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-                Your source for tips, articles, and inspiration for a healthier, happier life.
+                A curated selection of health articles from the World Health Organization (WHO) and other trusted sources.
             </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {blogPosts.map((post) => (
-                <Card key={post.slug} className="glassmorphic flex flex-col group overflow-hidden">
-                     <Link href={`/wellness-blog/${post.slug}`} className="flex flex-col h-full">
+                <Card key={post.id} className="glassmorphic flex flex-col group overflow-hidden">
+                     <a href={post.externalUrl} target="_blank" rel="noopener noreferrer" className="flex flex-col h-full">
                         <div className="relative w-full aspect-video overflow-hidden">
                             <Image
                                 src={post.image}
@@ -36,13 +36,13 @@ export default async function WellnessBlogPage() {
                             <h2 className="font-headline text-xl font-semibold mb-2 flex-grow">{post.title}</h2>
                             <p className="text-muted-foreground text-sm mb-4">{post.description}</p>
                             <div className="flex justify-between items-center text-sm text-muted-foreground mt-auto">
-                                <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+                                <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}</span>
                                 <span className="flex items-center group-hover:text-primary">
-                                    Read More <ArrowRight className="ml-1 h-4 w-4" />
+                                    Read on WHO <ArrowRight className="ml-1 h-4 w-4" />
                                 </span>
                             </div>
                         </div>
-                    </Link>
+                    </a>
                 </Card>
             ))}
         </div>

@@ -132,6 +132,7 @@ export type BlogPost = {
     category: string;
     date: string; // ISO 8601 string
     content: string; // HTML content
+    externalUrl?: string; // URL to the original article
 };
 
 export type DayEventType = 'medication' | 'appointment' | 'measurement';
