@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -56,7 +57,8 @@ export const createUserInFirestore = async (details: Partial<SignUpCredentials &
             avatarUrl: details.avatarUrl || '',
             age: details.age || '',
             phone: details.phone || '',
-            location: details.location || ''
+            location: details.location || '',
+            termsAccepted: false, // Set initial terms acceptance to false
         };
         await setDoc(doc(db, "users", uid), newUser);
         return newUser;

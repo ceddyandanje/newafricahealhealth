@@ -24,6 +24,7 @@ import { useToast } from "./use-toast";
 import { createUserInFirestore, updateUserInFirestore } from "@/lib/users";
 import { addLog } from "@/lib/logs";
 import OnboardingDialog from "@/components/auth/onboarding-dialog";
+import TermsDialog from "@/components/auth/terms-dialog";
 
 interface AuthContextType {
   user: User | null;
@@ -49,11 +50,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [isSavingOnboarding, setIsSavingOnboarding] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
+
+  const handleLoginChecks = (userData: User) => {
+    if (!userData.termsAccepted) {
+        setShowTerms(true);
+    } else if (userData.role === 'user' && !isProfileComplete(userData)) {
+        setShowOnboarding(true);
+    } else {
+        setShowOnboarding(false);
+        setShowTerms(false);
+        handleRedirect(userData);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
@@ -65,11 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (userDoc.exists()) {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
-                if (!isProfileComplete(userData) && userData.role === 'user') {
-                    setShowOnboarding(true);
-                } else {
-                    setShowOnboarding(false);
-                }
+                handleLoginChecks(userData);
             } else {
                  setUser(null);
             }
@@ -77,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setFirebaseUser(null);
             setUser(null);
             setShowOnboarding(false);
+            setShowTerms(false);
         }
         setIsLoading(false);
     });
@@ -85,12 +96,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const handleRedirect = (loggedInUser: User) => {
-    if (!isProfileComplete(loggedInUser) && loggedInUser.role === 'user') {
-        setShowOnboarding(true);
-    } else {
-        setShowOnboarding(false);
-    }
-
     const roleMap: { [key: string]: string | undefined } = {
         'admin': 'admin',
         'doctor': 'doctor/dashboard',
@@ -99,9 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         'lab-technician': 'labs/dashboard',
         'emergency-services': 'emergency/dashboard'
     }
-
     const destination = roleMap[loggedInUser.role];
-    
     if (destination) {
       const dashboardPath = `/${destination}`;
       if (!pathname.startsWith(dashboardPath)) {
@@ -114,18 +117,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
-        const userDocRef = doc(db, "users", userCredential.user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-            const userData = { id: userDoc.id, ...userDoc.data() } as User;
-            toast({ title: "Login Successful", description: `Welcome back, ${userData.name}!` });
-            handleRedirect(userData);
-            return true;
-        }
-        toast({ variant: 'destructive', title: "Login Failed", description: "User profile not found in database." });
-        return false;
+        await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
+        // onAuthStateChanged will handle the rest
+        return true;
     } catch (error: any) {
+        // Error handling remains the same
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
             case 'auth/user-not-found':
@@ -160,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (newUser) {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
-          handleRedirect(newUser);
+          // onAuthStateChanged will handle checks and redirects.
           return true;
         } else {
           throw new Error("Could not create user document in Firestore.");
@@ -187,30 +183,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userDocRef = doc(db, "users", googleUser.uid);
         const userDoc = await getDoc(userDocRef);
 
-        let userData: User | null;
-
         if (userDoc.exists()) {
-            userData = { id: userDoc.id, ...userDoc.data() } as User;
-            toast({ title: "Login Successful", description: `Welcome back, ${userData.name}!` });
+            toast({ title: "Login Successful", description: `Welcome back, ${googleUser.displayName}!` });
         } else {
-            userData = await createUserInFirestore({
+            const newUser = await createUserInFirestore({
                 name: googleUser.displayName || 'New User',
                 email: googleUser.email!,
                 avatarUrl: googleUser.photoURL
             }, googleUser.uid);
             
-            if (userData) {
-                toast({ title: "Signup Successful", description: `Welcome, ${userData.name}!` });
+            if (newUser) {
+                toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
             } else {
                 throw new Error("Could not create user document after Google Sign-In.");
             }
         }
-        
-        if (userData) {
-            handleRedirect(userData);
-            return true;
-        }
-        return false;
+        // onAuthStateChanged will handle the rest.
+        return true;
     } catch (error: any) {
         if (error.code === 'auth/account-exists-with-different-credential') {
              toast({ variant: 'destructive', title: "Account Exists", description: "An account already exists with this email address using a different sign-in method. Please sign in with your password to link your Google account." });
@@ -265,7 +254,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const handleSaveOnboarding = async (data: { name: string, phone: string, ageRange: string, location: string }) => {
     if (!user) return;
-    setIsSavingOnboarding(true);
+    setIsSaving(true);
     const updates = { name: data.name, phone: data.phone, age: data.ageRange, location: data.location };
     const success = await updateUserInFirestore(user.id, updates);
 
@@ -273,15 +262,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const updatedUser = { ...user, ...updates };
         setUser(updatedUser);
         setShowOnboarding(false);
+        handleRedirect(updatedUser);
         addLog("INFO", `User ${user.email} completed their profile onboarding.`);
         toast({ title: "Profile Complete!", description: "Thank you for completing your profile." });
     } else {
         toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your profile. Please try again." });
     }
-    setIsSavingOnboarding(false);
+    setIsSaving(false);
   }
-  
 
+  const handleAcceptTerms = async () => {
+    if (!user) return;
+    setIsSaving(true);
+    const success = await updateUserInFirestore(user.id, { termsAccepted: true });
+
+    if (success) {
+        const updatedUser = { ...user, termsAccepted: true };
+        setUser(updatedUser);
+        setShowTerms(false);
+        handleLoginChecks(updatedUser); // Re-run checks to see if onboarding is next
+        addLog("INFO", `User ${user.email} accepted the Terms of Service.`);
+    } else {
+        toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your preference. Please try again." });
+    }
+    setIsSaving(false);
+  };
+  
   const isAdmin = user?.role === 'admin';
 
   return (
@@ -292,7 +298,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             user={user} 
             isOpen={showOnboarding} 
             onSave={handleSaveOnboarding}
-            isSaving={isSavingOnboarding}
+            isSaving={isSaving}
+        />
+      )}
+      {user && showTerms && (
+        <TermsDialog
+          isOpen={showTerms}
+          onAccept={handleAcceptTerms}
+          isSaving={isSaving}
         />
       )}
     </AuthContext.Provider>

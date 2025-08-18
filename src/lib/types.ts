@@ -37,6 +37,7 @@ export type User = {
     labSpecialty?: 'Hematology' | 'Microbiology' | 'Biochemistry' | 'Pathology'; // For lab technicians
     emergencyUnit?: string; // For emergency services
     certificationLevel?: 'EMT' | 'Paramedic' | 'First Responder';
+    termsAccepted?: boolean;
 };
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;
