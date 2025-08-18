@@ -409,7 +409,5 @@ export default function PatientDashboardPage() {
                 </section>
             </div>
         </>
-    ];
+    );
 }
-
-    
