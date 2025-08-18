@@ -20,7 +20,7 @@ import { Area, Line, LineChart as LineChartComponent, Pie, PieChart as PieChartC
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useEvents, type DayEvent } from '@/lib/events';
 import Link from 'next/link';
@@ -95,12 +95,24 @@ export default function PatientDashboardPage() {
     const { events, isLoading: isEventsLoading } = useEvents(user?.id);
     const { metrics, isLoading: isMetricsLoading } = useHealthMetrics(user?.id);
     const router = useRouter();
+    const [greeting, setGreeting] = useState('Good morning');
     
     useEffect(() => {
         if (!isAuthLoading && !user) {
           router.push("/login");
         }
     }, [user, isAuthLoading, router]);
+
+    useEffect(() => {
+        const hour = new Date().getHours();
+        if (hour < 12) {
+            setGreeting('Good morning');
+        } else if (hour < 17) {
+            setGreeting('Good afternoon');
+        } else {
+            setGreeting('Good evening');
+        }
+    }, []);
 
     const healthTrendData = useMemo(() => {
         const last7Days = Array.from({ length: 7 }, (_, i) => subDays(new Date(), i)).reverse();
@@ -139,7 +151,7 @@ export default function PatientDashboardPage() {
     return (
         <div className="p-6 bg-gradient-to-br from-green-50/50 via-slate-50/50 to-green-50/50 dark:from-green-900/10 dark:via-slate-900/10 dark:to-green-900/10">
             <header className="py-6">
-                <h1 className="text-3xl font-bold">Good morning, {user?.name.split(' ')[0]}</h1>
+                <h1 className="text-3xl font-bold">{greeting}, {user?.name.split(' ')[0]}</h1>
                 <p className="text-muted-foreground">Here’s what your day looks like.</p>
             </header>
 
