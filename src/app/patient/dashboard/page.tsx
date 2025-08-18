@@ -156,7 +156,6 @@ export default function PatientDashboardPage() {
     }, [metrics, selectedMetric]);
     
     const hasChartData = useMemo(() => {
-        // Check if there's any data for the *selected* metric
         return metrics.some(m => m.type === selectedMetric);
     }, [metrics, selectedMetric]);
 
@@ -165,35 +164,34 @@ export default function PatientDashboardPage() {
         if (!user) return;
         
         let randomValue: number;
-        let metricPayload: { type: HealthMetricType; value: number; value2?: number; timestamp: string; };
+        let metricPayload: { type: HealthMetricType; value: number; value2?: number; };
 
         switch(selectedMetric) {
             case 'bloodSugar':
                 randomValue = Math.floor(Math.random() * (180 - 80 + 1)) + 80;
-                metricPayload = { type: selectedMetric, value: randomValue, timestamp: new Date().toISOString() };
+                metricPayload = { type: selectedMetric, value: randomValue };
                 break;
             case 'weight':
                 randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
-                metricPayload = { type: selectedMetric, value: randomValue, timestamp: new Date().toISOString() };
+                metricPayload = { type: selectedMetric, value: randomValue };
                 break;
             case 'heartRate':
                  randomValue = Math.floor(Math.random() * (100 - 60 + 1)) + 60;
-                 metricPayload = { type: selectedMetric, value: randomValue, timestamp: new Date().toISOString() };
+                 metricPayload = { type: selectedMetric, value: randomValue };
                  break;
             case 'bloodPressure':
                  const systolic = Math.floor(Math.random() * (140 - 110 + 1)) + 110;
                  const diastolic = Math.floor(Math.random() * (90 - 70 + 1)) + 70;
-                 metricPayload = { type: selectedMetric, value: systolic, value2: diastolic, timestamp: new Date().toISOString() };
+                 metricPayload = { type: selectedMetric, value: systolic, value2: diastolic };
                  break;
             default:
-                // This case should ideally not be reached due to UI constraints
-                metricPayload = { type: 'weight', value: 0, timestamp: new Date().toISOString() };
+                return;
         }
         
         const finalPayload: any = {
             type: metricPayload.type,
             value: metricPayload.value,
-            timestamp: metricPayload.timestamp
+            timestamp: new Date().toISOString()
         };
 
         if (metricPayload.type === 'bloodPressure' && metricPayload.value2 !== undefined) {
@@ -375,4 +373,5 @@ export default function PatientDashboardPage() {
     );
 }
 
+    
     
