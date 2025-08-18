@@ -12,9 +12,12 @@ import {
     updatePassword,
     EmailAuthProvider,
     reauthenticateWithCredential,
+    GoogleAuthProvider,
+    signInWithPopup,
+    linkWithCredential,
     type User as FirebaseUser
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 
 import { type User, type LoginCredentials, type SignUpCredentials } from "@/lib/types";
 import { useToast } from "./use-toast";
@@ -29,6 +32,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   signup: (credentials: SignUpCredentials) => Promise<boolean>;
   logout: () => void;
+  signInWithGoogle: () => Promise<boolean>;
   reauthenticateAndChangePassword: (currentPass: string, newPass: string) => Promise<boolean>;
   isLoading: boolean;
 }
@@ -70,20 +74,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const handleRedirect = (loggedInUser: User) => {
     const currentBase = pathname.split('/')[1];
     
-    const roleMap: { [key in User['role']]: string } = {
+    const roleMap: { [key: string]: string | undefined } = {
         'admin': 'admin',
-        'doctor': 'doctor',
-        'user': 'patient',
-        'delivery-driver': 'delivery',
-        'lab-technician': 'labs',
-        'emergency-services': 'emergency'
+        'doctor': 'doctor/dashboard',
+        'user': 'patient/dashboard',
+        'delivery-driver': 'delivery/dashboard',
+        'lab-technician': 'labs/dashboard',
+        'emergency-services': 'emergency/dashboard'
     }
 
     const destination = roleMap[loggedInUser.role];
-    const dashboardPath = `/${destination}`;
-
-    if (currentBase !== destination) {
+    
+    if (destination) {
+      const dashboardPath = `/${destination}`;
+      if (!pathname.startsWith(dashboardPath)) {
         router.push(dashboardPath);
+      }
+    } else {
+      router.push('/login');
     }
   };
 
@@ -128,7 +136,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password!);
         const fbUser = userCredential.user;
-        const newUser = await createUserInFirestore(credentials, fbUser.uid);
+        const newUser = await createUserInFirestore({
+            ...credentials, 
+            avatarUrl: fbUser.photoURL
+        }, fbUser.uid);
         
         if (newUser) {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
@@ -150,6 +161,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const signInWithGoogle = async (): Promise<boolean> => {
+    const provider = new GoogleAuthProvider();
+    try {
+        const result = await signInWithPopup(auth, provider);
+        const googleUser = result.user;
+        
+        // Check if the user exists in Firestore
+        const userDocRef = doc(db, "users", googleUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            // User exists, log them in
+            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+            toast({ title: "Login Successful", description: `Welcome back, ${userData.name}!` });
+            handleRedirect(userData);
+        } else {
+            // New user, create a profile
+            const newUser = await createUserInFirestore({
+                name: googleUser.displayName || 'New User',
+                email: googleUser.email!,
+                avatarUrl: googleUser.photoURL
+            }, googleUser.uid);
+            
+            if (newUser) {
+                toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
+                handleRedirect(newUser);
+            } else {
+                throw new Error("Could not create user document after Google Sign-In.");
+            }
+        }
+        return true;
+    } catch (error: any) {
+        if (error.code === 'auth/account-exists-with-different-credential') {
+             toast({ variant: 'destructive', title: "Account Exists", description: "An account already exists with this email address using a different sign-in method. Please sign in with your password to link your Google account." });
+        } else {
+            console.error("Google Sign-In Error:", error);
+            toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
+        }
+        return false;
+    }
+};
+
   const logout = useCallback(async () => {
     await signOut(auth);
     setUser(null);
@@ -168,7 +221,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const credential = EmailAuthProvider.credential(firebaseUser.email, currentPass);
       await reauthenticateWithCredential(firebaseUser, credential);
       
-      // If re-authentication is successful, update the password
       await updatePassword(firebaseUser, newPass);
       addLog("INFO", `User ${firebaseUser.email} successfully changed their password.`);
       toast({ title: "Success", description: "Your password has been changed successfully." });
@@ -196,7 +248,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, logout, reauthenticateAndChangePassword, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, logout, signInWithGoogle, reauthenticateAndChangePassword, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

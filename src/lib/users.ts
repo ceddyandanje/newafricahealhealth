@@ -43,20 +43,20 @@ export const getAllUsersFromFirestore = async (): Promise<User[]> => {
 };
 
 // Creates a user in Firestore (typically after successful Firebase Auth creation).
-export const createUserInFirestore = async (details: SignUpCredentials, uid?: string): Promise<User | null> => {
-    if (!uid) return null; // UID from Firebase Auth is required.
+export const createUserInFirestore = async (details: Partial<SignUpCredentials & { avatarUrl?: string | null }>, uid?: string): Promise<User | null> => {
+    if (!uid || !details.email) return null;
     try {
         const newUser: User = {
             id: uid,
-            name: details.name,
+            name: details.name || 'New User',
             email: details.email,
             role: details.email === 'rootaccessdenied4312@gmail.com' ? 'admin' : 'user',
             status: 'active',
             createdAt: new Date().toISOString(),
-            avatarUrl: '',
-            age: details.age,
-            phone: details.phone,
-            location: details.location
+            avatarUrl: details.avatarUrl || '',
+            age: details.age || '',
+            phone: details.phone || '',
+            location: details.location || ''
         };
         await setDoc(doc(db, "users", uid), newUser);
         return newUser;

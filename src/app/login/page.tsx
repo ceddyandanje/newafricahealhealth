@@ -38,8 +38,9 @@ const signupSchema = z.object({
 
 
 function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { login } = useAuth();
+    const { login, signInWithGoogle } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
     
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -50,6 +51,12 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
         setIsLoading(true);
         await login(values);
         setIsLoading(false);
+    }
+    
+    async function handleGoogleSignIn() {
+        setIsGoogleLoading(true);
+        await signInWithGoogle();
+        setIsGoogleLoading(false);
     }
 
     return (
@@ -67,12 +74,28 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                         <FormField name="password" control={form.control} render={({ field }) => (
                             <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                        <Button type="submit" className="w-full" disabled={isLoading}>
+                        <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Login
                         </Button>
                     </form>
                 </Form>
+                 <div className="relative my-4">
+                    <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    </div>
+                </div>
+                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+                    {isGoogleLoading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                        <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
+                    )}
+                    Sign in with Google
+                </Button>
                 <p className="text-center text-sm text-muted-foreground mt-4">
                     Don't have an account? <Button variant="link" className="p-0 h-auto" onClick={onSwitchTab}>Sign up</Button>
                 </p>
@@ -82,9 +105,9 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 }
 
 function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { signup } = useAuth();
-    const { toast } = useToast();
+    const { signup, signInWithGoogle } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
+    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
     const form = useForm<z.infer<typeof signupSchema>>({
         resolver: zodResolver(signupSchema),
@@ -102,6 +125,12 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
             location: values.location,
         });
         setIsLoading(false);
+    }
+    
+    async function handleGoogleSignIn() {
+        setIsGoogleLoading(true);
+        await signInWithGoogle();
+        setIsGoogleLoading(false);
     }
 
     return (
@@ -168,12 +197,24 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                             </FormItem>
                         )} />
 
-                        <Button type="submit" className="w-full bg-green-400 hover:bg-green-500 text-black" size="lg" disabled={isLoading}>
+                        <Button type="submit" className="w-full" size="lg" disabled={isLoading || isGoogleLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create an account
                         </Button>
-                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={() => toast({ title: "Feature Coming Soon" })}>
-                             <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
+                         <div className="relative my-2">
+                            <div className="absolute inset-0 flex items-center">
+                                <span className="w-full border-t" />
+                            </div>
+                            <div className="relative flex justify-center text-xs uppercase">
+                                <span className="bg-card px-2 text-muted-foreground">Or</span>
+                            </div>
+                        </div>
+                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
+                             {isGoogleLoading ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                             ) : (
+                                <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
+                             )}
                              Sign up with Google
                         </Button>
                     </form>
