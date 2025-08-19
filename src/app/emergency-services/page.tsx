@@ -40,7 +40,7 @@ export default function EmergencyServicesPage() {
           </div>
           <div className="relative h-80 rounded-2xl overflow-hidden glassmorphic p-2">
               <Image
-                  src="https://images.unsplash.com/photo-1629738365203-95561a29dca4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+                  src="https://images.unsplash.com/photo-1612625686051-de2e893a18a0?q=80&w=1055&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                   alt="Helicopter ambulance flying over a landscape"
                   fill
                   className="object-cover rounded-xl"
