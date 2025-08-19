@@ -57,7 +57,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const { toast } = useToast();
 
-  const handleLoginChecks = (userData: User) => {
+  const handleRedirect = useCallback((loggedInUser: User) => {
+    const roleMap: { [key: string]: string | undefined } = {
+        'admin': 'admin',
+        'doctor': 'doctor/dashboard',
+        'user': 'patient/dashboard',
+        'delivery-driver': 'delivery/dashboard',
+        'lab-technician': 'labs/dashboard',
+        'emergency-services': 'emergency/dashboard'
+    }
+    const destination = roleMap[loggedInUser.role];
+    if (destination) {
+      const dashboardPath = `/${destination}`;
+      if (!pathname.startsWith(dashboardPath)) {
+        router.push(dashboardPath);
+      }
+    } else {
+      router.push('/login');
+    }
+  }, [router, pathname]);
+
+  const handleLoginChecks = useCallback((userData: User) => {
     if (!userData.termsAccepted) {
         setShowTerms(true);
     } else if (userData.role === 'user' && !isProfileComplete(userData)) {
@@ -67,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setShowTerms(false);
         handleRedirect(userData);
     }
-  };
+  }, [handleRedirect]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
@@ -93,27 +113,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, []);
-
-  const handleRedirect = (loggedInUser: User) => {
-    const roleMap: { [key: string]: string | undefined } = {
-        'admin': 'admin',
-        'doctor': 'doctor/dashboard',
-        'user': 'patient/dashboard',
-        'delivery-driver': 'delivery/dashboard',
-        'lab-technician': 'labs/dashboard',
-        'emergency-services': 'emergency/dashboard'
-    }
-    const destination = roleMap[loggedInUser.role];
-    if (destination) {
-      const dashboardPath = `/${destination}`;
-      if (!pathname.startsWith(dashboardPath)) {
-        router.push(dashboardPath);
-      }
-    } else {
-      router.push('/login');
-    }
-  };
+  }, [handleLoginChecks]);
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
@@ -185,6 +185,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (userDoc.exists()) {
             toast({ title: "Login Successful", description: `Welcome back, ${googleUser.displayName}!` });
+            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+            handleLoginChecks(userData); // Manually trigger checks since onAuthStateChanged might not re-fire
         } else {
             const newUser = await createUserInFirestore({
                 name: googleUser.displayName || 'New User',
@@ -194,11 +196,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             
             if (newUser) {
                 toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
+                handleLoginChecks(newUser); // Manually trigger checks for new user
             } else {
                 throw new Error("Could not create user document after Google Sign-In.");
             }
         }
-        // onAuthStateChanged will handle the rest.
         return true;
     } catch (error: any) {
         if (error.code === 'auth/account-exists-with-different-credential') {
@@ -224,13 +226,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     name: error.customData._tokenResponse.displayName || user?.name,
                     avatarUrl: error.customData._tokenResponse.photoUrl || user?.avatarUrl,
                 });
+
+                // Fetch the updated user data and redirect
+                const updatedUserDoc = await getDoc(doc(db, "users", userCredential.user.uid));
+                if (updatedUserDoc.exists()) {
+                    const updatedUserData = { id: updatedUserDoc.id, ...updatedUserDoc.data() } as User;
+                    setUser(updatedUserData);
+                    toast({ title: "Accounts Linked!", description: "Your Google account has been successfully linked." });
+                    handleLoginChecks(updatedUserData);
+                }
                 
-                toast({ title: "Accounts Linked!", description: "Your Google account has been successfully linked." });
-                // onAuthStateChanged will handle redirect
                 return true;
 
             } catch (linkError: any) {
-                toast({ variant: 'destructive', title: "Link Failed", description: "Could not link accounts. The password may be incorrect." });
+                 let description = "Could not link accounts.";
+                if (linkError.code === 'auth/wrong-password' || linkError.code === 'auth/invalid-credential') {
+                    description = "The password you entered is incorrect.";
+                }
+                toast({ variant: 'destructive', title: "Link Failed", description });
                 return false;
             }
         } else {
@@ -268,6 +281,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       let description = "An unknown error occurred.";
       switch (error.code) {
         case 'auth/wrong-password':
+        case 'auth/invalid-credential':
           description = "The current password you entered is incorrect.";
           break;
         case 'auth/too-many-requests':
