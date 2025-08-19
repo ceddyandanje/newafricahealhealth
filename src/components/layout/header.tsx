@@ -17,11 +17,17 @@ import Image from "next/image"
 import { cn } from "@/lib/utils"
 
 const dropdownCategories = [
-    ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory', 'arthritis', 'kidney-disease', 'neurological-disorders'].includes(c.id)),
+    { id: 'arthritis', name: 'Arthritis' },
+    { id: 'cardiovascular', name: 'Cardiovascular Health' },
+    { id: 'diabetes-care', name: 'Diabetes Care' },
+    { id: 'emergency-services', name: 'Emergency Services' },
+    { id: 'kidney-disease', name: 'Kidney Disease' },
     { id: 'medical-tourism', name: 'Medical Tourism' },
+    { id: 'neurological-disorders', name: 'Neurological Disorders' },
     { id: 'organ-transplants', name: 'Organ Transplants' },
-    { id: 'emergency-services', name: 'Emergency Services' }
+    { id: 'respiratory', name: 'Respiratory' },
 ].sort((a, b) => a.name.localeCompare(b.name));
+
 
 function CategoriesDropdown() {
     return (
@@ -40,7 +46,7 @@ function CategoriesDropdown() {
                     <DropdownMenuItem key={category.id} asChild>
                         <Link 
                             href={`/${category.id}`} 
-                            className={cn(category.id === 'emergency-services' && 'font-bold text-red-500 [text-shadow:0_0_8px_theme(colors.red.500)] hover:!text-red-400')}
+                            className={cn(category.id === 'emergency-services' && 'font-bold text-red-500 hover:!text-red-600')}
                         >
                             {category.name}
                         </Link>
@@ -165,7 +171,7 @@ export default function Header() {
                                             href={`/${category.id}`} 
                                             className={cn(
                                                 "block py-2 text-muted-foreground hover:text-foreground",
-                                                category.id === 'emergency-services' && 'font-bold text-red-500 [text-shadow:0_0_8px_theme(colors.red.500)] hover:!text-red-400'
+                                                category.id === 'emergency-services' && 'font-bold text-red-500 hover:!text-red-600'
                                             )}
                                         >
                                             {category.name}
