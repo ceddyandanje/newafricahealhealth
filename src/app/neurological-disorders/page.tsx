@@ -8,7 +8,7 @@ export default function NeurologicalDisordersPage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://placehold.co/1920x800.png"
+            src="https://images.unsplash.com/photo-1559757175-245135b9915e?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Abstract image of neural networks"
             fill
             className="object-cover"
@@ -28,7 +28,7 @@ export default function NeurologicalDisordersPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/600x450.png"
+                        src="https://images.unsplash.com/photo-1584515933487-779824d29209?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                         alt="Compassionate caregiver assisting a patient"
                         fill
                         className="object-cover rounded-xl"

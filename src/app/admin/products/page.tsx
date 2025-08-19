@@ -34,7 +34,7 @@ const productSchema = z.object({
 function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onSave: (data: z.infer<typeof productSchema>, id?: string) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof productSchema>>({
         resolver: zodResolver(productSchema),
-        defaultValues: product ? { ...product, price: product.price / 100 } : { name: '', description: '', price: 0, category: '', brand: '', image: 'https://placehold.co/600x400.png', dataAiHint: '' },
+        defaultValues: product ? { ...product, price: product.price / 100 } : { name: '', description: '', price: 0, category: '', brand: '', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', dataAiHint: '' },
     });
 
     const handleSubmit = (values: z.infer<typeof productSchema>) => {
@@ -91,12 +91,12 @@ export default function ProductsAdminPage() {
             if (isEditing) {
                 await updateProduct(id, productWithPriceInCents);
                 addLog('INFO', `Product "${productData.name}" was updated.`);
-                addNotification({ type: 'product_update', title: 'Product Updated', description: `Product "${productData.name}" was successfully updated.`});
+                addNotification({ type: 'product_update', title: 'Product Updated', description: `Product "${productData.name}" was successfully updated.`, recipientId: 'admin_role' });
                 toast({ title: "Product Saved", description: "Changes to the product have been saved." });
             } else {
                 await addProduct(productWithPriceInCents);
                 addLog('INFO', `New product "${productData.name}" was added.`);
-                addNotification({ type: 'product_update', title: 'Product Added', description: `A new product, "${productData.name}", is now available.`});
+                addNotification({ type: 'product_update', title: 'Product Added', description: `A new product, "${productData.name}", is now available.`, recipientId: 'admin_role'});
                 toast({ title: "Product Added", description: "The new product has been added to the inventory." });
             }
             setEditingProduct(undefined);
@@ -110,7 +110,7 @@ export default function ProductsAdminPage() {
         try {
             await deleteProduct(product.id);
             addLog('WARN', `Product "${product.name}" was deleted.`);
-            addNotification({ type: 'product_update', title: 'Product Deleted', description: `Product "${product.name}" has been removed from inventory.`});
+            addNotification({ type: 'product_update', title: 'Product Deleted', description: `Product "${product.name}" has been removed from inventory.`, recipientId: 'admin_role'});
             toast({ variant: 'destructive', title: "Product Deleted", description: "The product has been removed." });
         } catch (error) {
             console.error("Failed to delete product:", error);
