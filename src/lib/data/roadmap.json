@@ -119,5 +119,13 @@
         "status": "Todo",
         "category": "AI & Automation",
         "createdAt": "2023-10-30T10:03:00Z"
+    },
+    {
+        "id": "task-16",
+        "title": "Implement End-to-End Order & Payment Workflow",
+        "description": "Develop the complete checkout and order management flow based on manual M-Pesa verification.\n\n**Phase 1: Customer Checkout**\n- Generate a unique Order ID (e.g., AHH-123456) on the checkout page.\n- Display clear Paybill instructions, using the Order ID as the Account Number.\n- Require the customer to input their M-Pesa Transaction Code to submit the order.\n\n**Phase 2: Admin Verification**\n- Create an `orders` collection in Firestore. New orders have a 'Pending Verification' status.\n- Build an 'Orders' page in the admin dashboard for admins to view incoming orders and the submitted M-Pesa code.\n- Admins will manually cross-reference the payment with their M-Pesa statement.\n- Admins can update the order status to 'Processing' (on success) or 'On Hold' (on failure).\n\n**Phase 3: Fulfillment**\n- An order status of 'Processing' should trigger automated notifications to the customer and make the order visible to the fulfillment team.\n- Add statuses for 'Shipped' and 'Delivered' to be updated by admins, triggering further customer notifications.\n\n**Data Handling & Edge Cases:**\n- Implement basic inventory reservation when an order is submitted.\n- Define a process for handling out-of-stock items after payment has been confirmed, focusing on clear communication with the customer (e.g., offer refund, alternative, or backorder).",
+        "status": "Todo",
+        "category": "Core Feature",
+        "createdAt": "2023-10-30T11:00:00Z"
     }
 ]
