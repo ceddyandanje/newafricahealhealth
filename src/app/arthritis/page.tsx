@@ -8,11 +8,11 @@ export default function ArthritisPage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://images.unsplash.com/photo-1584462126295-8a2745ac6263?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
-            alt="X-ray of a human joint"
+            src="https://images.unsplash.com/photo-1666886573215-b59d8ad9970c?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="Senior person holding their knee in discomfort"
             fill
             className="object-cover"
-            data-ai-hint="joint x-ray"
+            data-ai-hint="knee pain"
             priority
             />
             <div className="absolute inset-0 bg-black/50" />
