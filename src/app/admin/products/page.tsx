@@ -34,7 +34,7 @@ const productSchema = z.object({
 function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onSave: (data: z.infer<typeof productSchema>, id?: string) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof productSchema>>({
         resolver: zodResolver(productSchema),
-        defaultValues: product ? { ...product, price: product.price / 100 } : { name: '', description: '', price: 0, category: '', brand: '', image: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', dataAiHint: '' },
+        defaultValues: product ? { ...product, price: product.price / 100 } : { name: '', description: '', price: 0, category: '', brand: '', image: 'https://placehold.co/870x580.png', dataAiHint: '' },
     });
 
     const handleSubmit = (values: z.infer<typeof productSchema>) => {

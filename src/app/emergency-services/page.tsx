@@ -10,7 +10,7 @@ export default function EmergencyServicesPage() {
     <div className="bg-background">
       <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
         <Image
-          src="https://images.unsplash.com/photo-1581091221594-498c8a16c141?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          src="https://placehold.co/870x580.png"
           alt="Ambulance speeding down a city street"
           fill
           className="object-cover"
@@ -40,11 +40,11 @@ export default function EmergencyServicesPage() {
           </div>
           <div className="relative h-80 rounded-2xl overflow-hidden glassmorphic p-2">
               <Image
-                  src="https://images.unsplash.com/photo-1599493356233-d716f73d523c?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                  src="https://placehold.co/870x580.png"
                   alt="Helicopter ambulance flying over a landscape"
                   fill
                   className="object-cover rounded-xl"
-                  data-ai-hint="ambulance emergency"
+                  data-ai-hint="ambulance helicopter"
               />
           </div>
         </div>

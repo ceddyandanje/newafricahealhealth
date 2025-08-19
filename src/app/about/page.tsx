@@ -19,7 +19,7 @@ export default function AboutUsPage() {
           <div className="grid md:grid-cols-2 gap-16 items-center mb-20">
             <div className="relative h-96 rounded-2xl overflow-hidden">
                 <Image
-                    src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                    src="https://placehold.co/870x580.png"
                     alt="Healthcare professionals discussing results on a tablet"
                     fill
                     className="object-cover"

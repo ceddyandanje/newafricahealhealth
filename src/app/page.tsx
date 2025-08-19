@@ -21,7 +21,7 @@ export default function Home() {
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
             <Image
-              src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="https://placehold.co/1470x980.png"
               alt="Healthcare professional smiling"
               fill
               className="object-cover object-center"
@@ -164,7 +164,7 @@ export default function Home() {
         <section className="relative py-20 text-white">
           <div className="absolute inset-0">
             <Image 
-              src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              src="https://placehold.co/870x580.png"
               alt="Medical background"
               fill
               className="object-cover"
@@ -257,7 +257,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://images.unsplash.com/photo-1554151228-14d9def656e4?q=80&w=250&auto=format&fit=facearea&facepad=2&ixlib=rb-4.0.3" alt="Amina K." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="Amina K." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>AK</AvatarFallback>
                             </Avatar>
                             <div>
@@ -279,7 +279,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=250&auto=format&fit=facearea&facepad=2&ixlib=rb-4.0.3" alt="John M." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="John M." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>JM</AvatarFallback>
                             </Avatar>
                             <div>
@@ -301,7 +301,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=250&auto=format&fit=facearea&facepad=2&ixlib=rb-4.0.3" alt="Sarah L." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://placehold.co/100x100.png" alt="Sarah L." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>SL</AvatarFallback>
                             </Avatar>
                             <div>
