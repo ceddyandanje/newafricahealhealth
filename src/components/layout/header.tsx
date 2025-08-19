@@ -40,7 +40,7 @@ function CategoriesDropdown() {
                     <DropdownMenuItem key={category.id} asChild>
                         <Link 
                             href={`/${category.id}`} 
-                            className={cn(category.id === 'emergency-services' && 'text-red-500 hover:!text-red-600')}
+                            className={cn(category.id === 'emergency-services' && 'font-bold text-red-500 [text-shadow:0_0_8px_theme(colors.red.500)] hover:!text-red-400')}
                         >
                             {category.name}
                         </Link>
@@ -165,7 +165,7 @@ export default function Header() {
                                             href={`/${category.id}`} 
                                             className={cn(
                                                 "block py-2 text-muted-foreground hover:text-foreground",
-                                                category.id === 'emergency-services' && 'text-red-500 hover:!text-red-600 font-semibold'
+                                                category.id === 'emergency-services' && 'font-bold text-red-500 [text-shadow:0_0_8px_theme(colors.red.500)] hover:!text-red-400'
                                             )}
                                         >
                                             {category.name}
