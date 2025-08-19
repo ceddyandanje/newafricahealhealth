@@ -9,6 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
+import { db } from "@/lib/firebase"
+import { collection, addDoc } from "firebase/firestore"
+import { addLog } from "@/lib/logs"
+import { addNotification } from "@/lib/notifications"
+import { useState } from "react"
+import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
@@ -19,6 +25,7 @@ const formSchema = z.object({
 
 export default function ConsultationForm() {
     const { toast } = useToast()
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -30,15 +37,41 @@ export default function ConsultationForm() {
         },
     })
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log("Consultation Form Submitted", values)
-        // Here you would typically send the data to your backend
-        toast({
-            title: "Session Booked!",
-            description: "Thank you for your request. We will contact you shortly.",
-        })
-        form.reset()
-        // You might want to close the dialog here, which would require passing down a function from the parent.
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsSubmitting(true);
+        try {
+            // Write the consultation request to Firestore
+            await addDoc(collection(db, "consultations"), {
+                ...values,
+                createdAt: new Date().toISOString(),
+                status: 'New'
+            });
+            
+            // Log the event and notify admins
+            addLog("INFO", `New consultation request received from ${values.name} (${values.email}).`);
+            addNotification({
+                recipientId: 'admin_role',
+                type: 'info',
+                title: 'New Consultation Request',
+                description: `A new consultation request from ${values.name} has been submitted.`
+            });
+
+            toast({
+                title: "Request Sent!",
+                description: "Thank you for your request. We will contact you shortly.",
+            })
+            form.reset()
+        } catch (error) {
+            console.error("Error submitting consultation form:", error);
+            addLog("ERROR", `Failed to submit consultation form for ${values.name}. Error: ${error}`);
+            toast({
+                variant: 'destructive',
+                title: "Submission Failed",
+                description: "There was a problem sending your request. Please try again later.",
+            })
+        } finally {
+            setIsSubmitting(false);
+        }
     }
   
     return (
@@ -96,7 +129,10 @@ export default function ConsultationForm() {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className="w-full">Book Your Session</Button>
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Book Your Session
+                </Button>
             </form>
         </Form>
     )
