@@ -88,7 +88,7 @@ export default function AiChatWidget() {
                 <div className="flex justify-between items-center p-4 border-b">
                     <div className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
-                            <AvatarImage src="https://placehold.co/300x300.png" alt="AI Assistant" data-ai-hint="friendly robot" />
+                            <AvatarImage src="https://images.unsplash.com/photo-1599058917212-d750089bc07e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" alt="AI Assistant" data-ai-hint="friendly robot" />
                             <AvatarFallback>AHH</AvatarFallback>
                         </Avatar>
                         <h2 className="font-headline text-lg font-bold">AHH Assistant</h2>

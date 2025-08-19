@@ -9,7 +9,7 @@ export default function OrganTransplantsPage() {
       <div className="bg-background">
          <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-                src="https://placehold.co/870x580.png"
+                src="https://images.unsplash.com/photo-1582719471384-894c86c97e54?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                 alt="Surgical team performing a procedure"
                 fill
                 className="object-cover"
@@ -29,7 +29,7 @@ export default function OrganTransplantsPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/870x580.png"
+                        src="https://images.unsplash.com/photo-1527613426441-4da17471b66d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                         alt="Heart illustration with technology elements"
                         fill
                         className="object-cover rounded-xl"

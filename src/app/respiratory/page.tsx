@@ -8,7 +8,7 @@ export default function RespiratoryPage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://placehold.co/870x580.png"
+            src="https://images.unsplash.com/photo-1604015343469-536767b6d6f5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
             alt="Person breathing fresh air in a mountain landscape"
             fill
             className="object-cover"
@@ -28,7 +28,7 @@ export default function RespiratoryPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/920x613.png"
+                        src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=920&q=80"
                         alt="Person doing yoga to improve breathing"
                         fill
                         className="object-cover rounded-xl"

@@ -8,7 +8,7 @@ export default function CardiovascularPage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://placehold.co/870x580.png"
+            src="https://images.unsplash.com/photo-1506126613408-4e0521b2591e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
             alt="Illustration of a healthy heart with EKG lines"
             fill
             className="object-cover"
@@ -40,7 +40,7 @@ export default function CardiovascularPage() {
                 </div>
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/870x580.png"
+                        src="https://images.unsplash.com/photo-1530026405182-2823733226c0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                         alt="Doctor showing a patient a heart model"
                         fill
                         className="object-cover rounded-xl"

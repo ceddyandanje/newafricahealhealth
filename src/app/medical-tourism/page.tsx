@@ -8,7 +8,7 @@ export default function MedicalTourismPage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://placehold.co/853x569.png"
+            src="https://images.unsplash.com/photo-1629738365203-95561a29dca4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=853&q=80"
             alt="Modern hospital building for medical tourism"
             fill
             className="object-cover"
@@ -40,7 +40,7 @@ export default function MedicalTourismPage() {
                 </div>
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/870x580.png"
+                        src="https://images.unsplash.com/photo-1551076805-e1869033e561?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                         alt="Smiling patient talking to a doctor"
                         fill
                         className="object-cover rounded-xl"

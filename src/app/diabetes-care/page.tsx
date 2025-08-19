@@ -8,7 +8,7 @@ export default function DiabetesCarePage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://placehold.co/870x580.png"
+            src="https://images.unsplash.com/photo-1522040432323-9944a6f477e3?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
             alt="Person checking blood sugar level with a glucometer"
             fill
             className="object-cover"
@@ -28,7 +28,7 @@ export default function DiabetesCarePage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://placehold.co/870x580.png"
+                        src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                         alt="A collection of healthy foods suitable for a diabetic diet"
                         fill
                         className="object-cover rounded-xl"

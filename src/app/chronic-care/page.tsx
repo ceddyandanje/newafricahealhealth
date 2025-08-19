@@ -14,7 +14,7 @@ export default function ChronicCarePage() {
             {/* Hero Section */}
             <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
                 <Image
-                    src="https://placehold.co/870x580.png"
+                    src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                     alt="Healthcare professional assisting a patient with a tablet"
                     fill
                     className="object-cover"
