@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Settings, User, Bell, Lock, Palette, Phone, ShieldAlert, Home, UploadCloud, Loader2 } from 'lucide-react';
+import { Settings, User, Bell, Lock, Palette, Phone, ShieldAlert, Home, UploadCloud, Loader2, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import Image from 'next/image';
 
 
 export default function PatientSettingsPage() {
@@ -286,6 +287,47 @@ export default function PatientSettingsPage() {
                                 </div>
                             </div>
                              <Button onClick={handleMedicalUpdate}>Update Medical Details</Button>
+                        </CardContent>
+                    </Card>
+
+                     <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><CreditCard /> Payment Methods</CardTitle>
+                            <CardDescription>Manage your saved payment options for quick checkout.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div>
+                                <Label htmlFor="mpesa-number" className="font-semibold">M-Pesa</Label>
+                                <div className="flex items-center gap-2 mt-2">
+                                     <Image src="https://upload.wikimedia.org/wikipedia/commons/1/15/M-PESA_LOGO-01.svg" alt="M-Pesa Logo" width={80} height={25} />
+                                    <Input id="mpesa-number" placeholder="+254712345678" className="max-w-xs"/>
+                                    <Button>Save</Button>
+                                </div>
+                            </div>
+                            <Separator />
+                             <div>
+                                <Label className="font-semibold">Credit/Debit Card</Label>
+                                <div className="p-4 border rounded-lg mt-2 space-y-3">
+                                    <div className="space-y-1">
+                                        <Label htmlFor="card-number">Card Number</Label>
+                                        <Input id="card-number" placeholder="•••• •••• •••• 1234" />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-1">
+                                            <Label htmlFor="expiry-date">Expiry Date</Label>
+                                            <Input id="expiry-date" placeholder="MM / YY" />
+                                        </div>
+                                        <div className="space-y-1">
+                                            <Label htmlFor="cvc">CVC</Label>
+                                            <Input id="cvc" placeholder="123" />
+                                        </div>
+                                    </div>
+                                     <Button>Add Card</Button>
+                                     <p className="text-xs text-muted-foreground pt-2">
+                                        Note: For your security, card details are handled by a secure payment processor. Full card numbers are never stored on our servers.
+                                     </p>
+                                </div>
+                            </div>
                         </CardContent>
                     </Card>
 
