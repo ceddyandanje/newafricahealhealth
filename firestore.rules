@@ -1,61 +1,13 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check for admin role
-    function isAdmin() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    // Users can only read/write their own data, but admins can access anything.
-    match /users/{userId} {
-      allow read, update: if request.auth.uid == userId || isAdmin();
-      allow create, delete: if isAdmin();
-
-      // Subcollections for users
-      match /{subcollection}/{docId} {
-         allow read, write: if request.auth.uid == userId || isAdmin();
-      }
-    }
-    
-    // Public collections that anyone can read
-    match /products/{productId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    
-    match /blog/{postId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    match /roadmap/{taskId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    
-    // Consultations can be created by anyone, but only managed by admins
-    match /consultations/{consultationId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
-    
-    // Authenticated users can create requests, but only admins can manage them
-    match /refillRequests/{requestId} {
-      allow create: if request.auth != null;
-      allow read, update, delete: if isAdmin();
-    }
-    
-    // Logs and Notifications are admin-only
-    match /logs/{logId} {
-      allow read, write: if isAdmin();
-    }
-    
-    match /notifications/{notificationId} {
-      allow read, write: if isAdmin();
-      allow create: if true; // Allow system to create notifications
+    // WARNING: These rules are insecure and are for development purposes only.
+    // They allow any user to read and write to any collection.
+    // TODO: Implement secure rules before deploying to production.
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }

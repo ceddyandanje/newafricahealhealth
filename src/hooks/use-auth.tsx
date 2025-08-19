@@ -202,7 +202,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return true;
     } catch (error: any) {
         if (error.code === 'auth/account-exists-with-different-credential') {
-             toast({ variant: 'destructive', title: "Account Exists", description: "An account already exists with this email address using a different sign-in method. Please sign in with your password to link your Google account." });
+            const email = error.customData.email;
+            if (!email) {
+                toast({ variant: 'destructive', title: "Link Failed", description: "Could not retrieve email from Google. Please try again."});
+                return false;
+            }
+
+            const password = prompt("It looks like you already have an account with this email. Please enter your password to link your Google account.");
+            if (!password) {
+                toast({ variant: 'destructive', title: "Link Canceled", description: "Account linking was canceled."});
+                return false;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const googleCredential = GoogleAuthProvider.credentialFromError(error);
+                if (!googleCredential) throw new Error("Could not get Google credential.");
+
+                await linkWithCredential(userCredential.user, googleCredential);
+                await updateUserInFirestore(userCredential.user.uid, {
+                    name: error.customData._tokenResponse.displayName || user?.name,
+                    avatarUrl: error.customData._tokenResponse.photoUrl || user?.avatarUrl,
+                });
+                
+                toast({ title: "Accounts Linked!", description: "Your Google account has been successfully linked." });
+                // onAuthStateChanged will handle redirect
+                return true;
+
+            } catch (linkError: any) {
+                toast({ variant: 'destructive', title: "Link Failed", description: "Could not link accounts. The password may be incorrect." });
+                return false;
+            }
         } else {
             console.error("Google Sign-In Error:", error);
             toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
