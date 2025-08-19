@@ -28,7 +28,7 @@ export default function DiabetesCarePage() {
             <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+                        src="https://images.unsplash.com/photo-1685485276223-0bb0226dcca8?q=80&w=756&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                         alt="A collection of healthy foods suitable for a diabetic diet"
                         fill
                         className="object-cover rounded-xl"
@@ -79,3 +79,5 @@ export default function DiabetesCarePage() {
       </div>
     );
   }
+
+    
