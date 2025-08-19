@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, Ambulance, LifeBuoy, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw, Scissors } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, Ambulance, LifeBuoy, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw, Scissors, CheckCircle, Package } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -88,8 +88,54 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Global & Emergency Services Section */}
+        {/* Why We Do What We Do Section */}
         <section className="py-20">
+            <div className="container mx-auto px-4">
+                <div className="grid md:grid-cols-2 gap-16 items-center">
+                    <div className="relative h-96 rounded-2xl overflow-hidden shadow-lg">
+                        <Image
+                            src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+                            alt="Healthcare team working together"
+                            fill
+                            className="object-cover"
+                            data-ai-hint="healthcare team"
+                        />
+                    </div>
+                    <div>
+                        <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">Why We Do What We Do</h2>
+                        <p className="text-lg text-muted-foreground mb-6">
+                            We believe that access to quality healthcare is a fundamental right, not a privilege. Our mission is to bridge the gap in healthcare by leveraging technology to provide reliable, affordable, and accessible medical solutions across Africa.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="flex items-start gap-4">
+                                <CheckCircle className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                                <div>
+                                    <h4 className="font-semibold">Simplify Access</h4>
+                                    <p className="text-sm text-muted-foreground">We make it simple to get the medications and services you need, no matter where you are.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <CheckCircle className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                                <div>
+                                    <h4 className="font-semibold">Empower Patients</h4>
+                                    <p className="text-sm text-muted-foreground">We provide the tools and information to help you take control of your health journey.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <CheckCircle className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
+                                <div>
+                                    <h4 className="font-semibold">Build a Healthier Future</h4>
+                                    <p className="text-sm text-muted-foreground">Our goal is to build a healthier, more connected continent, one patient at a time.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        {/* Global & Emergency Services Section */}
+        <section className="py-20 bg-muted/20">
             <div className="container mx-auto px-4 text-center">
                 <h2 className="text-3xl md:text-4xl font-bold text-primary mb-4">Global & Emergency Services</h2>
                 <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-16">
@@ -129,7 +175,7 @@ export default function Home() {
         </section>
 
         {/* How It Works Section */}
-        <section className="py-20 bg-muted/20">
+        <section className="py-20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
               Your Chronic Care Journey, Simplified
