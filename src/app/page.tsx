@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, Ambulance, LifeBuoy, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw, Scissors, CheckCircle, Package } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, Ambulance, LifeBuoy, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw, Scissors, CheckCircle, Package, Youtube } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -92,14 +92,19 @@ export default function Home() {
         <section className="py-20">
             <div className="container mx-auto px-4">
                 <div className="grid md:grid-cols-2 gap-16 items-center">
-                    <div className="relative h-96 rounded-2xl overflow-hidden shadow-lg">
+                    <div className="relative aspect-video rounded-2xl overflow-hidden shadow-lg group">
                         <Image
                             src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
                             alt="Healthcare team working together"
                             fill
-                            className="object-cover"
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
                             data-ai-hint="healthcare team"
                         />
+                         <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                            <button className="bg-white/20 backdrop-blur-sm p-4 rounded-full text-white hover:bg-white/30 transition-colors">
+                                <Youtube className="h-12 w-12" />
+                            </button>
+                        </div>
                     </div>
                     <div>
                         <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary mb-4">Why We Do What We Do</h2>
