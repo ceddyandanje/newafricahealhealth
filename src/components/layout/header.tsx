@@ -14,6 +14,7 @@ import ThemeToggleButton from "./theme-toggle-button"
 import AuthButton from "./auth-button"
 import { chronicCareCategories } from "@/lib/chronicCareCategories"
 import Image from "next/image"
+import { cn } from "@/lib/utils"
 
 const dropdownCategories = [
     ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory', 'arthritis', 'kidney-disease', 'neurological-disorders'].includes(c.id)),
@@ -37,7 +38,12 @@ function CategoriesDropdown() {
                 <DropdownMenuSeparator />
                 {dropdownCategories.map(category => (
                     <DropdownMenuItem key={category.id} asChild>
-                        <Link href={`/${category.id}`}>{category.name}</Link>
+                        <Link 
+                            href={`/${category.id}`} 
+                            className={cn(category.id === 'emergency-services' && 'text-red-500 hover:!text-red-600')}
+                        >
+                            {category.name}
+                        </Link>
                     </DropdownMenuItem>
                 ))}
             </DropdownMenuContent>
@@ -155,7 +161,15 @@ export default function Header() {
                                 </SheetClose>
                                 {dropdownCategories.map(category => (
                                     <SheetClose asChild key={category.id}>
-                                        <Link href={`/${category.id}`} className="block py-2 text-muted-foreground hover:text-foreground">{category.name}</Link>
+                                        <Link 
+                                            href={`/${category.id}`} 
+                                            className={cn(
+                                                "block py-2 text-muted-foreground hover:text-foreground",
+                                                category.id === 'emergency-services' && 'text-red-500 hover:!text-red-600 font-semibold'
+                                            )}
+                                        >
+                                            {category.name}
+                                        </Link>
                                     </SheetClose>
                                 ))}
                             </CollapsibleContent>
