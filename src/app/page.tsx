@@ -3,7 +3,7 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, Ambulance, LifeBuoy, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw } from "lucide-react"
+import { User, HeartPulse, Stethoscope, Phone, ArrowRight, Plane, Heart, Pill, Brain, Ambulance, LifeBuoy, Sparkles, Truck, Video, ClipboardList, BookText, Star, RefreshCw, Scissors } from "lucide-react"
 import Typewriter from "@/components/effects/typewriter"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
@@ -164,7 +164,7 @@ export default function Home() {
         <section className="relative py-20 text-white">
           <div className="absolute inset-0">
             <Image 
-              src="https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
+              src="https://images.unsplash.com/photo-1584515933487-779824d29309?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtZWRpY2FsfGVufDB8fHx8MTc1NDE5NDQ2OHww&ixlib=rb-4.1.0&q=80&w=1920"
               alt="Medical background"
               fill
               className="object-cover"
@@ -257,7 +257,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://images.unsplash.com/photo-1554151228-14d9def656e4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80" alt="Amina K." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://images.unsplash.com/photo-1554151228-14d9def656e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxzbWlsaW5nJTIwcGVyc29ufGVufDB8fHx8MTc1NDE5NDQ2OXww&ixlib=rb-4.1.0&q=80&w=400" alt="Amina K." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>AK</AvatarFallback>
                             </Avatar>
                             <div>
@@ -279,7 +279,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80" alt="John M." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzbWlsaW5nJTIwcGVyc29ufGVufDB8fHx8MTc1NDE5NDQ2OXww&ixlib=rb-4.1.0&q=80&w=400" alt="John M." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>JM</AvatarFallback>
                             </Avatar>
                             <div>
@@ -301,7 +301,7 @@ export default function Home() {
                         </p>
                         <div className="flex items-center">
                             <Avatar className="h-12 w-12 mr-4">
-                                <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80" alt="Sarah L." data-ai-hint="smiling person" width={100} height={100} />
+                                <AvatarImage src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzbWlsaW5nJTIwcGVyc29ufGVufDB8fHx8MTc1NDE5NDQ2OXww&ixlib=rb-4.1.0&q=80&w=400" alt="Sarah L." data-ai-hint="smiling person" width={100} height={100} />
                                 <AvatarFallback>SL</AvatarFallback>
                             </Avatar>
                             <div>
@@ -318,9 +318,9 @@ export default function Home() {
         <section className="py-20">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-12 text-foreground">
-              Shop by Health Condition
+              Shop by Category
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
               <Link href="/products?category=Chronic+Care" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
@@ -329,15 +329,23 @@ export default function Home() {
                   <h3 className="text-xl font-semibold text-foreground">Chronic Care</h3>
                 </div>
               </Link>
+               <Link href="/products?category=Surgical+Equipment" className="block group">
+                <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
+                  <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
+                    <Scissors className="h-10 w-10" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground">Surgical Supplies</h3>
+                </div>
+              </Link>
               <Link href="/emergency-services" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Ambulance className="h-10 w-10" />
                   </div>
-                  <h3 className="text-xl font-semibold text-foreground">Emergency Response</h3>
+                  <h3 className="text-xl font-semibold text-foreground">Emergency</h3>
                 </div>
               </Link>
-              <Link href="/products?category=Medical+Tourism" className="block group">
+              <Link href="/medical-tourism" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Plane className="h-10 w-10" />
@@ -345,7 +353,7 @@ export default function Home() {
                   <h3 className="text-xl font-semibold text-foreground">Medical Tourism</h3>
                 </div>
               </Link>
-              <Link href="/products?category=Organ+Transplants" className="block group">
+              <Link href="/organ-transplants" className="block group">
                 <div className="glassmorphic p-8 text-center h-full transition-shadow duration-300 group-hover:shadow-2xl flex flex-col justify-center items-center">
                   <div className="inline-block p-4 bg-primary/20 text-primary rounded-full mb-4">
                     <Heart className="h-10 w-10" />
