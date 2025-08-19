@@ -8,7 +8,7 @@ export default function KidneyDiseasePage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://images.unsplash.com/photo-1599494324393-52c424a737a4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+            src="https://images.unsplash.com/photo-1650897492524-bbc1adb72626?q=80&w=911&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
             alt="Medical illustration of kidneys"
             fill
             className="object-cover"
