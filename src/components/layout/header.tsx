@@ -20,7 +20,7 @@ const dropdownCategories = [
     { id: 'medical-tourism', name: 'Medical Tourism' },
     { id: 'organ-transplants', name: 'Organ Transplants' },
     { id: 'emergency-services', name: 'Emergency Services' }
-];
+].sort((a, b) => a.name.localeCompare(b.name));
 
 function CategoriesDropdown() {
     return (
