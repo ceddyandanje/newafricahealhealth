@@ -16,7 +16,7 @@ import { chronicCareCategories } from "@/lib/chronicCareCategories"
 import Image from "next/image"
 
 const dropdownCategories = [
-    ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory', 'arthritis'].includes(c.id)),
+    ...chronicCareCategories.filter(c => ['cardiovascular', 'diabetes-care', 'respiratory', 'arthritis', 'kidney-disease', 'neurological-disorders'].includes(c.id)),
     { id: 'medical-tourism', name: 'Medical Tourism' },
     { id: 'organ-transplants', name: 'Organ Transplants' },
     { id: 'emergency-services', name: 'Emergency Services' }
