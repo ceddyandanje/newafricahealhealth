@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -40,7 +40,12 @@ export default function CheckoutPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const orderId = `AHH-${Date.now().toString().slice(-6)}`;
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const form = useForm<z.infer<typeof checkoutSchema>>({
     resolver: zodResolver(checkoutSchema),
@@ -87,7 +92,12 @@ export default function CheckoutPage() {
     }
   }
 
-  if (items.length === 0 && typeof window !== 'undefined') {
+  if (!isClient) {
+    // Render nothing or a loader on the server and initial client render
+    return null;
+  }
+  
+  if (items.length === 0) {
     return (
       <div className="container mx-auto px-4 py-12 text-center">
         <div className="glassmorphic p-12 max-w-md mx-auto">
