@@ -8,11 +8,11 @@ export default function MedicalTourismPage() {
       <div className="bg-background">
         <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
             <Image
-            src="https://images.unsplash.com/photo-1629738365203-95561a29dca4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=853&q=80"
-            alt="Modern hospital building for medical tourism"
+            src="https://images.unsplash.com/photo-1566935843973-aed0ddcb0ecc?q=80&w=829&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+            alt="Airplane wing over clouds"
             fill
             className="object-cover"
-            data-ai-hint="modern hospital"
+            data-ai-hint="airplane travel"
             priority
             />
             <div className="absolute inset-0 bg-black/50" />
