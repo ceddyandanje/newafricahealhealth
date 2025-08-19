@@ -40,11 +40,11 @@ export default function CardiovascularPage() {
                 </div>
                 <div className="relative h-96 rounded-2xl overflow-hidden glassmorphic p-2">
                     <Image
-                        src="https://images.unsplash.com/photo-1530026405182-2823733226c0?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+                        src="https://images.unsplash.com/photo-1682706841297-5524ba1faa9c?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                         alt="Doctor showing a patient a heart model"
                         fill
                         className="object-cover rounded-xl"
-                        data-ai-hint="doctor heart model"
+                        data-ai-hint="doctor patient"
                     />
                 </div>
             </div>
