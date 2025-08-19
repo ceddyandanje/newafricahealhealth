@@ -144,5 +144,21 @@ export type Availability = {
     slots: string[];
 };
 
+export type OrderStatus = 'Pending Verification' | 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled' | 'On Hold';
 
+export type Order = {
+    id: string; // Firestore ID
+    orderId: string; // Human-readable ID like AHH-123456
+    userId: string;
+    name: string;
+    email: string;
+    address: string;
+    city: string;
+    items: CartItem[];
+    totalPrice: number; // in cents
+    status: OrderStatus;
+    mpesaCode: string;
+    createdAt: string; // ISO 8601 string
+    updatedAt: string; // ISO 8601 string
+};
     
