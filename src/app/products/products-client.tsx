@@ -28,6 +28,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import AddToCartButton from "@/components/products/add-to-cart-button";
 import { Loader2, PackageSearch, Search } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface ProductsClientProps {
   initialProducts: Product[];
@@ -181,73 +182,75 @@ export default function ProductsClient({
       <div className="grid grid-cols-4 gap-8">
         {/* Left Column: Filters */}
         <aside className="col-span-1 sticky top-24 h-fit">
-          <Card className="p-6 glass-card">
+          <Card className="p-6 glass-card overflow-hidden">
             <h2 className="font-headline text-2xl font-bold mb-2">Filters</h2>
             <p className="text-muted-foreground mb-6">Refine your search.</p>
             
-            <div className="relative mb-6">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input
-                placeholder="Search products..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
+            <ScrollArea className="h-[calc(100vh-20rem)] pr-4">
+              <div className="relative mb-6">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
 
-            <div>
-              <h3 className="font-semibold mb-2">Price Range</h3>
-              <Slider
-                value={priceRange}
-                onValueChange={(value) => setPriceRange(value as [number, number])}
-                max={maxPrice}
-                step={100}
-              />
-              <p className="text-sm text-muted-foreground mt-2 text-center">
-                {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
-              </p>
-            </div>
+              <div>
+                <h3 className="font-semibold mb-2">Price Range</h3>
+                <Slider
+                  value={priceRange}
+                  onValueChange={(value) => setPriceRange(value as [number, number])}
+                  max={maxPrice}
+                  step={100}
+                />
+                <p className="text-sm text-muted-foreground mt-2 text-center">
+                  {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
+                </p>
+              </div>
 
-            <Accordion type="multiple" defaultValue={["category", "brand"]} className="w-full mt-4">
-              <AccordionItem value="category">
-                <AccordionTrigger className="font-semibold">Category</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-2">
-                    {categories.map((cat) => (
-                      <div key={cat} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`cat-${cat}`}
-                          checked={selectedCategories.includes(cat)}
-                          onCheckedChange={() => handleCategoryChange(cat)}
-                        />
-                        <label htmlFor={`cat-${cat}`} className="text-sm">
-                          {cat}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="brand">
-                <AccordionTrigger className="font-semibold">Brand</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-2">
-                    {brands.map((brand) => (
-                      <div key={brand} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`brand-${brand}`}
-                          checked={selectedBrands.includes(brand)}
-                          onCheckedChange={() => handleBrandChange(brand)}
-                        />
-                        <label htmlFor={`brand-${brand}`} className="text-sm">
-                          {brand}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+              <Accordion type="multiple" defaultValue={["category", "brand"]} className="w-full mt-4">
+                <AccordionItem value="category">
+                  <AccordionTrigger className="font-semibold">Category</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2">
+                      {categories.map((cat) => (
+                        <div key={cat} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`cat-${cat}`}
+                            checked={selectedCategories.includes(cat)}
+                            onCheckedChange={() => handleCategoryChange(cat)}
+                          />
+                          <label htmlFor={`cat-${cat}`} className="text-sm">
+                            {cat}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem value="brand">
+                  <AccordionTrigger className="font-semibold">Brand</AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-2">
+                      {brands.map((brand) => (
+                        <div key={brand} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`brand-${brand}`}
+                            checked={selectedBrands.includes(brand)}
+                            onCheckedChange={() => handleBrandChange(brand)}
+                          />
+                          <label htmlFor={`brand-${brand}`} className="text-sm">
+                            {brand}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </ScrollArea>
           </Card>
         </aside>
 
