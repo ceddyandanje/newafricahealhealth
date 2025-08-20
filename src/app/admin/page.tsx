@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks, Package, CheckCircle } from "lucide-react";
+import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks, Package, CheckCircle, ListOrdered } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell, Line, LineChart as LineChartComponent, Area } from "recharts"
@@ -17,6 +17,9 @@ import { cn } from "@/lib/utils";
 import UserInsightsDialog from "@/components/admin/patient-insights-dialog";
 import { useProducts } from "@/hooks/use-products";
 import InventoryStatusDialog from "@/components/admin/inventory-status-dialog";
+import { useOrdersForAdmin as useOrders } from "@/lib/orders";
+import { useRouter } from "next/navigation";
+
 
 const revenueChartData = [
     { name: '10 May', income: 80, expense: 40 },
@@ -40,6 +43,9 @@ export default function AdminDashboardPage() {
     const { requests } = useRequests();
     const { users } = useUsers();
     const { products } = useProducts();
+    const { orders } = useOrders();
+    const router = useRouter();
+
     const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
     const [isPatientInsightsOpen, setIsPatientInsightsOpen] = useState(false);
     const [isInventoryDialogOpen, setIsInventoryDialogOpen] = useState(false);
@@ -54,7 +60,7 @@ export default function AdminDashboardPage() {
         { title: "Total Users", value: users.length.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50", clickable: true },
         { title: "Pending Requests", value: pendingRequests.length.toString(), icon: ClipboardList, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-900/50", clickable: true },
         { title: "Inventory Low Stock", value: lowStockCount.toString(), icon: Package, color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/50", clickable: true },
-        { title: "Staff", value: (users.length - patientCount).toString(), icon: Users, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
+        { title: "Total Orders", value: orders.length.toString(), icon: ListOrdered, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50", clickable: true },
     ];
     
     // Note: The breakdown is illustrative. In a real app, this would come from patient status data.
@@ -88,6 +94,9 @@ export default function AdminDashboardPage() {
         }
         if (itemTitle === "Inventory Low Stock") {
             setIsInventoryDialogOpen(true);
+        }
+        if (itemTitle === "Total Orders") {
+            router.push('/admin/orders');
         }
     }
 

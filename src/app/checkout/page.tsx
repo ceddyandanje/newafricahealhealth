@@ -53,10 +53,19 @@ export default function CheckoutPage() {
       name: user?.name || "", 
       email: user?.email || "", 
       address: "", 
-      city: user?.location || "", 
+      city: "", 
       mpesaCode: ""
     },
   })
+
+  // Set form values from user profile when available
+  useEffect(() => {
+    if (user) {
+        form.setValue('name', user.name);
+        form.setValue('email', user.email);
+    }
+  }, [user, form]);
+
 
   async function onSubmit(values: z.infer<typeof checkoutSchema>) {
     if (!user) {

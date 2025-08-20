@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useOrders } from '@/lib/orders';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ListOrdered, Loader2, Package, CheckCircle, RefreshCw, Truck } from 'lucide-react';
+import { ListOrdered, Loader2, Package, CheckCircle, RefreshCw, Truck, XCircle, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { type Order, OrderStatus } from '@/lib/types';
 import Image from 'next/image';
@@ -22,8 +22,8 @@ const statusConfig: { [key in OrderStatus]: { icon: React.ElementType, color: st
     'Processing': { icon: Package, color: 'text-blue-600', description: 'Your order is being prepared for shipment.' },
     'Shipped': { icon: Truck, color: 'text-indigo-600', description: 'Your order is on its way to you.' },
     'Delivered': { icon: CheckCircle, color: 'text-green-600', description: 'Your order has been delivered. Thank you!' },
-    'Cancelled': { icon: CheckCircle, color: 'text-red-600', description: 'This order has been cancelled.' },
-    'On Hold': { icon: CheckCircle, color: 'text-orange-600', description: 'There is an issue with your order. Please contact support.' },
+    'Cancelled': { icon: XCircle, color: 'text-red-600', description: 'This order has been cancelled.' },
+    'On Hold': { icon: AlertCircle, color: 'text-orange-600', description: 'There is an issue with your order. Please contact support.' },
 };
 
 function OrderItem({ order }: { order: Order }) {

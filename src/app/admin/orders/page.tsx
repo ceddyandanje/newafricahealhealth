@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { ListOrdered, Search, Loader2, Filter, Package, User, Clipboard, Check, X, Truck } from "lucide-react";
-import { useOrders, updateOrderStatus } from "@/lib/orders";
+import { useOrdersForAdmin as useOrders, updateOrderStatus } from "@/lib/orders";
 import { type Order, OrderStatus } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
@@ -17,6 +17,7 @@ import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
 
 
 const formatPrice = (priceInCents: number) => {
