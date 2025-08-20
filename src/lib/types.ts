@@ -10,6 +10,7 @@ export type Product = {
   brand: string;
   tags?: string[];
   dataAiHint: string;
+  stock: number;
 };
 
 export type CartItem = {

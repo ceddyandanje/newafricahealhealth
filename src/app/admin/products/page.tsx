@@ -25,6 +25,7 @@ const productSchema = z.object({
     name: z.string().min(3, 'Name is required'),
     description: z.string().min(10, 'Description is required'),
     price: z.coerce.number().min(1, 'Price must be a positive number'),
+    stock: z.coerce.number().min(0, 'Stock cannot be negative'),
     category: z.string().min(2, 'Category is required'),
     brand: z.string().min(2, 'Brand is required'),
     image: z.string().url('Must be a valid image URL'),
@@ -34,7 +35,7 @@ const productSchema = z.object({
 function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onSave: (data: z.infer<typeof productSchema>, id?: string) => void, onOpenChange: (open: boolean) => void }) {
     const form = useForm<z.infer<typeof productSchema>>({
         resolver: zodResolver(productSchema),
-        defaultValues: product ? { ...product, price: product.price / 100 } : { name: '', description: '', price: 0, category: '', brand: '', image: 'https://placehold.co/870x580.png', dataAiHint: '' },
+        defaultValues: product ? { ...product, price: product.price / 100 } : { name: '', description: '', price: 0, stock: 0, category: '', brand: '', image: 'https://placehold.co/870x580.png', dataAiHint: '' },
     });
 
     const handleSubmit = (values: z.infer<typeof productSchema>) => {
@@ -51,15 +52,22 @@ function ProductForm({ product, onSave, onOpenChange }: { product?: Product, onS
                 <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
-                <FormField control={form.control} name="price" render={({ field }) => (
-                    <FormItem><FormLabel>Price (in KES)</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="category" render={({ field }) => (
-                    <FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
-                <FormField control={form.control} name="brand" render={({ field }) => (
-                    <FormItem><FormLabel>Brand</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                )} />
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="price" render={({ field }) => (
+                        <FormItem><FormLabel>Price (in KES)</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="stock" render={({ field }) => (
+                        <FormItem><FormLabel>Stock Quantity</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="category" render={({ field }) => (
+                        <FormItem><FormLabel>Category</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="brand" render={({ field }) => (
+                        <FormItem><FormLabel>Brand</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                </div>
                  <FormField control={form.control} name="image" render={({ field }) => (
                     <FormItem><FormLabel>Image URL</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
@@ -162,7 +170,7 @@ export default function ProductsAdminPage() {
                                 <TableRow>
                                     <TableHead>Product</TableHead>
                                     <TableHead>Category</TableHead>
-                                    <TableHead>Brand</TableHead>
+                                    <TableHead>Stock</TableHead>
                                     <TableHead>Price</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -177,7 +185,7 @@ export default function ProductsAdminPage() {
                                             </div>
                                         </TableCell>
                                         <TableCell>{product.category}</TableCell>
-                                        <TableCell>{product.brand}</TableCell>
+                                        <TableCell>{product.stock}</TableCell>
                                         <TableCell>KES {product.price / 100}</TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="ghost" size="icon" onClick={() => { setEditingProduct(product); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks } from "lucide-react";
+import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks, Package } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell, Line, LineChart as LineChartComponent, Area } from "recharts"
@@ -14,8 +14,9 @@ import RefillRequestDialog from "@/components/admin/refill-request-dialog";
 import { useUsers, type User } from "@/lib/users";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useRoadmapTasks } from "@/lib/roadmap";
 import PatientInsightsDialog from "@/components/admin/patient-insights-dialog";
+import { useProducts } from "@/hooks/use-products";
+import InventoryStatusDialog from "@/components/admin/inventory-status-dialog";
 
 const revenueChartData = [
     { name: '10 May', income: 80, expense: 40 },
@@ -38,20 +39,21 @@ export default function AdminDashboardPage() {
     const [isClient, setIsClient] = useState(false);
     const [requests] = useRequests();
     const { users } = useUsers();
-    const { tasks } = useRoadmapTasks();
+    const { products } = useProducts();
     const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
     const [isPatientInsightsOpen, setIsPatientInsightsOpen] = useState(false);
+    const [isInventoryDialogOpen, setIsInventoryDialogOpen] = useState(false);
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
     const patients = users.filter(u => u.role === 'user');
     const patientCount = patients.length;
-    const pendingTasksCount = tasks.filter(t => t.status === 'Todo' || t.status === 'In Progress').length;
+    const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 10).length;
 
     const summaryData = [
         { title: "Patients", value: patientCount.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50", clickable: true },
         { title: "Pending Requests", value: pendingRequests.length.toString(), icon: ClipboardList, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-900/50", clickable: true },
-        { title: "Pending Tasks", value: pendingTasksCount.toString(), icon: ListChecks, color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/50", href: "/admin/roadmap" },
+        { title: "Inventory Low Stock", value: lowStockCount.toString(), icon: Package, color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/50", clickable: true },
         { title: "Staff", value: (users.length - patientCount).toString(), icon: Users, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
     ];
     
@@ -83,6 +85,9 @@ export default function AdminDashboardPage() {
         }
         if (itemTitle === "Patients") {
             setIsPatientInsightsOpen(true);
+        }
+        if (itemTitle === "Inventory Low Stock") {
+            setIsInventoryDialogOpen(true);
         }
     }
 
@@ -266,6 +271,7 @@ export default function AdminDashboardPage() {
             </div>
             {isRequestsDialogOpen && <RefillRequestDialog requests={pendingRequests} isOpen={isRequestsDialogOpen} onClose={() => setIsRequestsDialogOpen(false)} />}
             {isPatientInsightsOpen && <PatientInsightsDialog patients={patients} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
+            {isInventoryDialogOpen && <InventoryStatusDialog products={products} isOpen={isInventoryDialogOpen} onClose={() => setIsInventoryDialogOpen(false)} />}
         </div>
     );
 }
