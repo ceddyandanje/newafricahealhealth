@@ -10,6 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/
 import { Pie, PieChart, Cell, Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip as RechartsTooltip } from 'recharts';
 import { ListOrdered, DollarSign, CalendarDays, TrendingUp, PieChart as PieChartIcon, LineChart as LineChartIcon } from 'lucide-react';
 import { subDays, format, startOfDay } from 'date-fns';
+import { useRouter } from 'next/navigation';
 
 interface OrdersOverviewDialogProps {
     orders: Order[];
