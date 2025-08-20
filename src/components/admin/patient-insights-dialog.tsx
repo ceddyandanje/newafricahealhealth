@@ -41,6 +41,27 @@ const RoleCard = ({ role, count }: { role: UserRole, count: number }) => {
     )
 };
 
+const StatCard = ({ icon: Icon, value, label, percentage, trend }: { icon: React.ElementType, value: string | number, label: string, percentage: number, trend: 'up' | 'down' | 'same' }) => {
+    const trendIcon = trend === 'up' ? ArrowUp : trend === 'down' ? ArrowDown : Minus;
+    const trendColor = trend === 'up' ? 'text-green-500' : trend === 'down' ? 'text-red-500' : 'text-muted-foreground';
+
+    return (
+        <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+            <Icon className="h-8 w-8 text-muted-foreground" />
+            <div className="flex-grow">
+                <p className="text-sm text-muted-foreground">{label}</p>
+                <p className="text-3xl font-bold">{value}</p>
+            </div>
+            {percentage !== 0 && (
+                <div className={cn("flex items-center text-sm font-semibold", trendColor)}>
+                    <trendIcon className="h-4 w-4" />
+                    <span>{percentage.toFixed(1)}%</span>
+                </div>
+            )}
+        </div>
+    );
+};
+
 
 export default function UserInsightsDialog({ users, isOpen, onClose }: PatientInsightsDialogProps) {
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
@@ -90,10 +111,15 @@ export default function UserInsightsDialog({ users, isOpen, onClose }: PatientIn
         } else if (currentPeriodSignups > 0) {
             percentageChange = 100; // If previous was 0 and current is > 0, growth is effectively infinite, show 100%
         }
+        
+        let trend: 'up' | 'down' | 'same' = 'same';
+        if (percentageChange > 0) trend = 'up';
+        if (percentageChange < 0) trend = 'down';
 
         return {
             currentPeriod: currentPeriodSignups,
-            percentage: percentageChange
+            percentage: percentageChange,
+            trend
         };
     }, [growthChartData]);
     
@@ -117,9 +143,9 @@ export default function UserInsightsDialog({ users, isOpen, onClose }: PatientIn
                             ))}
                         </div>
                         
-                        <div className="grid md:grid-cols-2 gap-6 pt-4">
+                        <div className="grid md:grid-cols-3 gap-6 pt-4">
                              {/* Left Column: Chart */}
-                             <div>
+                             <div className="md:col-span-2">
                                 <div className="flex justify-between items-center mb-3">
                                     <h3 className="font-semibold flex items-center gap-2"><BarChartIcon className="h-5 w-5 text-muted-foreground"/> Weekly Sign-up Growth</h3>
                                     <div className="flex items-center rounded-md bg-muted p-0.5 text-sm font-medium">
@@ -155,21 +181,24 @@ export default function UserInsightsDialog({ users, isOpen, onClose }: PatientIn
                              </div>
 
                              {/* Right Column: Recent Signups */}
-                            <div>
-                                <h3 className="font-semibold mb-3 flex items-center gap-2"><CalendarDays className="h-5 w-5 text-muted-foreground"/> Recent Signups</h3>
-                                <div className="space-y-3">
-                                    {recentSignups.map(p => (
-                                        <div key={p.id} className="flex items-center gap-3">
-                                            <Avatar>
-                                                <AvatarImage src={p.avatarUrl} alt={p.name} />
-                                                <AvatarFallback>{p.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="text-sm font-semibold">{p.name}</p>
-                                                <p className="text-xs text-muted-foreground">{p.email}</p>
+                            <div className="space-y-4">
+                                <StatCard icon={UserPlus} value={growthStats.currentPeriod} label="Last 4 Weeks" percentage={growthStats.percentage} trend={growthStats.trend} />
+                                <div>
+                                    <h3 className="font-semibold mb-3 flex items-center gap-2"><CalendarDays className="h-5 w-5 text-muted-foreground"/> Recent Signups</h3>
+                                    <div className="space-y-3">
+                                        {recentSignups.map(p => (
+                                            <div key={p.id} className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={p.avatarUrl} alt={p.name} />
+                                                    <AvatarFallback>{p.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="text-sm font-semibold">{p.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{p.email}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </div>
