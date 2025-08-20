@@ -26,6 +26,7 @@ import { createUserInFirestore, updateUserInFirestore } from "@/lib/users";
 import { addLog } from "@/lib/logs";
 import OnboardingDialog from "@/components/auth/onboarding-dialog";
 import TermsDialog from "@/components/auth/terms-dialog";
+import { addNotification } from "@/lib/notifications";
 
 interface AuthContextType {
   user: User | null;
@@ -157,6 +158,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         
         if (newUser) {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
+          addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
+          addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} (${newUser.email}) has been created.`});
           // onAuthStateChanged will handle checks and redirects.
           return true;
         } else {
@@ -200,6 +203,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             
             if (newUser) {
                 toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
+                addLog("INFO", `New user signed up via Google: ${newUser.name} (${newUser.email}).`);
+                addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User (Google)', description: `An account for ${newUser.name} (${newUser.email}) has been created.`});
                 setUser(newUser); // Manually set user state
                 handleLoginChecks(newUser);
             } else {
