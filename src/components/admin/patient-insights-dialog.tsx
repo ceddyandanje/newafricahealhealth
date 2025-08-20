@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BarChart as BarChartIcon, Users, UserPlus, MapPin, TrendingUp, CalendarDays, LineChart as LineChartIcon } from 'lucide-react';
+import { BarChart as BarChartIcon, Users, UserPlus, MapPin, TrendingUp, CalendarDays, LineChart as LineChartIcon, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { type User } from '@/lib/types';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, Tooltip as RechartsTooltip, Legend } from 'recharts';
@@ -18,11 +18,26 @@ interface PatientInsightsDialogProps {
     onClose: () => void;
 }
 
-const StatCard = ({ icon: Icon, value, label }: { icon: React.ElementType, value: string | number, label: string }) => (
+const StatCard = ({ icon: Icon, value, label, growth }: { icon: React.ElementType, value: string | number, label: string, growth?: { value: number, isPositive: boolean, isNeutral: boolean } }) => (
     <div className="flex items-center gap-3 bg-muted/50 p-3 rounded-lg">
         <Icon className="h-6 w-6 text-primary" />
         <div>
-            <p className="text-2xl font-bold">{value}</p>
+            <div className="flex items-baseline gap-1">
+                <p className="text-2xl font-bold">{value}</p>
+                {growth && (
+                    <span className={cn(
+                        "flex items-center text-xs font-bold",
+                        growth.isPositive && "text-green-500",
+                        !growth.isPositive && !growth.isNeutral && "text-red-500",
+                        growth.isNeutral && "text-muted-foreground"
+                    )}>
+                        {growth.isPositive && <ArrowUp className="h-3 w-3" />}
+                        {!growth.isPositive && !growth.isNeutral && <ArrowDown className="h-3 w-3" />}
+                        {growth.isNeutral && <Minus className="h-3 w-3" />}
+                        {growth.value.toFixed(1)}%
+                    </span>
+                )}
+            </div>
             <p className="text-sm text-muted-foreground">{label}</p>
         </div>
     </div>
@@ -74,6 +89,23 @@ export default function PatientInsightsDialog({ patients, isOpen, onClose }: Pat
 
         return last8Weeks;
     }, [patients]);
+
+    const growthStats = useMemo(() => {
+        const currentPeriodSignups = growthChartData.slice(-4).reduce((acc, d) => acc + d.count, 0);
+        const previousPeriodSignups = growthChartData.slice(0, 4).reduce((acc, d) => acc + d.count, 0);
+
+        let percentageChange = 0;
+        if (previousPeriodSignups > 0) {
+            percentageChange = ((currentPeriodSignups - previousPeriodSignups) / previousPeriodSignups) * 100;
+        } else if (currentPeriodSignups > 0) {
+            percentageChange = 100; // If previous was 0 and current is > 0, growth is effectively infinite, show 100%
+        }
+
+        return {
+            currentPeriod: currentPeriodSignups,
+            percentage: percentageChange
+        };
+    }, [growthChartData]);
     
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
@@ -94,7 +126,16 @@ export default function PatientInsightsDialog({ patients, isOpen, onClose }: Pat
                             <StatCard icon={Users} value={patients.length} label="Total Patients" />
                             <StatCard icon={UserPlus} value={newThisMonth} label="New This Month" />
                             <StatCard icon={MapPin} value={locationCounts[0]} label="Top Location" />
-                             <StatCard icon={TrendingUp} value={growthChartData.slice(-4).reduce((acc, d) => acc + d.count, 0)} label="Last 4 Weeks" />
+                             <StatCard 
+                                icon={TrendingUp} 
+                                value={growthStats.currentPeriod} 
+                                label="Last 4 Weeks" 
+                                growth={{ 
+                                    value: growthStats.percentage, 
+                                    isPositive: growthStats.percentage > 0,
+                                    isNeutral: growthStats.percentage === 0
+                                }} 
+                            />
                         </div>
                         
                         <div>
