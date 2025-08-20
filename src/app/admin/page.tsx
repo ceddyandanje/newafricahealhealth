@@ -196,8 +196,8 @@ export default function AdminDashboardPage() {
                                     <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
                                     <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                                    <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
-                                    <Bar dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar key="income" dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar key="expense" dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
                                 </BarChartComponent>
                             ) : (
                                 <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
