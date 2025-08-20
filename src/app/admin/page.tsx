@@ -14,7 +14,7 @@ import RefillRequestDialog from "@/components/admin/refill-request-dialog";
 import { useUsers, type User } from "@/lib/users";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import PatientInsightsDialog from "@/components/admin/patient-insights-dialog";
+import UserInsightsDialog from "@/components/admin/patient-insights-dialog";
 import { useProducts } from "@/hooks/use-products";
 import InventoryStatusDialog from "@/components/admin/inventory-status-dialog";
 
@@ -37,7 +37,7 @@ const availableDoctors = [
 
 export default function AdminDashboardPage() {
     const [isClient, setIsClient] = useState(false);
-    const [requests] = useRequests();
+    const { requests } = useRequests();
     const { users } = useUsers();
     const { products } = useProducts();
     const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
                 </Card>
             </div>
             {isRequestsDialogOpen && <RefillRequestDialog requests={pendingRequests} isOpen={isRequestsDialogOpen} onClose={() => setIsRequestsDialogOpen(false)} />}
-            {isPatientInsightsOpen && <PatientInsightsDialog users={users} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
+            {isPatientInsightsOpen && <UserInsightsDialog users={users} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
             {isInventoryDialogOpen && <InventoryStatusDialog products={products} isOpen={isInventoryDialogOpen} onClose={() => setIsInventoryDialogOpen(false)} />}
         </div>
     );
