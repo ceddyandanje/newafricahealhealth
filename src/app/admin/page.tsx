@@ -190,7 +190,7 @@ export default function AdminDashboardPage() {
                         <p className="text-sm text-muted-foreground line-through">$12,458</p>
                     </div>
                     {!isClient ? <Skeleton className="h-[250px] w-full" /> :
-                    <>
+                    <div key={chartType}>
                         <ChartContainer config={{}} className="h-[250px] w-full">
                            {chartType === 'bar' ? (
                                 <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -198,8 +198,8 @@ export default function AdminDashboardPage() {
                                     <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
                                     <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                                    <Bar key="income-bar" dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
-                                    <Bar key="expense-bar" dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
                                 </BarChartComponent>
                             ) : (
                                 <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -226,7 +226,7 @@ export default function AdminDashboardPage() {
                             <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Income</div>
                             <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary-foreground))'}}></span>Expense</div>
                         </div>
-                    </>
+                    </div>
                     }
                 </CardContent>
             </Card>
