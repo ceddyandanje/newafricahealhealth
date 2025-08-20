@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
     const [requests] = useRequests();
     const { users } = useUsers();
     const { tasks } = useRoadmapTasks();
-    const [selectedRequest, setSelectedRequest] = useState<RefillRequest | null>(null);
+    const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
     const [isPatientInsightsOpen, setIsPatientInsightsOpen] = useState(false);
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
@@ -78,8 +78,8 @@ export default function AdminDashboardPage() {
     }, [])
 
     const handleCardClick = (itemTitle: string) => {
-        if (itemTitle === "Pending Requests" && pendingRequests.length > 0) {
-            setSelectedRequest(pendingRequests[0]);
+        if (itemTitle === "Pending Requests") {
+            setIsRequestsDialogOpen(true);
         }
         if (itemTitle === "Patients") {
             setIsPatientInsightsOpen(true);
@@ -264,7 +264,7 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-            {selectedRequest && <RefillRequestDialog request={selectedRequest} isOpen={!!selectedRequest} onClose={() => setSelectedRequest(null)} />}
+            {isRequestsDialogOpen && <RefillRequestDialog requests={pendingRequests} isOpen={isRequestsDialogOpen} onClose={() => setIsRequestsDialogOpen(false)} />}
             {isPatientInsightsOpen && <PatientInsightsDialog patients={patients} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
         </div>
     );

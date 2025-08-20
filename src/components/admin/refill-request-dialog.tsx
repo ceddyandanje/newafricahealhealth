@@ -6,11 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type RefillRequest } from '@/lib/refillRequests';
-import { User, Pill, Calendar, Shield, DollarSign, Check, X } from 'lucide-react';
+import { User, Pill, Calendar, Shield, DollarSign, Check, X, Circle } from 'lucide-react';
 import { Label } from '../ui/label';
+import { Card, CardContent, CardHeader } from '../ui/card';
+import { ScrollArea } from '../ui/scroll-area';
+import { cn } from '@/lib/utils';
+
 
 interface RefillRequestDialogProps {
-    request: RefillRequest;
+    requests: RefillRequest[];
     isOpen: boolean;
     onClose: () => void;
     // onUpdate: (id: string, updates: Partial<RefillRequest>) => void; // For future implementation
@@ -23,76 +27,69 @@ const statusVariant = {
     Completed: 'outline',
 } as const;
 
-export default function RefillRequestDialog({ request, isOpen, onClose }: RefillRequestDialogProps) {
 
-    const handleUpdateStatus = (newStatus: 'Approved' | 'Rejected') => {
+export default function RefillRequestDialog({ requests, isOpen, onClose }: RefillRequestDialogProps) {
+
+    const handleUpdateStatus = (requestId: string, newStatus: 'Approved' | 'Rejected') => {
         // In a real app, you would call an update function passed via props
-        console.log(`Updating request ${request.id} to ${newStatus}`);
-        onClose();
+        console.log(`Updating request ${requestId} to ${newStatus}`);
+        onClose(); // This would be more complex in a real app
     };
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <Pill /> Refill Request Details
+                    <DialogTitle className="flex items-center gap-2 font-headline text-2xl">
+                        <Pill /> Pending Refill Requests
                     </DialogTitle>
                     <DialogDescription>
-                        Review and process the medication refill request.
+                        Review and process outstanding medication refill requests from patients.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="py-4 space-y-4">
-                    <div className="flex items-center gap-2">
-                        <User className="text-muted-foreground" /> 
-                        <div>
-                            <p className="text-sm font-semibold">{request.patientName}</p>
-                            <p className="text-xs text-muted-foreground">Patient ID: {request.patientId}</p>
-                        </div>
+
+                <ScrollArea className="max-h-[60vh] -mx-6 px-6">
+                    <div className="py-4 space-y-4">
+                        {requests.length > 0 ? requests.map(request => (
+                           <Card key={request.id} className="overflow-hidden">
+                                <CardHeader className="p-3 bg-muted/50 flex flex-row justify-between items-center">
+                                    <div>
+                                        <p className="font-semibold">{request.medicationName}</p>
+                                        <p className="text-xs text-muted-foreground">For: {request.patientName}</p>
+                                    </div>
+                                    <Badge variant={statusVariant[request.status]}>{request.status}</Badge>
+                                </CardHeader>
+                                <CardContent className="p-3 grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                                        <span>{new Date(request.requestDate).toLocaleDateString()}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                         <Badge variant={request.paymentStatus === 'Paid' ? 'default' : 'secondary'}>{request.paymentStatus}</Badge>
+                                    </div>
+                                    <div className="col-span-2 flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5">
+                                            <span className={cn("h-2.5 w-2.5 rounded-full bg-slate-400 animate-pulse")}></span>
+                                            <span className="text-xs text-muted-foreground">Chemist Offline</span>
+                                        </div>
+                                    </div>
+                                    <div className="col-span-2 pt-2 border-t mt-1 flex gap-2">
+                                        <Button size="sm" className="flex-1" onClick={() => handleUpdateStatus(request.id, 'Approved')}><Check className="mr-2 h-4 w-4"/>Approve</Button>
+                                        <Button size="sm" className="flex-1" variant="destructive" onClick={() => handleUpdateStatus(request.id, 'Rejected')}><X className="mr-2 h-4 w-4"/>Reject</Button>
+                                    </div>
+                                </CardContent>
+                           </Card>
+                        )) : (
+                            <div className="text-center text-muted-foreground py-10">
+                                <p>No pending requests at the moment.</p>
+                            </div>
+                        )}
                     </div>
-                     <div className="flex items-center gap-2">
-                        <Pill className="text-muted-foreground" />
-                         <div>
-                            <p className="text-sm font-semibold">{request.medicationName}</p>
-                            <p className="text-xs text-muted-foreground">Prescription ID: {request.prescriptionId}</p>
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Calendar className="text-muted-foreground" />
-                        <div>
-                             <p className="text-sm font-semibold">{new Date(request.requestDate).toLocaleString()}</p>
-                             <p className="text-xs text-muted-foreground">Request Date</p>
-                        </div>
-                    </div>
-                     <div className="flex items-center gap-2">
-                        <Shield className="text-muted-foreground" />
-                        <Badge variant={statusVariant[request.status]}>{request.status}</Badge>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <DollarSign className="text-muted-foreground" />
-                        <Badge variant={request.paymentStatus === 'Paid' ? 'default' : 'secondary'}>{request.paymentStatus}</Badge>
-                    </div>
-                     <div>
-                        <Label htmlFor="approver" className="text-xs font-semibold">Assign Approver</Label>
-                        <Select>
-                            <SelectTrigger id="approver">
-                                <SelectValue placeholder="Select Pharmacist..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="doc1">Dr. Jaylon Stanton</SelectItem>
-                                <SelectItem value="doc2">Dr. Carla Schleifer</SelectItem>
-                                <SelectItem value="doc3">Dr. Hanna Geidt</SelectItem>
-                            </SelectContent>
-                        </Select>
-                     </div>
-                </div>
-                <DialogFooter className="grid grid-cols-2 gap-2">
-                    <Button variant="destructive" onClick={() => handleUpdateStatus('Rejected')}>
-                        <X className="mr-2" /> Reject
-                    </Button>
-                    <Button onClick={() => handleUpdateStatus('Approved')}>
-                        <Check className="mr-2" /> Approve
-                    </Button>
+                </ScrollArea>
+                
+                <DialogFooter>
+                    <Button variant="outline" onClick={onClose}>Close</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
