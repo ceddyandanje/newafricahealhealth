@@ -286,43 +286,45 @@ export default function UsersPage() {
                             <Loader2 className="h-8 w-8 animate-spin text-primary" />
                          </div>
                     ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>User</TableHead>
-                                <TableHead>Role</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Date Joined</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {users.map((user) => (
-                                <TableRow key={user.id} onClick={() => setSelectedUser(user)} className="cursor-pointer">
-                                    <TableCell>
-                                        <div className="flex items-center gap-3">
-                                            <Avatar>
-                                                <AvatarImage src={user.avatarUrl || ''} alt={user.name} />
-                                                <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                            </Avatar>
-                                            <div>
-                                                <p className="font-semibold">{user.name}</p>
-                                                <p className="text-sm text-muted-foreground">{user.email}</p>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'} className="capitalize">{user.role.replace('-', ' ')}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={statusBadgeVariant[user.status]} className="capitalize">{user.status}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        {formatDate(user.createdAt)}
-                                    </TableCell>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>User</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Date Joined</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {users.map((user) => (
+                                    <TableRow key={user.id} onClick={() => setSelectedUser(user)} className="cursor-pointer">
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={user.avatarUrl || ''} alt={user.name} />
+                                                    <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-semibold whitespace-nowrap">{user.name}</p>
+                                                    <p className="text-sm text-muted-foreground">{user.email}</p>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'} className="capitalize">{user.role.replace('-', ' ')}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={statusBadgeVariant[user.status]} className="capitalize">{user.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="whitespace-nowrap">
+                                            {formatDate(user.createdAt)}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
                     )}
                 </CardContent>
             </Card>

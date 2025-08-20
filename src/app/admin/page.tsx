@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks, Package, CheckCircle, ListOrdered } from "lucide-react";
+import { ClipboardList, BarChart3, LineChart as LineChartIcon, CheckCircle, Package, ListOrdered, Users } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell, Line, LineChart as LineChartComponent, Area } from "recharts"
@@ -130,108 +130,110 @@ export default function AdminDashboardPage() {
     }
 
     return (
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="p-4 md:p-6 space-y-6">
             {/* Top Row: Summary Cards */}
-            <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {summaryData.map(renderCard)}
             </div>
 
-            {/* Middle Row: Charts */}
-            <Card className="lg:col-span-1 flex flex-col">
-                <CardHeader>
-                    <CardTitle>Patients</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex flex-col items-center justify-center">
-                    {!isClient ? <Skeleton className="w-[200px] h-[200px] rounded-full" /> :
-                    <>
-                        <div className="relative">
-                            <PieChartComponent width={200} height={200}>
-                                <Pie data={a_patientsChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
-                                    {a_patientsChartData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
-                                    ))}
-                                </Pie>
-                            </PieChartComponent>
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                <p className="text-muted-foreground text-sm">Total</p>
-                                <p className="font-bold text-2xl">{patientCount}</p>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Middle Row: Charts */}
+                <Card className="lg:col-span-1 flex flex-col">
+                    <CardHeader>
+                        <CardTitle>Patients</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow flex flex-col items-center justify-center">
+                        {!isClient ? <Skeleton className="w-[200px] h-[200px] rounded-full" /> :
+                        <>
+                            <div className="relative">
+                                <PieChartComponent width={200} height={200}>
+                                    <Pie data={a_patientsChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
+                                        {a_patientsChartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
+                                        ))}
+                                    </Pie>
+                                </PieChartComponent>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <p className="text-muted-foreground text-sm">Total</p>
+                                    <p className="font-bold text-2xl">{patientCount}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
+                                {patientsChartData.slice(1).map(item => (
+                                     <div key={item.name} className="flex items-center gap-2">
+                                        <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
+                                        <span>{item.name}: {item.value}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                        }
+                    </CardContent>
+                </Card>
+
+                <Card className="lg:col-span-2 flex flex-col">
+                    <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+                        <div>
+                            <CardTitle>Daily Revenue Report</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="ghost" size="icon" onClick={() => setChartType('bar')} className={cn(chartType === 'bar' && 'bg-accent')}>
+                                <BarChart3 className="h-5 w-5" />
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => setChartType('line')} className={cn(chartType === 'line' && 'bg-accent')}>
+                                <LineChartIcon className="h-5 w-5" />
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="flex-grow">
+                         <div className="flex justify-end items-center gap-2 mb-4">
+                            <p className="text-2xl font-bold text-blue-500">$32,485</p>
+                            <p className="text-sm text-muted-foreground line-through">$12,458</p>
+                        </div>
+                        {!isClient ? <Skeleton className="h-[250px] w-full" /> :
+                        <div key={chartType}>
+                            <ChartContainer config={{}} className="h-[250px] w-full">
+                               {chartType === 'bar' ? (
+                                    <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
+                                        <Bar key="income-bar" dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
+                                        <Bar key="expense-bar" dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    </BarChartComponent>
+                                ) : (
+                                    <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                         <defs>
+                                            <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                                <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                            </linearGradient>
+                                            <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
+                                                <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                        <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                        <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
+                                        <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
+                                        <Area type="monotone" dataKey="expense" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
+                                    </LineChartComponent>
+                                )}
+                            </ChartContainer>
+                            <div className="flex justify-center items-center gap-6 mt-4 text-sm">
+                                <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Income</div>
+                                <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary-foreground))'}}></span>Expense</div>
                             </div>
                         </div>
-                        <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
-                            {patientsChartData.slice(1).map(item => (
-                                 <div key={item.name} className="flex items-center gap-2">
-                                    <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
-                                    <span>{item.name}: {item.value}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </>
-                    }
-                </CardContent>
-            </Card>
+                        }
+                    </CardContent>
+                </Card>
+            </div>
 
-            <Card className="lg:col-span-2 flex flex-col">
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle>Daily Revenue Report</CardTitle>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="icon" onClick={() => setChartType('bar')} className={cn(chartType === 'bar' && 'bg-accent')}>
-                            <BarChart3 className="h-5 w-5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => setChartType('line')} className={cn(chartType === 'line' && 'bg-accent')}>
-                            <LineChartIcon className="h-5 w-5" />
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="flex-grow">
-                     <div className="flex justify-end items-center gap-2 mb-4">
-                        <p className="text-2xl font-bold text-blue-500">$32,485</p>
-                        <p className="text-sm text-muted-foreground line-through">$12,458</p>
-                    </div>
-                    {!isClient ? <Skeleton className="h-[250px] w-full" /> :
-                    <div key={chartType}>
-                        <ChartContainer config={{}} className="h-[250px] w-full">
-                           {chartType === 'bar' ? (
-                                <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                    <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                                    <Bar dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
-                                    <Bar dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
-                                </BarChartComponent>
-                            ) : (
-                                <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
-                                     <defs>
-                                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                        </linearGradient>
-                                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
-                                            <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                    <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                    <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
-                                    <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
-                                    <Area type="monotone" dataKey="expense" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
-                                </LineChartComponent>
-                            )}
-                        </ChartContainer>
-                        <div className="flex justify-center items-center gap-6 mt-4 text-sm">
-                            <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Income</div>
-                            <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary-foreground))'}}></span>Expense</div>
-                        </div>
-                    </div>
-                    }
-                </CardContent>
-            </Card>
-
-             <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-3 gap-6">
+             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <Card className="lg:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Available Doctors</CardTitle>
@@ -261,7 +263,7 @@ export default function AdminDashboardPage() {
                     <CardHeader>
                         <CardTitle>Doctor of the Month</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex items-center justify-around">
+                    <CardContent className="flex flex-col sm:flex-row items-center justify-around text-center sm:text-left gap-4">
                         <div className="text-center">
                             <Avatar className="h-24 w-24 mx-auto mb-2 border-4 border-white">
                                 <AvatarImage src="https://i.pravatar.cc/150?u=doc-month" />
@@ -270,7 +272,7 @@ export default function AdminDashboardPage() {
                             <p className="font-bold">Dr. Tobey Doo</p>
                             <p className="text-sm opacity-80">Cardiologist</p>
                         </div>
-                        <div className="w-px bg-white/30 self-stretch mx-4"></div>
+                        <div className="w-full sm:w-px sm:bg-white/30 sm:self-stretch h-px sm:h-auto bg-white/30 mx-4"></div>
                         <div className="space-y-2">
                             <p className="font-bold">Total Appointments</p>
                             <p className="text-4xl font-bold">124</p>

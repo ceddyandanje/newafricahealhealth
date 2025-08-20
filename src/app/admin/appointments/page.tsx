@@ -43,42 +43,44 @@ export default function AppointmentsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Appointment ID</TableHead>
-                  <TableHead>Patient</TableHead>
-                  <TableHead>Doctor</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {appointments.map((apt) => (
-                  <TableRow key={apt.id}>
-                    <TableCell className="font-medium">{apt.id}</TableCell>
-                    <TableCell>
-                        <div className="flex items-center gap-2">
-                            <Avatar className="h-8 w-8">
-                                <AvatarImage src={apt.patientAvatar} />
-                                <AvatarFallback>{apt.patient.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            {apt.patient}
-                        </div>
-                    </TableCell>
-                    <TableCell>{apt.doctor}</TableCell>
-                    <TableCell>{apt.date} at {apt.time}</TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariant[apt.status as keyof typeof statusVariant]}>{apt.status}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm">Details</Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Appointment ID</TableHead>
+                      <TableHead>Patient</TableHead>
+                      <TableHead>Doctor</TableHead>
+                      <TableHead>Date & Time</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {appointments.map((apt) => (
+                      <TableRow key={apt.id}>
+                        <TableCell className="font-medium whitespace-nowrap">{apt.id}</TableCell>
+                        <TableCell>
+                            <div className="flex items-center gap-2">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={apt.patientAvatar} />
+                                    <AvatarFallback>{apt.patient.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="whitespace-nowrap">{apt.patient}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell className="whitespace-nowrap">{apt.doctor}</TableCell>
+                        <TableCell className="whitespace-nowrap">{apt.date} at {apt.time}</TableCell>
+                        <TableCell>
+                          <Badge variant={statusVariant[apt.status as keyof typeof statusVariant]}>{apt.status}</Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm">Details</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+            </div>
           </CardContent>
         </Card>
     </div>

@@ -165,36 +165,38 @@ export default function ProductsAdminPage() {
                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Product</TableHead>
-                                    <TableHead>Category</TableHead>
-                                    <TableHead>Stock</TableHead>
-                                    <TableHead>Price</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {products.map((product) => (
-                                    <TableRow key={product.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Image src={product.image} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
-                                                <p className="font-semibold">{product.name}</p>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>{product.category}</TableCell>
-                                        <TableCell>{product.stock}</TableCell>
-                                        <TableCell>KES {product.price / 100}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => { setEditingProduct(product); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingProduct(product); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
-                                        </TableCell>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Product</TableHead>
+                                        <TableHead>Category</TableHead>
+                                        <TableHead>Stock</TableHead>
+                                        <TableHead>Price</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {products.map((product) => (
+                                        <TableRow key={product.id}>
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <Image src={product.image} alt={product.name} width={40} height={40} className="rounded-md object-cover" />
+                                                    <p className="font-semibold whitespace-nowrap">{product.name}</p>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{product.category}</TableCell>
+                                            <TableCell>{product.stock}</TableCell>
+                                            <TableCell>KES {product.price / 100}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="icon" onClick={() => { setEditingProduct(product); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
+                                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingProduct(product); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     )}
                 </CardContent>
             </Card>

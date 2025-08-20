@@ -146,28 +146,30 @@ export default function OrdersPage() {
                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Order ID</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead>Customer</TableHead>
-                                    <TableHead>Total</TableHead>
-                                    <TableHead>Status</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {orders.map((order) => (
-                                    <TableRow key={order.id} onClick={() => setSelectedOrder(order)} className="cursor-pointer">
-                                        <TableCell className="font-mono font-semibold">{order.orderId}</TableCell>
-                                        <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
-                                        <TableCell>{order.name}</TableCell>
-                                        <TableCell>{formatPrice(order.totalPrice)}</TableCell>
-                                        <TableCell><Badge variant={statusVariant[order.status]}>{order.status}</Badge></TableCell>
+                       <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Order ID</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Customer</TableHead>
+                                        <TableHead>Total</TableHead>
+                                        <TableHead>Status</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {orders.map((order) => (
+                                        <TableRow key={order.id} onClick={() => setSelectedOrder(order)} className="cursor-pointer">
+                                            <TableCell className="font-mono font-semibold">{order.orderId}</TableCell>
+                                            <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                                            <TableCell>{order.name}</TableCell>
+                                            <TableCell>{formatPrice(order.totalPrice)}</TableCell>
+                                            <TableCell><Badge variant={statusVariant[order.status]}>{order.status}</Badge></TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                       </div>
                     )}
                 </CardContent>
             </Card>

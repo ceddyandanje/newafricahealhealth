@@ -8,10 +8,10 @@ export default function Footer() {
   const logoUrl = "https://firebasestorage.googleapis.com/v0/b/africa-heal-health-x8xrn.firebasestorage.app/o/FB_IMG_1754584185750.jpg?alt=media&token=447d8b93-7b65-4236-832b-9d9d89411946";
   return (
     <footer className="bg-muted/40 dark:bg-black/20 text-foreground border-t border-black/20">
-      <div className="container py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+      <div className="container py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Column 1: AHH Info & Socials */}
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-1 lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2">
               <Image src={logoUrl} alt="Africa Heal Health Logo" width={40} height={40} className="rounded-full" />
               <span className="font-bold text-xl font-headline">Africa Heal Health</span>
@@ -28,7 +28,7 @@ export default function Footer() {
           </div>
 
           {/* Column 2: Quick Links */}
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-1">
             <h3 className="font-headline font-semibold">Quick Links</h3>
             <nav className="space-y-2">
               <Link href="/about" className="block text-sm text-muted-foreground hover:text-primary">About Us</Link>
@@ -38,7 +38,7 @@ export default function Footer() {
           </div>
 
           {/* Column 3: Contact Us */}
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-1">
             <h3 className="font-headline font-semibold">Contact Us</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
@@ -57,7 +57,7 @@ export default function Footer() {
           </div>
 
           {/* Column 4: Newsletter */}
-          <div className="space-y-4">
+          <div className="space-y-4 col-span-1">
             <h3 className="font-headline font-semibold">Newsletter</h3>
             <p className="text-sm text-muted-foreground">Get the latest health news and product updates.</p>
             <div className="flex gap-2">
@@ -67,7 +67,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-6 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground">
+        <div className="mt-8 pt-8 border-t border-border/50 text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} AHH. All Rights Reserved.</p>
         </div>
       </div>
