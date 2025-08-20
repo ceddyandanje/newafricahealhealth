@@ -19,6 +19,7 @@ import { useProducts } from "@/hooks/use-products";
 import InventoryStatusDialog from "@/components/admin/inventory-status-dialog";
 import { useOrdersForAdmin as useOrders } from "@/lib/orders";
 import { useRouter } from "next/navigation";
+import OrdersOverviewDialog from "@/components/admin/orders-overview-dialog";
 
 
 const revenueChartData = [
@@ -49,6 +50,7 @@ export default function AdminDashboardPage() {
     const [isRequestsDialogOpen, setIsRequestsDialogOpen] = useState(false);
     const [isPatientInsightsOpen, setIsPatientInsightsOpen] = useState(false);
     const [isInventoryDialogOpen, setIsInventoryDialogOpen] = useState(false);
+    const [isOrdersOverviewOpen, setIsOrdersOverviewOpen] = useState(false);
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
@@ -96,7 +98,7 @@ export default function AdminDashboardPage() {
             setIsInventoryDialogOpen(true);
         }
         if (itemTitle === "Total Orders") {
-            router.push('/admin/orders');
+            setIsOrdersOverviewOpen(true);
         }
     }
 
@@ -196,8 +198,8 @@ export default function AdminDashboardPage() {
                                     <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
                                     <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
                                     <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                                    <Bar key="income" dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
-                                    <Bar key="expense" dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar key="income-bar" dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
+                                    <Bar key="expense-bar" dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
                                 </BarChartComponent>
                             ) : (
                                 <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
@@ -280,6 +282,7 @@ export default function AdminDashboardPage() {
             {isRequestsDialogOpen && <RefillRequestDialog requests={pendingRequests} isOpen={isRequestsDialogOpen} onClose={() => setIsRequestsDialogOpen(false)} />}
             {isPatientInsightsOpen && <UserInsightsDialog users={users} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
             {isInventoryDialogOpen && <InventoryStatusDialog products={products} isOpen={isInventoryDialogOpen} onClose={() => setIsInventoryDialogOpen(false)} />}
+            {isOrdersOverviewOpen && <OrdersOverviewDialog orders={orders} isOpen={isOrdersOverviewOpen} onClose={() => setIsOrdersOverviewOpen(false)} />}
         </div>
     );
 }
