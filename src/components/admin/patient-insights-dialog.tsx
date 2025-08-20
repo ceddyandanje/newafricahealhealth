@@ -42,7 +42,7 @@ const RoleCard = ({ role, count }: { role: UserRole, count: number }) => {
 };
 
 const StatCard = ({ icon: Icon, value, label, percentage, trend }: { icon: React.ElementType, value: string | number, label: string, percentage: number, trend: 'up' | 'down' | 'same' }) => {
-    const trendIcon = trend === 'up' ? ArrowUp : trend === 'down' ? ArrowDown : Minus;
+    const TrendIcon = trend === 'up' ? ArrowUp : trend === 'down' ? ArrowDown : Minus;
     const trendColor = trend === 'up' ? 'text-green-500' : trend === 'down' ? 'text-red-500' : 'text-muted-foreground';
 
     return (
@@ -54,7 +54,7 @@ const StatCard = ({ icon: Icon, value, label, percentage, trend }: { icon: React
             </div>
             {percentage !== 0 && (
                 <div className={cn("flex items-center text-sm font-semibold", trendColor)}>
-                    <trendIcon className="h-4 w-4" />
+                    <TrendIcon className="h-4 w-4" />
                     <span>{percentage.toFixed(1)}%</span>
                 </div>
             )}
