@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
     const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 10).length;
 
     const summaryData = [
-        { title: "Patients", value: patientCount.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50", clickable: true },
+        { title: "Total Users", value: users.length.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50", clickable: true },
         { title: "Pending Requests", value: pendingRequests.length.toString(), icon: ClipboardList, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-900/50", clickable: true },
         { title: "Inventory Low Stock", value: lowStockCount.toString(), icon: Package, color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/50", clickable: true },
         { title: "Staff", value: (users.length - patientCount).toString(), icon: Users, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
         if (itemTitle === "Pending Requests") {
             setIsRequestsDialogOpen(true);
         }
-        if (itemTitle === "Patients") {
+        if (itemTitle === "Total Users") {
             setIsPatientInsightsOpen(true);
         }
         if (itemTitle === "Inventory Low Stock") {
@@ -269,7 +269,7 @@ export default function AdminDashboardPage() {
                 </Card>
             </div>
             {isRequestsDialogOpen && <RefillRequestDialog requests={pendingRequests} isOpen={isRequestsDialogOpen} onClose={() => setIsRequestsDialogOpen(false)} />}
-            {isPatientInsightsOpen && <PatientInsightsDialog patients={patients} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
+            {isPatientInsightsOpen && <PatientInsightsDialog users={users} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
             {isInventoryDialogOpen && <InventoryStatusDialog products={products} isOpen={isInventoryDialogOpen} onClose={() => setIsInventoryDialogOpen(false)} />}
         </div>
     );

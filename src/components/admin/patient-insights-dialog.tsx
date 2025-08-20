@@ -5,70 +5,60 @@ import { useMemo, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { BarChart as BarChartIcon, Users, UserPlus, MapPin, TrendingUp, CalendarDays, LineChart as LineChartIcon, ArrowUp, ArrowDown, Minus } from 'lucide-react';
-import { type User } from '@/lib/types';
+import { BarChart as BarChartIcon, Users, UserPlus, CalendarDays, LineChart as LineChartIcon, ArrowUp, ArrowDown, Minus, HeartPulse, Truck, FlaskConical, Shield, Ambulance } from 'lucide-react';
+import { type User, type UserRole } from '@/lib/types';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, Tooltip as RechartsTooltip, Legend } from 'recharts';
-import { format, subDays, startOfDay, startOfWeek } from 'date-fns';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Line, LineChart, Tooltip as RechartsTooltip } from 'recharts';
+import { format, subDays, startOfWeek } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '../ui/scroll-area';
 
 interface PatientInsightsDialogProps {
-    patients: User[];
+    users: User[];
     isOpen: boolean;
     onClose: () => void;
 }
 
-const StatCard = ({ icon: Icon, value, label, growth }: { icon: React.ElementType, value: string | number, label: string, growth?: { value: number, isPositive: boolean, isNeutral: boolean } }) => (
-    <div className="flex items-center gap-3 bg-muted/50 p-3 rounded-lg">
-        <Icon className="h-6 w-6 text-primary" />
-        <div>
-            <div className="flex items-baseline gap-1">
-                <p className="text-2xl font-bold">{value}</p>
-                {growth && (
-                    <span className={cn(
-                        "flex items-center text-xs font-bold",
-                        growth.isPositive && "text-green-500",
-                        !growth.isPositive && !growth.isNeutral && "text-red-500",
-                        growth.isNeutral && "text-muted-foreground"
-                    )}>
-                        {growth.isPositive && <ArrowUp className="h-3 w-3" />}
-                        {!growth.isPositive && !growth.isNeutral && <ArrowDown className="h-3 w-3" />}
-                        {growth.isNeutral && <Minus className="h-3 w-3" />}
-                        {growth.value.toFixed(1)}%
-                    </span>
-                )}
-            </div>
-            <p className="text-sm text-muted-foreground">{label}</p>
-        </div>
-    </div>
-);
+const roleConfig: { [key in UserRole]: { icon: React.ElementType, color: string } } = {
+    'user': { icon: Users, color: 'text-blue-500' },
+    'doctor': { icon: HeartPulse, color: 'text-green-500' },
+    'admin': { icon: Shield, color: 'text-red-500' },
+    'delivery-driver': { icon: Truck, color: 'text-orange-500' },
+    'lab-technician': { icon: FlaskConical, color: 'text-purple-500' },
+    'emergency-services': { icon: Ambulance, color: 'text-yellow-500' },
+}
 
-export default function PatientInsightsDialog({ patients, isOpen, onClose }: PatientInsightsDialogProps) {
+const RoleCard = ({ role, count }: { role: UserRole, count: number }) => {
+    const config = roleConfig[role];
+    return (
+        <div className={cn("flex items-center gap-3 p-3 rounded-lg bg-muted/50", config.color)}>
+            <config.icon className="h-6 w-6" />
+            <div>
+                <p className="text-2xl font-bold">{count}</p>
+                <p className="text-sm font-semibold capitalize">{role.replace('-', ' ')}s</p>
+            </div>
+        </div>
+    )
+};
+
+
+export default function UserInsightsDialog({ users, isOpen, onClose }: PatientInsightsDialogProps) {
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
     
-    const sortedPatients = useMemo(() => {
-        return [...patients].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    }, [patients]);
+    const sortedUsers = useMemo(() => {
+        return [...users].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }, [users]);
     
     const recentSignups = useMemo(() => {
-        return sortedPatients.slice(0, 5);
-    }, [sortedPatients]);
-
-    const newThisMonth = useMemo(() => {
-        const oneMonthAgo = subDays(new Date(), 30);
-        return patients.filter(p => new Date(p.createdAt) >= oneMonthAgo).length;
-    }, [patients]);
-
-    const locationCounts = useMemo(() => {
-        const counts = patients.reduce((acc, patient) => {
-            const loc = patient.location || "Unknown";
-            acc[loc] = (acc[loc] || 0) + 1;
+        return sortedUsers.slice(0, 5);
+    }, [sortedUsers]);
+    
+    const roleCounts = useMemo(() => {
+       return users.reduce((acc, user) => {
+            acc[user.role] = (acc[user.role] || 0) + 1;
             return acc;
-        }, {} as Record<string, number>);
-        
-        return Object.entries(counts)
-            .sort(([, a], [, b]) => b - a)[0] || ["N/A", 0];
-    }, [patients]);
+        }, {} as Record<UserRole, number>);
+    }, [users]);
 
     const growthChartData = useMemo(() => {
         // Aggregate by week for the last 8 weeks
@@ -77,8 +67,8 @@ export default function PatientInsightsDialog({ patients, isOpen, onClose }: Pat
             return { date: format(weekStart, 'MMM d'), weekId: format(weekStart, 'yyyy-ww'), count: 0 };
         });
         
-        patients.forEach(patient => {
-            const joinDate = new Date(patient.createdAt);
+        users.forEach(user => {
+            const joinDate = new Date(user.createdAt);
             const weekStart = startOfWeek(joinDate, { weekStartsOn: 1 });
             const weekId = format(weekStart, 'yyyy-ww');
             const weekData = last8Weeks.find(d => d.weekId === weekId);
@@ -88,7 +78,7 @@ export default function PatientInsightsDialog({ patients, isOpen, onClose }: Pat
         });
 
         return last8Weeks;
-    }, [patients]);
+    }, [users]);
 
     const growthStats = useMemo(() => {
         const currentPeriodSignups = growthChartData.slice(-4).reduce((acc, d) => acc + d.count, 0);
@@ -109,92 +99,85 @@ export default function PatientInsightsDialog({ patients, isOpen, onClose }: Pat
     
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-3xl">
+            <DialogContent className="sm:max-w-4xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 font-headline text-2xl">
-                        <Users /> Patient Insights
+                        <Users /> User Insights
                     </DialogTitle>
                     <DialogDescription>
-                        An overview of your patient user base and growth trends.
+                        An overview of your user base and growth trends.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="grid md:grid-cols-2 gap-6 py-4 max-h-[70vh] overflow-y-auto pr-4">
-                    {/* Left Column: Stats & Recent */}
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <StatCard icon={Users} value={patients.length} label="Total Patients" />
-                            <StatCard icon={UserPlus} value={newThisMonth} label="New This Month" />
-                            <StatCard icon={MapPin} value={locationCounts[0]} label="Top Location" />
-                             <StatCard 
-                                icon={TrendingUp} 
-                                value={growthStats.currentPeriod} 
-                                label="Last 4 Weeks" 
-                                growth={{ 
-                                    value: growthStats.percentage, 
-                                    isPositive: growthStats.percentage > 0,
-                                    isNeutral: growthStats.percentage === 0
-                                }} 
-                            />
+                <ScrollArea className="max-h-[70vh] -mx-6 px-6">
+                    <div className="py-4 space-y-6">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {Object.entries(roleConfig).map(([role, config]) => (
+                                <RoleCard key={role} role={role as UserRole} count={roleCounts[role as UserRole] || 0} />
+                            ))}
                         </div>
                         
-                        <div>
-                           <h3 className="font-semibold mb-3 flex items-center gap-2"><CalendarDays className="h-5 w-5 text-muted-foreground"/> Recent Signups</h3>
-                            <div className="space-y-3">
-                                {recentSignups.map(p => (
-                                    <div key={p.id} className="flex items-center gap-3">
-                                        <Avatar>
-                                            <AvatarImage src={p.avatarUrl} alt={p.name} />
-                                            <AvatarFallback>{p.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="text-sm font-semibold">{p.name}</p>
-                                            <p className="text-xs text-muted-foreground">{p.email}</p>
-                                        </div>
+                        <div className="grid md:grid-cols-2 gap-6 pt-4">
+                             {/* Left Column: Chart */}
+                             <div>
+                                <div className="flex justify-between items-center mb-3">
+                                    <h3 className="font-semibold flex items-center gap-2"><BarChartIcon className="h-5 w-5 text-muted-foreground"/> Weekly Sign-up Growth</h3>
+                                    <div className="flex items-center rounded-md bg-muted p-0.5 text-sm font-medium">
+                                        <Button size="icon" variant={chartType === 'bar' ? 'secondary' : 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}>
+                                            <BarChartIcon className="h-4 w-4"/>
+                                        </Button>
+                                        <Button size="icon" variant={chartType === 'line' ? 'secondary' : 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}>
+                                            <LineChartIcon className="h-4 w-4"/>
+                                        </Button>
                                     </div>
-                                ))}
+                                </div>
+                                <div className="h-56 w-full">
+                                    <ChartContainer config={{}} className="h-full w-full">
+                                        {chartType === 'bar' ? (
+                                            <BarChart data={growthChartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                                <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                                                <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+                                                <Bar dataKey="count" name="New Users" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                            </BarChart>
+                                        ) : (
+                                            <LineChart data={growthChartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                                <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} />
+                                                <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
+                                                <RechartsTooltip content={<ChartTooltipContent />} />
+                                                <Line type="monotone" dataKey="count" name="New Users" stroke="hsl(var(--primary))" strokeWidth={2} />
+                                            </LineChart>
+                                        )}
+                                    </ChartContainer>
+                                </div>
+                             </div>
+
+                             {/* Right Column: Recent Signups */}
+                            <div>
+                                <h3 className="font-semibold mb-3 flex items-center gap-2"><CalendarDays className="h-5 w-5 text-muted-foreground"/> Recent Signups</h3>
+                                <div className="space-y-3">
+                                    {recentSignups.map(p => (
+                                        <div key={p.id} className="flex items-center gap-3">
+                                            <Avatar>
+                                                <AvatarImage src={p.avatarUrl} alt={p.name} />
+                                                <AvatarFallback>{p.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="text-sm font-semibold">{p.name}</p>
+                                                <p className="text-xs text-muted-foreground">{p.email}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </div>
-                    {/* Right Column: Chart */}
-                    <div>
-                         <div className="flex justify-between items-center mb-3">
-                            <h3 className="font-semibold flex items-center gap-2"><BarChartIcon className="h-5 w-5 text-muted-foreground"/> Weekly Sign-up Growth</h3>
-                             <div className="flex items-center rounded-md bg-muted p-0.5 text-sm font-medium">
-                                <Button size="icon" variant={chartType === 'bar' ? 'secondary' : 'ghost'} className="h-7 w-7" onClick={() => setChartType('bar')}>
-                                    <BarChartIcon className="h-4 w-4"/>
-                                </Button>
-                                <Button size="icon" variant={chartType === 'line' ? 'secondary' : 'ghost'} className="h-7 w-7" onClick={() => setChartType('line')}>
-                                    <LineChartIcon className="h-4 w-4"/>
-                                </Button>
-                            </div>
-                         </div>
-                         <div className="h-64 w-full">
-                            <ChartContainer config={{}} className="h-full w-full">
-                                {chartType === 'bar' ? (
-                                    <BarChart data={growthChartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                        <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} />
-                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                                        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-                                        <Bar dataKey="count" name="New Patients" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-                                    </BarChart>
-                                ) : (
-                                    <LineChart data={growthChartData} margin={{ top: 5, right: 5, left: -20, bottom: 5 }}>
-                                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                         <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} />
-                                         <YAxis tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                                         <RechartsTooltip content={<ChartTooltipContent />} />
-                                         <Line type="monotone" dataKey="count" name="New Patients" stroke="hsl(var(--primary))" strokeWidth={2} />
-                                    </LineChart>
-                                )}
-                            </ChartContainer>
-                         </div>
-                    </div>
-                </div>
-
-                <DialogFooter>
+                </ScrollArea>
+                <DialogFooter className="pt-4 border-t">
                     <Button variant="outline" onClick={onClose}>Close</Button>
+                     <Button onClick={() => window.location.href = '/admin/users'}>Manage Users</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
