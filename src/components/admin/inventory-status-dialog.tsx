@@ -137,7 +137,7 @@ export default function InventoryStatusDialog({ products, isOpen, onClose }: Inv
     const chartData = [
         { name: 'Out of Stock', value: outOfStockCount, fill: 'hsl(var(--destructive))' },
         { name: 'Low Stock', value: lowStockCount, fill: 'hsl(var(--primary))' },
-        { name: 'In Stock', value: inStockCount, fill: 'hsl(var(--chart-2))' }, // Using a chart color
+        { name: 'In Stock', value: inStockCount, fill: 'hsl(var(--chart-2))' },
     ];
     
     return (
