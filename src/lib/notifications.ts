@@ -16,10 +16,10 @@ export const useNotifications = (userId?: string, userRole?: UserRole) => {
         if (!userId) return;
 
         // Query for notifications sent to the specific user OR their role (e.g., 'admin_role')
+        // We remove the orderBy clause to avoid needing a composite index.
         const q = query(
             notificationsCollection, 
-            where('recipientId', 'in', [userId, `${userRole}_role`]),
-            orderBy('time', 'desc')
+            where('recipientId', 'in', [userId, `${userRole}_role`])
         );
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {

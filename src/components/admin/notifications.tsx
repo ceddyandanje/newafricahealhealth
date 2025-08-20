@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
 import { useNotifications, updateNotification, clearAllNotifications } from '@/lib/notifications';
 import { useAuth } from '@/hooks/use-auth';
+import { useMemo } from 'react';
 
 const iconMap = {
     new_appointment: UserPlus,
@@ -32,14 +33,19 @@ const iconMap = {
 export default function Notifications() {
   const { user } = useAuth();
   const { notifications } = useNotifications(user?.id, user?.role);
-  const unreadCount = notifications.filter(n => !n.read).length;
+  
+  const sortedNotifications = useMemo(() => {
+    return [...notifications].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  }, [notifications]);
+
+  const unreadCount = sortedNotifications.filter(n => !n.read).length;
 
   const handleMarkAsRead = (id: string) => {
     updateNotification(id, { read: true });
   };
   
   const handleMarkAllAsRead = () => {
-    notifications.forEach(n => {
+    sortedNotifications.forEach(n => {
         if (!n.read) {
             updateNotification(n.id, { read: true });
         }
@@ -91,14 +97,14 @@ export default function Notifications() {
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Notifications</SheetTitle>
-           {notifications.length > 0 ? (
+           {sortedNotifications.length > 0 ? (
             <SheetDescription>You have {unreadCount} unread messages.</SheetDescription>
            ) : (
             <SheetDescription>You have no new notifications.</SheetDescription>
            )}
         </SheetHeader>
         <div className="flex justify-between items-center mt-2">
-            <Button variant="ghost" size="sm" onClick={handleClearAll} disabled={notifications.length === 0} className="text-destructive hover:text-destructive">
+            <Button variant="ghost" size="sm" onClick={handleClearAll} disabled={sortedNotifications.length === 0} className="text-destructive hover:text-destructive">
                 <Trash2 className="mr-2 h-4 w-4"/> Clear All
             </Button>
             <Button variant="link" size="sm" onClick={handleMarkAllAsRead} disabled={unreadCount === 0}>
@@ -107,13 +113,13 @@ export default function Notifications() {
         </div>
         <ScrollArea className="h-[calc(100vh-170px)]">
             <div className="py-4 pr-4 space-y-4">
-            {notifications.length === 0 ? (
+            {sortedNotifications.length === 0 ? (
                 <div className="text-center text-muted-foreground py-16">
                     <Bell className="mx-auto h-12 w-12 mb-4" />
                     <p>All caught up!</p>
                 </div>
             ) : (
-                notifications.map(notification => {
+                sortedNotifications.map(notification => {
                     const Icon = iconMap[notification.type as keyof typeof iconMap] || iconMap.default;
                     return (
                         <div
