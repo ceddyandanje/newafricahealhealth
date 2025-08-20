@@ -26,7 +26,7 @@ export const useRequests = () => {
         return () => unsubscribe();
     }, []);
 
-    return [requests, setRequests] as const;
+    return {requests, setRequests};
 };
 
 
@@ -51,5 +51,6 @@ export const addRequest = async (payload: NewRequestPayload) => {
         await addDoc(collection(db, "refillRequests"), newRequest);
     } catch (error) {
         console.error("Error adding refill request to Firestore: ", error);
+        throw error; // Re-throw the error so the calling function can handle it
     }
 };
