@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from "react";
@@ -12,10 +11,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRequests, type RefillRequest } from "@/lib/refillRequests";
 import RefillRequestDialog from "@/components/admin/refill-request-dialog";
-import { useUsers } from "@/lib/users";
+import { useUsers, type User } from "@/lib/users";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useRoadmapTasks } from "@/lib/roadmap";
+import PatientInsightsDialog from "@/components/admin/patient-insights-dialog";
 
 const revenueChartData = [
     { name: '10 May', income: 80, expense: 40 },
@@ -40,6 +40,7 @@ export default function AdminDashboardPage() {
     const { users } = useUsers();
     const { tasks } = useRoadmapTasks();
     const [selectedRequest, setSelectedRequest] = useState<RefillRequest | null>(null);
+    const [isPatientInsightsOpen, setIsPatientInsightsOpen] = useState(false);
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
@@ -48,7 +49,7 @@ export default function AdminDashboardPage() {
     const pendingTasksCount = tasks.filter(t => t.status === 'Todo' || t.status === 'In Progress').length;
 
     const summaryData = [
-        { title: "Patients", value: patientCount.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50" },
+        { title: "Patients", value: patientCount.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50", clickable: true },
         { title: "Pending Requests", value: pendingRequests.length.toString(), icon: ClipboardList, color: "text-orange-500", bgColor: "bg-orange-100 dark:bg-orange-900/50", clickable: true },
         { title: "Pending Tasks", value: pendingTasksCount.toString(), icon: ListChecks, color: "text-purple-500", bgColor: "bg-purple-100 dark:bg-purple-900/50", href: "/admin/roadmap" },
         { title: "Staff", value: (users.length - patientCount).toString(), icon: Users, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50" },
@@ -79,6 +80,9 @@ export default function AdminDashboardPage() {
     const handleCardClick = (itemTitle: string) => {
         if (itemTitle === "Pending Requests" && pendingRequests.length > 0) {
             setSelectedRequest(pendingRequests[0]);
+        }
+        if (itemTitle === "Patients") {
+            setIsPatientInsightsOpen(true);
         }
     }
 
@@ -260,7 +264,8 @@ export default function AdminDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
-             {selectedRequest && <RefillRequestDialog request={selectedRequest} isOpen={!!selectedRequest} onClose={() => setSelectedRequest(null)} />}
+            {selectedRequest && <RefillRequestDialog request={selectedRequest} isOpen={!!selectedRequest} onClose={() => setSelectedRequest(null)} />}
+            {isPatientInsightsOpen && <PatientInsightsDialog patients={patients} isOpen={isPatientInsightsOpen} onClose={() => setIsPatientInsightsOpen(false)} />}
         </div>
     );
 }

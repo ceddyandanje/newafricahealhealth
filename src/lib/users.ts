@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { User, MedicalProfile } from './types';
 import type { SignUpCredentials } from './types';
 import { db } from './firebase';
-import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, orderBy } from 'firebase/firestore';
 
 // Custom hook to manage users state. It fetches from Firestore on mount.
 export const useUsers = () => {
@@ -34,7 +34,8 @@ const usersCollection = collection(db, 'users');
 // Fetches all users directly from Firestore.
 export const getAllUsersFromFirestore = async (): Promise<User[]> => {
     try {
-        const querySnapshot = await getDocs(usersCollection);
+        const q = query(usersCollection, orderBy('createdAt', 'desc'));
+        const querySnapshot = await getDocs(q);
         const users = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
         return users;
     } catch (error) {
