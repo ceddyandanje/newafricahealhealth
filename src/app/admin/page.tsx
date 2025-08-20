@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks, Package } from "lucide-react";
+import { Hospital, Truck, Users, ClipboardList, BarChart3, LineChart as LineChartIcon, ListChecks, Package, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart as BarChartComponent, CartesianGrid, XAxis, YAxis, Pie, PieChart as PieChartComponent, Cell, Line, LineChart as LineChartComponent, Area } from "recharts"
@@ -92,26 +92,25 @@ export default function AdminDashboardPage() {
     }
 
     const renderCard = (item: typeof summaryData[0]) => {
+        const isLowStockCard = item.title === 'Inventory Low Stock';
+        const isLowStockZero = isLowStockCard && item.value === '0';
+
         const cardContent = (
              <CardContent className="p-4 flex items-center justify-between">
                 <div>
                     <p className="text-sm text-muted-foreground">{item.title}</p>
-                    <p className="text-2xl font-bold">{item.value}</p>
+                    {isLowStockZero ? (
+                        <CheckCircle className="h-8 w-8 text-green-500 mt-1" />
+                    ) : (
+                        <p className="text-2xl font-bold">{item.value}</p>
+                    )}
                 </div>
                 <div className={`p-3 rounded-full ${item.bgColor} ${item.color}`}>
                     <item.icon className="h-6 w-6"/>
                 </div>
             </CardContent>
         );
-
-        if (item.href) {
-            return (
-                <Link href={item.href} key={item.title}>
-                    <Card className="hover:shadow-lg transition-shadow h-full">{cardContent}</Card>
-                </Link>
-            )
-        }
-
+        
         return (
             <Card key={item.title} onClick={() => item.clickable && handleCardClick(item.title)} className={item.clickable ? "cursor-pointer hover:shadow-lg transition-shadow h-full" : "h-full"}>
                {cardContent}
