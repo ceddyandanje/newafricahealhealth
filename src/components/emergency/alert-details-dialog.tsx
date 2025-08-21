@@ -24,28 +24,53 @@ const serviceIcons: { [key in EmergencyRequest['serviceType']]: React.ElementTyp
     'Air Ambulance': Plane,
 };
 
+interface AlertDetailsDialogProps {
+    alerts: EmergencyRequest[];
+}
+
+type Suggestion = {
+    id: string;
+    suggestion: string;
+}
+
 export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyRequest[] }) {
     const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
-    const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
-    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [suggestions, setSuggestions] = useState<Map<string, string>>(new Map());
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (selectedAlert) {
-            setIsAiLoading(true);
-            setAiSuggestion(null);
-            suggestEmergencyResponse({ 
-                serviceType: selectedAlert.serviceType,
-                location: selectedAlert.location 
-            }).then(response => {
-                setAiSuggestion(response.suggestion);
-                setIsAiLoading(false);
-            }).catch(error => {
-                console.error("AI suggestion failed:", error);
-                setAiSuggestion("Could not load AI suggestion.");
-                setIsAiLoading(false);
-            });
+        if (alerts.length > 0) {
+            setIsLoading(true);
+            const fetchSuggestions = async () => {
+                const newSuggestions = new Map<string, string>();
+                try {
+                    await Promise.all(alerts.map(async (alert) => {
+                        const response = await suggestEmergencyResponse({
+                            serviceType: alert.serviceType,
+                            location: alert.location
+                        });
+                        newSuggestions.set(alert.id, response.suggestion);
+                    }));
+                } catch (error) {
+                    console.error("AI suggestion failed for one or more alerts:", error);
+                    alerts.forEach(alert => {
+                        if (!newSuggestions.has(alert.id)) {
+                             newSuggestions.set(alert.id, "Could not load AI suggestion.");
+                        }
+                    });
+                }
+                setSuggestions(newSuggestions);
+                setIsLoading(false);
+            };
+            fetchSuggestions();
         }
-    }, [selectedAlert]);
+    }, [alerts]);
+
+    useEffect(() => {
+        if (!selectedAlert && alerts.length > 0) {
+            setSelectedAlert(alerts[0]);
+        }
+    }, [alerts, selectedAlert])
 
     const formatTime = (dateString: string) => {
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -109,10 +134,10 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
 
                              <div className="p-4 border rounded-lg bg-primary/5">
                                  <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary"/> AI Recommendation</h3>
-                                 {isAiLoading ? (
-                                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Generating suggestion...</div>
+                                 {isLoading ? (
+                                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Generating suggestions for all alerts...</div>
                                  ) : (
-                                    <p className="text-sm font-medium whitespace-pre-wrap">{aiSuggestion}</p>
+                                    <p className="text-sm font-medium whitespace-pre-wrap">{suggestions.get(selectedAlert.id)}</p>
                                  )}
                              </div>
 

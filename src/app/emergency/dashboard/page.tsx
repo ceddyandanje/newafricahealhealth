@@ -4,7 +4,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Siren, Ambulance, Plane, Clock, MapPin, User, Check, X, Send } from "lucide-react";
+import { Siren, Ambulance, Plane, Clock, MapPin, User, Check, X, Send, HeartPulse } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
@@ -33,6 +33,17 @@ const statusVariant = {
     'At Scene': 'destructive',
     'Unavailable': 'outline',
 } as const;
+
+const serviceIcons: { [key in EmergencyRequest['serviceType']]: React.ElementType } = {
+    'First Aid': HeartPulse,
+    'Ground Ambulance': Ambulance,
+    'Air Ambulance': Plane,
+};
+
+const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
 
 const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementType, value: string | number, label: string, variant: 'default' | 'destructive' }) => (
     <Card className={cn('bg-background', variant === 'destructive' && 'bg-destructive/10')}>
@@ -77,13 +88,25 @@ export default function EmergencyDashboardPage() {
                             <TabsContent value="alerts" className="flex-grow overflow-hidden mt-2">
                                 <DialogTrigger asChild>
                                     <Card className="h-full flex flex-col cursor-pointer hover:bg-muted/50 transition-colors">
-                                        <CardHeader className="p-4">
-                                            <CardTitle>Incoming Alerts</CardTitle>
+                                        <CardHeader className="p-4 border-b">
+                                            <CardTitle className="text-base">Incoming Alerts</CardTitle>
                                         </CardHeader>
-                                        <CardContent className="p-0 flex-grow overflow-y-auto">
-                                            <div className="p-4 text-center text-muted-foreground">
-                                                <p>Click to open the AI-powered dispatch center.</p>
-                                            </div>
+                                        <CardContent className="p-2 flex-grow overflow-y-auto space-y-2">
+                                            {incomingAlerts.map(alert => {
+                                                const Icon = serviceIcons[alert.serviceType];
+                                                return (
+                                                    <div key={alert.id} className="p-2 border rounded-md bg-background/50">
+                                                        <div className="flex justify-between items-center text-sm font-semibold">
+                                                            <div className="flex items-center gap-2">
+                                                                <Icon className="h-4 w-4"/>
+                                                                {alert.serviceType}
+                                                            </div>
+                                                            <span className="text-xs text-muted-foreground">{formatTime(alert.createdAt)}</span>
+                                                        </div>
+                                                        <p className="text-xs text-muted-foreground mt-1">For: {alert.requestor}</p>
+                                                    </div>
+                                                );
+                                            })}
                                         </CardContent>
                                     </Card>
                                 </DialogTrigger>
@@ -91,7 +114,7 @@ export default function EmergencyDashboardPage() {
                             <TabsContent value="units" className="flex-grow overflow-hidden mt-2">
                                 <Card className="h-full flex flex-col">
                                      <CardHeader className="p-4">
-                                        <CardTitle>Unit Status</CardTitle>
+                                        <CardTitle className="text-base">Unit Status</CardTitle>
                                      </CardHeader>
                                     <CardContent className="p-0 flex-grow overflow-y-auto">
                                         <div className="space-y-0">
