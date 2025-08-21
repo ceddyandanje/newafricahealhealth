@@ -112,6 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 await signOut(auth);
             }
         }
+        setIsLoading(false);
     };
 
     // This effect runs once on mount to check for redirect results and set up the listener.
