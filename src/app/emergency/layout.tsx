@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import EmergencySidebar from "@/components/emergency/sidebar";
+import { cn } from '@/lib/utils';
 
 export default function EmergencyLayout({
   children,
@@ -33,7 +34,9 @@ export default function EmergencyLayout({
   return (
     <div className="min-h-screen bg-muted/40 flex">
         <EmergencySidebar />
-        <main className="flex-1 pl-20 transition-all duration-300">
+        <main className={cn(
+          "flex-1 pl-20 transition-all duration-300",
+        )}>
             {children}
         </main>
     </div>

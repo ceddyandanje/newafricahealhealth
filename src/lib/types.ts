@@ -178,4 +178,33 @@ export type Appointment = {
     status: AppointmentStatus;
     notes?: string;
 };
+
+export type EmergencyServiceType = 'First Aid' | 'Ground Ambulance' | 'Air Ambulance';
+
+export type EmergencyRequest = {
+  id: string; // Firestore ID
+  userId?: string; // Optional if non-user requests
+  requestor: 'Me' | 'Someone Else';
+  serviceType: EmergencyServiceType;
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  bloodGroup?: string;
+  allergies?: string;
+  status: 'Pending' | 'Acknowledged' | 'Unit Dispatched' | 'On Scene' | 'Resolved' | 'Cancelled';
+  createdAt: string; // ISO String
+  dispatchedUnitId?: string;
+};
+
+export type EmergencyUnit = {
+    id: string; // e.g., G-01 for Ground 1
+    type: 'Ground' | 'Air' | 'Medevac';
+    status: 'Available' | 'En Route' | 'At Scene' | 'Transporting' | 'At Hospital' | 'Unavailable';
+    currentLocation: {
+        latitude: number;
+        longitude: number;
+    };
+    assignedIncidentId?: string;
+};
     

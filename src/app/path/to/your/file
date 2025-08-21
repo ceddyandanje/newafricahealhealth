@@ -1,0 +1,7 @@
+The user wants to add two new pages:
+1.  `/emergency/alerts`: To show a detailed, filterable list of active alerts.
+2.  `/emergency/history`: To show a log of all past incidents.
+
+This requires creating two new page files. I will create placeholder pages for now that can be built out later.
+
+Here are the changes.

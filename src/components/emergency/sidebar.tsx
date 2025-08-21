@@ -37,7 +37,7 @@ export default function EmergencySidebar() {
                                     href={item.href}
                                     className={cn(
                                         'h-12 w-12 flex items-center justify-center rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-foreground',
-                                        pathname === item.href && 'bg-destructive/20 text-destructive'
+                                        pathname.startsWith(item.href) && 'bg-destructive/20 text-destructive'
                                     )}
                                 >
                                     <item.icon className="h-6 w-6" />
