@@ -61,31 +61,6 @@ export default function EmergencyDashboardPage() {
             </div>
 
             <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2 h-[55vh] flex flex-col">
-                    <CardHeader>
-                        <CardTitle>Live Incident Map</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow relative p-0">
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4081395.0993356823!2d35.24233191564264!3d-0.02279185433246275!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182780aa73dcf839%3A0x8634440b87c6f09!2sKenya!5e0!3m2!1sen!2sus!4v1754589984922"
-                            width="100%"
-                            height="100%"
-                            style={{ border: 0 }}
-                            allowFullScreen={false}
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                            className="rounded-b-lg"
-                        ></iframe>
-                        {/* Placeholder for map markers */}
-                        <div className="absolute top-1/4 left-1/3">
-                            <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
-                        </div>
-                            <div className="absolute bottom-1/2 right-1/4">
-                            <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
-                        </div>
-                    </CardContent>
-                </Card>
-
                 <div className="md:col-span-1 h-[55vh] flex flex-col">
                      <Tabs defaultValue="alerts" className="flex-grow flex flex-col h-full">
                         <TabsList className="grid w-full grid-cols-2">
@@ -139,6 +114,31 @@ export default function EmergencyDashboardPage() {
                         </TabsContent>
                     </Tabs>
                 </div>
+
+                <Card className="md:col-span-2 h-[55vh] flex flex-col">
+                    <CardHeader>
+                        <CardTitle>Live Incident Map</CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-grow relative p-0">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4081395.0993356823!2d35.24233191564264!3d-0.02279185433246275!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182780aa73dcf839%3A0x8634440b87c6f09!2sKenya!5e0!3m2!1sen!2sus!4v1754589984922"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen={false}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            className="rounded-b-lg"
+                        ></iframe>
+                        {/* Placeholder for map markers */}
+                        <div className="absolute top-1/4 left-1/3">
+                            <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
+                        </div>
+                            <div className="absolute bottom-1/2 right-1/4">
+                            <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
