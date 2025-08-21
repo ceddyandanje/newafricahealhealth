@@ -14,6 +14,8 @@ import {
     reauthenticateWithCredential,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     linkWithCredential,
     fetchSignInMethodsForEmail,
     type User as FirebaseUser
@@ -159,7 +161,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (newUser) {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
-          addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} (${newUser.email}) has been created.`});
+          addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
           // onAuthStateChanged will handle checks and redirects.
           return true;
         } else {
@@ -177,101 +179,71 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return false;
     }
   };
+  
+  const processGoogleSignIn = async (googleUser: FirebaseUser) => {
+    const userDocRef = doc(db, "users", googleUser.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+        toast({ title: "Login Successful", description: `Welcome back, ${googleUser.displayName}!` });
+        const userData = { id: userDoc.id, ...userDoc.data() } as User;
+        setUser(userData);
+        handleLoginChecks(userData);
+    } else {
+        const newUser = await createUserInFirestore({
+            name: googleUser.displayName || 'New User',
+            email: googleUser.email!,
+            avatarUrl: googleUser.photoURL
+        }, googleUser.uid);
+        
+        if (newUser) {
+            toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
+            addLog("INFO", `New user signed up via Google: ${newUser.name} (${newUser.email}).`);
+            addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User (Google)', description: `An account for ${newUser.name} (${newUser.email}) has been created.`});
+            setUser(newUser);
+            handleLoginChecks(newUser);
+        } else {
+            throw new Error("Could not create user document after Google Sign-In.");
+        }
+    }
+    return true;
+  };
+  
+  // Handle redirect result on page load
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+        setIsLoading(true);
+        try {
+            const result = await getRedirectResult(auth);
+            if (result) {
+                await processGoogleSignIn(result.user);
+            }
+        } catch (error: any) {
+            console.error("Google Sign-In Redirect Error:", error);
+            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+               toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
+            }
+        }
+        setIsLoading(false);
+    }
+    handleRedirectResult();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const signInWithGoogle = async (): Promise<boolean> => {
     const provider = new GoogleAuthProvider();
     try {
-        const result = await signInWithPopup(auth, provider);
-        const googleUser = result.user;
-        
-        const userDocRef = doc(db, "users", googleUser.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-            // This is a returning user who signed up with Google before.
-            toast({ title: "Login Successful", description: `Welcome back, ${googleUser.displayName}!` });
-            const userData = { id: userDoc.id, ...userDoc.data() } as User;
-            setUser(userData); // Manually set user state to trigger effects
-            handleLoginChecks(userData);
-        } else {
-            // This is a new user signing up with Google for the first time.
-            const newUser = await createUserInFirestore({
-                name: googleUser.displayName || 'New User',
-                email: googleUser.email!,
-                avatarUrl: googleUser.photoURL
-            }, googleUser.uid);
-            
-            if (newUser) {
-                toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
-                addLog("INFO", `New user signed up via Google: ${newUser.name} (${newUser.email}).`);
-                addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User (Google)', description: `An account for ${newUser.name} (${newUser.email}) has been created.`});
-                setUser(newUser); // Manually set user state
-                handleLoginChecks(newUser);
-            } else {
-                throw new Error("Could not create user document after Google Sign-In.");
-            }
-        }
-        return true;
+      await signInWithRedirect(auth, provider);
+      // The browser will redirect. The result is handled by the `getRedirectResult` useEffect.
+      return true; // The function will likely not reach here due to redirection
     } catch (error: any) {
-        if (error.code === 'auth/account-exists-with-different-credential') {
-            const email = error.customData.email;
-            if (!email) {
-                toast({ variant: 'destructive', title: "Link Failed", description: "Could not retrieve email from Google. Please try again."});
-                return false;
-            }
-
-            // Prompt user for password to link accounts
-            const password = prompt("It looks like you already have an account with this email. Please enter your password to link your Google account.");
-            if (!password) {
-                toast({ variant: 'destructive', title: "Link Canceled", description: "Account linking was canceled."});
-                return false;
-            }
-
-            try {
-                // Sign in with email and password to get the user credential
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                
-                // Get the Google credential from the original error
-                const googleCredential = GoogleAuthProvider.credentialFromError(error);
-                if (!googleCredential) throw new Error("Could not get Google credential from error.");
-
-                // Link the Google credential to the now-signed-in user
-                await linkWithCredential(userCredential.user, googleCredential);
-                
-                // Update Firestore document with Google's name/photo if they are better
-                 const googleData = {
-                    name: error.customData?._tokenResponse?.displayName || userCredential.user.displayName,
-                    avatarUrl: error.customData?._tokenResponse?.photoUrl || userCredential.user.photoURL,
-                 };
-                await updateUserInFirestore(userCredential.user.uid, googleData);
-
-                // Fetch the fully updated user data to ensure state is correct
-                const updatedUserDoc = await getDoc(doc(db, "users", userCredential.user.uid));
-                if (updatedUserDoc.exists()) {
-                    const updatedUserData = { id: updatedUserDoc.id, ...updatedUserDoc.data() } as User;
-                    setUser(updatedUserData);
-                    toast({ title: "Accounts Linked!", description: "Your Google account has been successfully linked." });
-                    handleLoginChecks(updatedUserData); // This will handle the redirect
-                    return true;
-                } else {
-                    throw new Error("Could not retrieve user data after linking.");
-                }
-
-            } catch (linkError: any) {
-                let description = "Could not link accounts.";
-                if (linkError.code === 'auth/wrong-password' || linkError.code === 'auth/invalid-credential') {
-                    description = "The password you entered is incorrect.";
-                }
-                toast({ variant: 'destructive', title: "Link Failed", description });
-                return false;
-            }
-        } else {
-            console.error("Google Sign-In Error:", error);
-            toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
-            return false;
-        }
+        console.error("Google Sign-In Start Error:", error);
+        toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not start the Google sign-in process. Please check your connection and try again." });
+        return false;
     }
   };
+
 
   const logout = useCallback(async () => {
     await signOut(auth);
