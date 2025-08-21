@@ -47,18 +47,10 @@ const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementTy
 );
 
 export default function EmergencyDashboardPage() {
-    const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
-
-    const formatTimeAgo = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-        if (seconds < 60) return `${seconds}s ago`;
-        return `${Math.floor(seconds / 60)}m ago`;
-    }
+    const [isAlertsDialogOpen, setIsAlertsDialogOpen] = useState(false);
 
     return (
-        <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedAlert(null)}>
+        <Dialog open={isAlertsDialogOpen} onOpenChange={setIsAlertsDialogOpen}>
             <div className="p-6 h-full flex flex-col gap-6">
                 <header>
                     <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -89,17 +81,8 @@ export default function EmergencyDashboardPage() {
                                             <CardTitle>Incoming Alerts</CardTitle>
                                         </CardHeader>
                                         <CardContent className="p-0 flex-grow overflow-y-auto">
-                                            <div className="space-y-3 p-4">
-                                                {incomingAlerts.map(alert => (
-                                                     <div key={alert.id} className="border p-3 rounded-lg bg-background">
-                                                        <div className="flex justify-between items-start">
-                                                            <Badge variant="destructive">{alert.serviceType}</Badge>
-                                                            <span className="text-xs text-muted-foreground">{formatTimeAgo(alert.createdAt)}</span>
-                                                        </div>
-                                                        <p className="text-sm my-2 flex items-center gap-2"><MapPin className="h-4 w-4"/> Lat: {alert.location.latitude}, Lon: {alert.location.longitude}</p>
-                                                        <p className="text-sm text-muted-foreground flex items-center gap-2"><User className="h-4 w-4"/> For: {alert.requestor}</p>
-                                                    </div>
-                                                ))}
+                                            <div className="p-4 text-center text-muted-foreground">
+                                                <p>Click to open the AI-powered dispatch center.</p>
                                             </div>
                                         </CardContent>
                                     </Card>
