@@ -119,7 +119,7 @@ export default function AdminDashboardPage() {
         );
         
         return (
-            <Card key={item.title} onClick={() => item.clickable && handleCardClick(item.title)} className={item.clickable ? "cursor-pointer hover:shadow-lg transition-shadow h-full" : "h-full"}>
+            <Card key={item.title} onClick={() => item.clickable && handleCardClick(item.title)} className={cn("cursor-pointer hover:shadow-lg transition-shadow h-full", !item.clickable && "pointer-events-none")}>
                {cardContent}
             </Card>
         );
@@ -185,8 +185,14 @@ export default function AdminDashboardPage() {
                             <p className="text-sm text-muted-foreground line-through">$12,458</p>
                         </div>
                         {!isClient ? <Skeleton className="h-[250px] w-full" /> :
-                        <div key={chartType}>
-                            <ChartContainer config={{}} className="h-[250px] w-full">
+                        <div key={chartType} className="relative">
+                             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4 text-center rounded-lg">
+                                <h3 className="font-bold text-lg mb-2 text-foreground">Coming Soon: Live Revenue Tracking</h3>
+                                <p className="text-sm text-muted-foreground max-w-sm">
+                                    This chart will display live data from your orders, including daily income vs. expenses, to give you a clear view of your financial performance.
+                                </p>
+                            </div>
+                            <ChartContainer config={{}} className="h-[250px] w-full blur-sm">
                                {chartType === 'bar' ? (
                                     <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -217,7 +223,7 @@ export default function AdminDashboardPage() {
                                     </LineChartComponent>
                                 )}
                             </ChartContainer>
-                            <div className="flex justify-center items-center gap-6 mt-4 text-sm">
+                            <div className="flex justify-center items-center gap-6 mt-4 text-sm blur-sm">
                                 <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Income</div>
                                 <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary-foreground))'}}></span>Expense</div>
                             </div>
