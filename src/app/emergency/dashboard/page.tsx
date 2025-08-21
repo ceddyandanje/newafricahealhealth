@@ -62,14 +62,14 @@ export default function EmergencyDashboardPage() {
             </div>
 
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
-                <div className="lg:col-span-2 flex flex-col h-full">
+                <div className="lg:col-span-2 flex flex-col h-full min-h-[500px]">
                     <Card className="flex-grow flex flex-col">
                         <CardHeader>
                             <CardTitle>Live Incident Map</CardTitle>
                         </CardHeader>
                         <CardContent className="flex-grow relative p-0">
                             <iframe
-                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8167982.724280536!2d33.56150249609376!3d0.023559!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182780aa73dcf839%3A0x8634440b87c6f09!2sKenya!5e0!3m2!1sen!2sus!4v1754555852465"
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4081395.0993356823!2d35.24233191564264!3d-0.02279185433246275!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182780aa73dcf839%3A0x8634440b87c6f09!2sKenya!5e0!3m2!1sen!2sus!4v1754589984922"
                                 width="100%"
                                 height="100%"
                                 style={{ border: 0 }}
