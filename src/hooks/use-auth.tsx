@@ -103,8 +103,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (userDoc.exists()) {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
-                handleLoginChecks(userData);
+                // Don't run login checks here if a redirect is being processed.
+                // The redirect handler will call it.
+                if (!auth.currentUser?.isAnonymous) { // A bit of a hack to see if we're in a redirect flow
+                    handleLoginChecks(userData);
+                }
             } else {
+                 // This case can happen if a user is created in Auth but not Firestore
                  setUser(null);
             }
         } else {
@@ -118,6 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => unsubscribe();
   }, [handleLoginChecks]);
+
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     try {
@@ -181,6 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
   
   const processGoogleSignIn = async (googleUser: FirebaseUser) => {
+    setIsLoading(true);
     const userDocRef = doc(db, "users", googleUser.uid);
     const userDoc = await getDoc(userDocRef);
 
@@ -206,16 +213,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             throw new Error("Could not create user document after Google Sign-In.");
         }
     }
+    setIsLoading(false);
     return true;
   };
   
   // Handle redirect result on page load
   useEffect(() => {
     const handleRedirectResult = async () => {
-        setIsLoading(true);
         try {
             const result = await getRedirectResult(auth);
             if (result) {
+                setIsLoading(true); // Set loading true only if there is a result to process
                 await processGoogleSignIn(result.user);
             }
         } catch (error: any) {
@@ -223,8 +231,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
             }
+            setIsLoading(false);
         }
-        setIsLoading(false);
     }
     handleRedirectResult();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -236,7 +244,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await signInWithRedirect(auth, provider);
       // The browser will redirect. The result is handled by the `getRedirectResult` useEffect.
-      return true; // The function will likely not reach here due to redirection
+      return true; // This function will likely not reach here due to redirection
     } catch (error: any) {
         console.error("Google Sign-In Start Error:", error);
         toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not start the Google sign-in process. Please check your connection and try again." });
