@@ -8,11 +8,15 @@ import { Siren, Ambulance, Plane, Clock, MapPin, User, Check, X, Send } from "lu
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import AlertDetailsDialog from '@/components/emergency/alert-details-dialog';
+import { type EmergencyRequest } from '@/lib/types';
+
 
 // Mock Data - In a real app, this would come from a real-time Firestore stream
-const incomingAlerts = [
-    { id: 'INC-001', type: 'Ground Ambulance', location: 'Lat: -1.28, Lon: 36.82', for: 'Someone Else', time: '2m ago' },
-    { id: 'INC-002', type: 'First Aid', location: 'Lat: -1.31, Lon: 36.80', for: 'Me', time: '5m ago' },
+const incomingAlerts: EmergencyRequest[] = [
+    { id: 'INC-001', serviceType: 'Ground Ambulance', location: { latitude: -1.28, longitude: 36.82 }, requestor: 'Someone Else', createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(), status: 'Pending' },
+    { id: 'INC-002', serviceType: 'First Aid', location: { latitude: -1.31, longitude: 36.80 }, requestor: 'Me', createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(), status: 'Pending' },
 ];
 
 const unitStatuses = [
@@ -31,7 +35,7 @@ const statusVariant = {
 } as const;
 
 const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementType, value: string | number, label: string, variant: 'default' | 'destructive' }) => (
-    <Card className={variant === 'destructive' ? 'bg-destructive/10' : 'bg-background'}>
+    <Card className={cn('bg-background', variant === 'destructive' && 'bg-destructive/10')}>
         <CardContent className="p-4 flex items-center gap-4">
             <Icon className={cn("h-8 w-8", variant === 'destructive' ? 'text-destructive' : 'text-primary')} />
             <div>
@@ -43,103 +47,118 @@ const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementTy
 );
 
 export default function EmergencyDashboardPage() {
+    const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
+
+    const formatTimeAgo = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+        if (seconds < 60) return `${seconds}s ago`;
+        return `${Math.floor(seconds / 60)}m ago`;
+    }
+
     return (
-        <div className="p-6 h-full flex flex-col gap-6">
-            <header>
-                <h1 className="text-3xl font-bold flex items-center gap-2">
-                    <Siren className="w-8 h-8 text-destructive" />
-                    Emergency Command Center
-                </h1>
-                <p className="text-muted-foreground">Live overview of incidents and unit availability.</p>
-            </header>
+        <Dialog onOpenChange={(isOpen) => !isOpen && setSelectedAlert(null)}>
+            <div className="p-6 h-full flex flex-col gap-6">
+                <header>
+                    <h1 className="text-3xl font-bold flex items-center gap-2">
+                        <Siren className="w-8 h-8 text-destructive" />
+                        Emergency Command Center
+                    </h1>
+                    <p className="text-muted-foreground">Live overview of incidents and unit availability.</p>
+                </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <StatCard icon={Siren} value={3} label="Active Incidents" variant="destructive" />
-                <StatCard icon={Ambulance} value={1} label="Available Ground Units" variant="default" />
-                <StatCard icon={Plane} value={1} label="Available Air Units" variant="default" />
-                <StatCard icon={Clock} value="7m 32s" label="Avg. Response Time" variant="default" />
-            </div>
-
-            <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="md:col-span-1 h-[55vh] flex flex-col">
-                     <Tabs defaultValue="alerts" className="flex-grow flex flex-col h-full">
-                        <TabsList className="grid w-full grid-cols-2">
-                            <TabsTrigger value="alerts">Incoming Alerts ({incomingAlerts.length})</TabsTrigger>
-                            <TabsTrigger value="units">Unit Status ({unitStatuses.length})</TabsTrigger>
-                        </TabsList>
-                        <TabsContent value="alerts" className="flex-grow overflow-hidden mt-2">
-                            <Card className="h-full flex flex-col">
-                                <CardHeader className="p-4">
-                                    <CardTitle>Incoming Alerts</CardTitle>
-                                </CardHeader>
-                                <CardContent className="p-0 flex-grow overflow-y-auto">
-                                    <div className="space-y-3 p-4">
-                                        {incomingAlerts.map(alert => (
-                                            <div key={alert.id} className="border p-3 rounded-lg bg-background">
-                                                <div className="flex justify-between items-start">
-                                                    <Badge variant="destructive">{alert.type}</Badge>
-                                                    <span className="text-xs text-muted-foreground">{alert.time}</span>
-                                                </div>
-                                                <p className="text-sm my-2 flex items-center gap-2"><MapPin className="h-4 w-4"/> {alert.location}</p>
-                                                <p className="text-sm text-muted-foreground flex items-center gap-2"><User className="h-4 w-4"/> For: {alert.for}</p>
-                                                <div className="flex gap-2 mt-3">
-                                                    <Button size="sm" variant="outline" className="flex-1"><Check className="h-4 w-4 mr-1"/> Acknowledge</Button>
-                                                    <Button size="sm" className="flex-1"><Send className="h-4 w-4 mr-1"/> Dispatch Unit</Button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                        <TabsContent value="units" className="flex-grow overflow-hidden mt-2">
-                            <Card className="h-full flex flex-col">
-                                 <CardHeader className="p-4">
-                                    <CardTitle>Unit Status</CardTitle>
-                                 </CardHeader>
-                                <CardContent className="p-0 flex-grow overflow-y-auto">
-                                    <div className="space-y-0">
-                                        {unitStatuses.map(unit => (
-                                            <div key={unit.id} className="flex items-center justify-between p-3 border-b last:border-b-0">
-                                                <div className="flex items-center gap-3">
-                                                    {unit.type === 'Ground' ? <Ambulance className="h-5 w-5"/> : <Plane className="h-5 w-5"/>}
-                                                    <p className="font-semibold">{unit.id}</p>
-                                                </div>
-                                                <Badge variant={statusVariant[unit.status as keyof typeof statusVariant]}>{unit.status}</Badge>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
-                    </Tabs>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <StatCard icon={Siren} value={3} label="Active Incidents" variant="destructive" />
+                    <StatCard icon={Ambulance} value={1} label="Available Ground Units" variant="default" />
+                    <StatCard icon={Plane} value={1} label="Available Air Units" variant="default" />
+                    <StatCard icon={Clock} value="7m 32s" label="Avg. Response Time" variant="default" />
                 </div>
 
-                <Card className="md:col-span-2 h-[55vh] flex flex-col">
-                    <CardHeader>
-                        <CardTitle>Live Incident Map</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex-grow relative p-0">
-                        <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4081395.0993356823!2d35.24233191564264!3d-0.02279185433246275!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182780aa73dcf839%3A0x8634440b87c6f09!2sKenya!5e0!3m2!1sen!2sus!4v1754589984922"
-                            width="100%"
-                            height="100%"
-                            style={{ border: 0 }}
-                            allowFullScreen={false}
-                            loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
-                            className="rounded-b-lg"
-                        ></iframe>
-                        {/* Placeholder for map markers */}
-                        <div className="absolute top-1/4 left-1/3">
-                            <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
-                        </div>
-                            <div className="absolute bottom-1/2 right-1/4">
-                            <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="md:col-span-1 h-[55vh] flex flex-col">
+                         <Tabs defaultValue="alerts" className="flex-grow flex flex-col h-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="alerts">Incoming Alerts ({incomingAlerts.length})</TabsTrigger>
+                                <TabsTrigger value="units">Unit Status ({unitStatuses.length})</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="alerts" className="flex-grow overflow-hidden mt-2">
+                                <Card className="h-full flex flex-col">
+                                    <CardHeader className="p-4">
+                                        <CardTitle>Incoming Alerts</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-0 flex-grow overflow-y-auto">
+                                        <div className="space-y-3 p-4">
+                                            {incomingAlerts.map(alert => (
+                                                <DialogTrigger key={alert.id} asChild onClick={() => setSelectedAlert(alert)}>
+                                                    <div className="border p-3 rounded-lg bg-background cursor-pointer hover:bg-muted/50 transition-colors">
+                                                        <div className="flex justify-between items-start">
+                                                            <Badge variant="destructive">{alert.serviceType}</Badge>
+                                                            <span className="text-xs text-muted-foreground">{formatTimeAgo(alert.createdAt)}</span>
+                                                        </div>
+                                                        <p className="text-sm my-2 flex items-center gap-2"><MapPin className="h-4 w-4"/> Lat: {alert.location.latitude}, Lon: {alert.location.longitude}</p>
+                                                        <p className="text-sm text-muted-foreground flex items-center gap-2"><User className="h-4 w-4"/> For: {alert.requestor}</p>
+                                                        <div className="flex gap-2 mt-3">
+                                                            <Button size="sm" variant="outline" className="w-full text-xs h-8"><Check className="h-4 w-4 mr-1"/> Acknowledge</Button>
+                                                            <Button size="sm" className="w-full text-xs h-8"><Send className="h-4 w-4 mr-1"/> Dispatch</Button>
+                                                        </div>
+                                                    </div>
+                                                </DialogTrigger>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                            <TabsContent value="units" className="flex-grow overflow-hidden mt-2">
+                                <Card className="h-full flex flex-col">
+                                     <CardHeader className="p-4">
+                                        <CardTitle>Unit Status</CardTitle>
+                                     </CardHeader>
+                                    <CardContent className="p-0 flex-grow overflow-y-auto">
+                                        <div className="space-y-0">
+                                            {unitStatuses.map(unit => (
+                                                <div key={unit.id} className="flex items-center justify-between p-3 border-b last:border-b-0">
+                                                    <div className="flex items-center gap-3">
+                                                        {unit.type === 'Ground' ? <Ambulance className="h-5 w-5"/> : <Plane className="h-5 w-5"/>}
+                                                        <p className="font-semibold">{unit.id}</p>
+                                                    </div>
+                                                    <Badge variant={statusVariant[unit.status as keyof typeof statusVariant]}>{unit.status}</Badge>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+
+                    <Card className="md:col-span-2 h-[55vh] flex flex-col">
+                        <CardHeader>
+                            <CardTitle>Live Incident Map</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow relative p-0">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4081395.0993356823!2d35.24233191564264!3d-0.02279185433246275!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182780aa73dcf839%3A0x8634440b87c6f09!2sKenya!5e0!3m2!1sen!2sus!4v1754589984922"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                allowFullScreen={false}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                className="rounded-b-lg"
+                            ></iframe>
+                            {/* Placeholder for map markers */}
+                            <div className="absolute top-1/4 left-1/3">
+                                <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
+                            </div>
+                                <div className="absolute bottom-1/2 right-1/4">
+                                <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
-        </div>
+            {selectedAlert && <AlertDetailsDialog alert={selectedAlert} />}
+        </Dialog>
     );
 }
