@@ -82,8 +82,14 @@ export default function EmergencyDashboardPage() {
                     <div className="md:col-span-1 h-[55vh] flex flex-col">
                          <Tabs defaultValue="alerts" className="flex-grow flex flex-col h-full">
                             <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="alerts">Incoming Alerts ({incomingAlerts.length})</TabsTrigger>
-                                <TabsTrigger value="units">Unit Status ({unitStatuses.length})</TabsTrigger>
+                                <TabsTrigger value="alerts" className="flex items-center gap-2">
+                                    Incoming Alerts 
+                                    <Badge className="bg-destructive/80 text-white">{incomingAlerts.length}</Badge>
+                                </TabsTrigger>
+                                <TabsTrigger value="units" className="flex items-center gap-2">
+                                    Unit Status
+                                    <Badge variant="secondary">{unitStatuses.length}</Badge>
+                                </TabsTrigger>
                             </TabsList>
                             <TabsContent value="alerts" className="flex-grow overflow-hidden mt-2">
                                 <DialogTrigger asChild>
