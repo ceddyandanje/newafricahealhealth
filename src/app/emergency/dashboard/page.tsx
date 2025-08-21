@@ -45,7 +45,7 @@ const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementTy
 
 export default function EmergencyDashboardPage() {
     return (
-        <div className="p-6 h-screen flex flex-col gap-6">
+        <div className="p-6 h-full flex flex-col gap-6">
             <header>
                 <h1 className="text-3xl font-bold flex items-center gap-2">
                     <Siren className="w-8 h-8 text-destructive" />
@@ -62,8 +62,8 @@ export default function EmergencyDashboardPage() {
             </div>
 
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
-                <div className="lg:col-span-2 flex flex-col h-full min-h-[500px]">
-                    <Card className="flex-grow flex flex-col">
+                <div className="lg:col-span-2 w-full aspect-square">
+                    <Card className="h-full flex flex-col">
                         <CardHeader>
                             <CardTitle>Live Incident Map</CardTitle>
                         </CardHeader>
