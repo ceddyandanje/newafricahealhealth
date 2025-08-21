@@ -36,42 +36,44 @@ export default function DoctorsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Doctor</TableHead>
-                <TableHead>Specialty</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {doctors.map((doctor) => (
-                <TableRow key={doctor.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={doctor.avatar} alt={doctor.name} />
-                        <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold">{doctor.name}</p>
-                        <p className="text-sm text-muted-foreground">{doctor.email}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{doctor.specialty}</TableCell>
-                  <TableCell>
-                    <Badge variant={doctor.status === 'Active' ? 'default' : 'secondary'}>{doctor.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Doctor</TableHead>
+                    <TableHead>Specialty</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {doctors.map((doctor) => (
+                    <TableRow key={doctor.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={doctor.avatar} alt={doctor.name} />
+                            <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold whitespace-nowrap">{doctor.name}</p>
+                            <p className="text-sm text-muted-foreground">{doctor.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>{doctor.specialty}</TableCell>
+                      <TableCell>
+                        <Badge variant={doctor.status === 'Active' ? 'default' : 'secondary'}>{doctor.status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
         </CardContent>
       </Card>
     </div>

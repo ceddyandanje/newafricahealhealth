@@ -38,45 +38,47 @@ export default function PatientsPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Patient</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Last Visit</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {patients.map((patient) => (
-                <TableRow key={patient.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={patient.avatar} alt={patient.name} />
-                        <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold">{patient.name}</p>
-                        <p className="text-sm text-muted-foreground">{patient.id}</p>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                        <p>{patient.email}</p>
-                        <p className="text-sm text-muted-foreground">{patient.phone}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{patient.lastVisit}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                    <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Patient</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Last Visit</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {patients.map((patient) => (
+                    <TableRow key={patient.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={patient.avatar} alt={patient.name} />
+                            <AvatarFallback>{patient.name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold whitespace-nowrap">{patient.name}</p>
+                            <p className="text-sm text-muted-foreground">{patient.id}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                            <p className="whitespace-nowrap">{patient.email}</p>
+                            <p className="text-sm text-muted-foreground whitespace-nowrap">{patient.phone}</p>
+                        </div>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">{patient.lastVisit}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+          </div>
         </CardContent>
       </Card>
     </div>

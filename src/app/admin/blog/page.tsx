@@ -152,29 +152,31 @@ export default function BlogAdminPage() {
                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
                     ) : (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Title</TableHead>
-                                    <TableHead>Category</TableHead>
-                                    <TableHead>Date</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {posts.map((post) => (
-                                    <TableRow key={post.id}>
-                                        <TableCell className="font-semibold">{post.title}</TableCell>
-                                        <TableCell><Badge variant="secondary">{post.category}</Badge></TableCell>
-                                        <TableCell>{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="ghost" size="icon" onClick={() => { setEditingPost(post); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
-                                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingPost(post); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
-                                        </TableCell>
+                        <div className="overflow-x-auto">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Title</TableHead>
+                                        <TableHead>Category</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
+                                </TableHeader>
+                                <TableBody>
+                                    {posts.map((post) => (
+                                        <TableRow key={post.id}>
+                                            <TableCell className="font-semibold whitespace-nowrap">{post.title}</TableCell>
+                                            <TableCell><Badge variant="secondary">{post.category}</Badge></TableCell>
+                                            <TableCell className="whitespace-nowrap">{new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="ghost" size="icon" onClick={() => { setEditingPost(post); setIsFormOpen(true); }}><Edit className="h-4 w-4" /></Button>
+                                                <Button variant="ghost" size="icon" className="text-destructive" onClick={() => { setDeletingPost(post); setIsDeleteConfirmOpen(true);}}><Trash2 className="h-4 w-4" /></Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </div>
                     )}
                 </CardContent>
             </Card>
