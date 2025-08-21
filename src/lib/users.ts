@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { User, MedicalProfile } from './types';
 import type { SignUpCredentials } from './types';
 import { db } from './firebase';
-import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
 
 // Custom hook to manage users state. It fetches from Firestore on mount.
 export const useUsers = () => {
@@ -14,13 +14,20 @@ export const useUsers = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const fetchUsers = async () => {
-            setIsLoading(true);
-            const userList = await getAllUsersFromFirestore();
+        const usersCollectionRef = collection(db, 'users');
+        const q = query(usersCollectionRef, orderBy('createdAt', 'desc'));
+
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const userList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
             setUsers(userList);
             setIsLoading(false);
-        };
-        fetchUsers();
+        }, (error) => {
+            console.error("Error fetching users from Firestore:", error);
+            setIsLoading(false);
+        });
+
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
     }, []); // Empty dependency array ensures this runs only once on mount
 
     return { users, setUsers, isLoading };
