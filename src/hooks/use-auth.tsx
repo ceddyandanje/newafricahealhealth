@@ -13,14 +13,11 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential,
     GoogleAuthProvider,
-    signInWithPopup,
     signInWithRedirect,
     getRedirectResult,
-    linkWithCredential,
-    fetchSignInMethodsForEmail,
     type User as FirebaseUser
 } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 import { type User, type LoginCredentials, type SignUpCredentials } from "@/lib/types";
 import { useToast } from "./use-toast";
@@ -94,38 +91,62 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [handleRedirect]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-        setIsLoading(true);
-        if (fbUser) {
-            setFirebaseUser(fbUser);
-            const userDocRef = doc(db, "users", fbUser.uid);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-                const userData = { id: userDoc.id, ...userDoc.data() } as User;
-                setUser(userData);
-                // Don't run login checks here if a redirect is being processed.
-                // The redirect handler will call it.
-                if (!auth.currentUser?.isAnonymous) { // A bit of a hack to see if we're in a redirect flow
-                    handleLoginChecks(userData);
-                }
-            } else {
-                 // This case can happen if a user is created in Auth but not Firestore
-                 setUser(null);
-            }
+    const processUser = async (fbUser: FirebaseUser | null) => {
+      if (fbUser) {
+        setFirebaseUser(fbUser);
+        const userDocRef = doc(db, "users", fbUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          const userData = { id: userDoc.id, ...userDoc.data() } as User;
+          setUser(userData);
+          handleLoginChecks(userData);
         } else {
-            setFirebaseUser(null);
-            setUser(null);
-            setShowOnboarding(false);
-            setShowTerms(false);
+           // This case can happen if a user is created in Auth but not Firestore
+           // Let's create the user doc now.
+           const newUser = await createUserInFirestore({
+                name: fbUser.displayName || 'New User',
+                email: fbUser.email!,
+                avatarUrl: fbUser.photoURL
+            }, fbUser.uid);
+            if (newUser) {
+                setUser(newUser);
+                handleLoginChecks(newUser);
+            } else {
+                setUser(null);
+            }
         }
+      } else {
+        setFirebaseUser(null);
+        setUser(null);
+        setShowOnboarding(false);
+        setShowTerms(false);
+      }
+      setIsLoading(false);
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, processUser);
+    
+    // Check for redirect result on initial load
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result) {
+          // If there's a redirect result, it means a sign-in just happened.
+          // onAuthStateChanged will handle the user processing.
+          toast({ title: "Signing In...", description: "Finalizing your Google sign-in." });
+        }
+      })
+      .catch((error) => {
+        console.error("Google Sign-In Redirect Error:", error);
+        toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
         setIsLoading(false);
-    });
+      });
 
     return () => unsubscribe();
-  }, [handleLoginChecks]);
+  }, [handleLoginChecks, toast]);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
+    setIsLoading(true);
     try {
         await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
         // onAuthStateChanged will handle the rest
@@ -151,11 +172,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 description = error.message;
         }
         toast({ variant: 'destructive', title: "Login Failed", description });
+        setIsLoading(false);
         return false;
     }
   };
 
   const signup = async (credentials: SignUpCredentials): Promise<boolean> => {
+    setIsLoading(true);
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password!);
         const fbUser = userCredential.user;
@@ -182,72 +205,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             description = error.message;
         }
          toast({ variant: 'destructive', title: "Signup Failed", description });
+         setIsLoading(false);
         return false;
     }
   };
   
-  const processGoogleSignIn = async (googleUser: FirebaseUser) => {
-    setIsLoading(true);
-    const userDocRef = doc(db, "users", googleUser.uid);
-    const userDoc = await getDoc(userDocRef);
-
-    if (userDoc.exists()) {
-        toast({ title: "Login Successful", description: `Welcome back, ${googleUser.displayName}!` });
-        const userData = { id: userDoc.id, ...userDoc.data() } as User;
-        setUser(userData);
-        handleLoginChecks(userData);
-    } else {
-        const newUser = await createUserInFirestore({
-            name: googleUser.displayName || 'New User',
-            email: googleUser.email!,
-            avatarUrl: googleUser.photoURL
-        }, googleUser.uid);
-        
-        if (newUser) {
-            toast({ title: "Signup Successful", description: `Welcome, ${newUser.name}!` });
-            addLog("INFO", `New user signed up via Google: ${newUser.name} (${newUser.email}).`);
-            addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User (Google)', description: `An account for ${newUser.name} (${newUser.email}) has been created.`});
-            setUser(newUser);
-            handleLoginChecks(newUser);
-        } else {
-            throw new Error("Could not create user document after Google Sign-In.");
-        }
-    }
-    setIsLoading(false);
-    return true;
-  };
-  
-  // Handle redirect result on page load
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-        try {
-            const result = await getRedirectResult(auth);
-            if (result) {
-                setIsLoading(true); // Set loading true only if there is a result to process
-                await processGoogleSignIn(result.user);
-            }
-        } catch (error: any) {
-            console.error("Google Sign-In Redirect Error:", error);
-            if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-               toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
-            }
-            setIsLoading(false);
-        }
-    }
-    handleRedirectResult();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-
   const signInWithGoogle = async (): Promise<boolean> => {
     const provider = new GoogleAuthProvider();
+    setIsLoading(true); // Set loading state immediately before redirect
     try {
       await signInWithRedirect(auth, provider);
-      // The browser will redirect. The result is handled by the `getRedirectResult` useEffect.
-      return true; // This function will likely not reach here due to redirection
+      // The browser will redirect. The result is handled by the `onAuthStateChanged` and `getRedirectResult` useEffect.
+      return true;
     } catch (error: any) {
         console.error("Google Sign-In Start Error:", error);
         toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not start the Google sign-in process. Please check your connection and try again." });
+        setIsLoading(false);
         return false;
     }
   };
