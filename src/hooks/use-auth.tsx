@@ -184,12 +184,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userDocRef = doc(db, "users", fbUser.uid);
         const userDoc = await getDoc(userDocRef);
 
+        let finalUserData: User;
+
         if (userDoc.exists()) {
             // Existing user
-            const existingUserData = { id: userDoc.id, ...userDoc.data() } as User;
-            setUser(existingUserData);
-            setFirebaseUser(fbUser);
-            handleLoginChecks(existingUserData);
+            finalUserData = { id: userDoc.id, ...userDoc.data() } as User;
         } else {
             // New user via Google
             const newUser = await createUserInFirestore({
@@ -198,15 +197,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 avatarUrl: fbUser.photoURL
             }, fbUser.uid);
             
-            if (newUser) {
-                setUser(newUser);
-                setFirebaseUser(fbUser);
-                handleLoginChecks(newUser);
-            } else {
+            if (!newUser) {
                 throw new Error("Could not create user document for Google Sign-In.");
             }
+            finalUserData = newUser;
         }
+        
+        // This centralized block ensures user state is set before any checks are run.
+        setUser(finalUserData);
+        setFirebaseUser(fbUser);
+        handleLoginChecks(finalUserData);
+        // Loading state is set to false by the main onAuthStateChanged listener
+        
         return true;
+
     } catch (error: any) {
         let description = "An unknown error occurred during Google Sign-In.";
         if (error.code === 'auth/popup-closed-by-user') {
