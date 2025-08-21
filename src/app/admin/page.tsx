@@ -139,10 +139,16 @@ export default function AdminDashboardPage() {
                         <CardTitle>Order Status Funnel</CardTitle>
                         <CardDescription>A real-time overview of the order fulfillment process.</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex-grow flex flex-col items-center justify-center">
+                    <CardContent className="flex-grow flex flex-col items-center justify-center relative">
                         {!isClient ? <Skeleton className="w-[200px] h-[200px] rounded-full" /> :
                         <>
-                            <ChartContainer config={{}} className="h-[200px] w-full">
+                            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4 text-center rounded-lg">
+                                <h3 className="font-bold text-lg mb-2 text-foreground">Live Order Funnel</h3>
+                                <p className="text-sm text-muted-foreground max-w-sm">
+                                    This chart will provide a live breakdown of all orders by status (e.g., Pending, Processing, Shipped) to give you an at-a-glance view of your operations.
+                                </p>
+                            </div>
+                            <ChartContainer config={{}} className="h-[200px] w-full blur-sm">
                                 <PieChartComponent>
                                     <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                                     <Pie data={orderStatusDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
@@ -152,7 +158,7 @@ export default function AdminDashboardPage() {
                                     </Pie>
                                 </PieChartComponent>
                             </ChartContainer>
-                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm">
+                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm blur-sm">
                                 {orderStatusDistribution.map(item => (
                                      <div key={item.name} className="flex items-center gap-2">
                                         <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
