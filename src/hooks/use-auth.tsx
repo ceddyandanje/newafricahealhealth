@@ -13,8 +13,7 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential,
     GoogleAuthProvider,
-    signInWithRedirect,
-    getRedirectResult,
+    signInWithPopup,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -69,7 +68,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
     const destination = roleMap[loggedInUser.role];
 
-    // If there's a destination and we are not already there, redirect.
     if (destination && !pathname.startsWith(destination)) {
       router.push(destination);
     }
@@ -88,63 +86,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [handleRedirect]);
 
   useEffect(() => {
-    const processUser = async (fbUser: FirebaseUser) => {
-        setFirebaseUser(fbUser);
-        const userDocRef = doc(db, "users", fbUser.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-            const userData = { id: userDoc.id, ...userDoc.data() } as User;
-            setUser(userData);
-            handleLoginChecks(userData);
-        } else {
-            const newUser = await createUserInFirestore({
-                name: fbUser.displayName || 'New User',
-                email: fbUser.email!,
-                avatarUrl: fbUser.photoURL
-            }, fbUser.uid);
-
-            if (newUser) {
-                setUser(newUser);
-                handleLoginChecks(newUser);
-            } else {
-                // Failed to create user doc, log out to be safe
-                await signOut(auth);
-            }
-        }
-        setIsLoading(false);
-    };
-
-    // This effect runs once on mount to check for redirect results and set up the listener.
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
         if (fbUser) {
-            // User is signed in. `processUser` will handle fetching/creating the doc and redirecting.
-            await processUser(fbUser);
-        } else {
-            // No user is signed in.
-            // Let's check if a redirect just happened.
-            try {
-                const result = await getRedirectResult(auth);
-                if (result) {
-                    // This means a sign-in just completed.
-                    // The onAuthStateChanged listener above will be re-triggered with the new user.
-                    // We don't need to do anything else here.
-                } else {
-                    // No user and no redirect result, so they are truly logged out.
-                    setFirebaseUser(null);
-                    setUser(null);
-                    setIsLoading(false);
-                }
-            } catch (error) {
-                console.error("Error getting redirect result:", error);
-                toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not process Google Sign-In. Please try again." });
-                setIsLoading(false);
+            setFirebaseUser(fbUser);
+            const userDocRef = doc(db, "users", fbUser.uid);
+            const userDoc = await getDoc(userDocRef);
+
+            if (userDoc.exists()) {
+                const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                setUser(userData);
+                handleLoginChecks(userData);
             }
+            // Note: New user creation is handled by the signup/signInWithGoogle functions
+            // to ensure all necessary details are passed. This listener just syncs state
+            // for already existing users.
+        } else {
+            setUser(null);
+            setFirebaseUser(null);
         }
+        setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [handleLoginChecks, toast]);
+  }, [handleLoginChecks]);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -154,7 +118,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // onAuthStateChanged will handle the rest
         return true;
     } catch (error: any) {
-        // Error handling remains the same
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
             case 'auth/user-not-found':
@@ -162,8 +125,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 description = "No account found with this email address. Please check your email or sign up.";
                 break;
             case 'auth/wrong-password':
-                description = "Incorrect password. Please try again.";
-                break;
             case 'auth/invalid-credential':
                  description = "The email or password you entered is incorrect. Please try again.";
                  break;
@@ -193,7 +154,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-          // onAuthStateChanged will handle checks and redirects.
+          setUser(newUser);
+          handleLoginChecks(newUser);
           return true;
         } else {
           throw new Error("Could not create user document in Firestore.");
@@ -214,18 +176,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   const signInWithGoogle = async (): Promise<boolean> => {
     const provider = new GoogleAuthProvider();
-    // No need to set isLoading here, as the page will reload anyway
+    setIsLoading(true);
     try {
-      await signInWithRedirect(auth, provider);
-      // The browser redirects away, so this promise may not resolve.
-      return true;
+        const result = await signInWithPopup(auth, provider);
+        const fbUser = result.user;
+        
+        const userDocRef = doc(db, "users", fbUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            // Existing user
+            const existingUserData = { id: userDoc.id, ...userDoc.data() } as User;
+            setUser(existingUserData);
+            setFirebaseUser(fbUser);
+            handleLoginChecks(existingUserData);
+        } else {
+            // New user via Google
+            const newUser = await createUserInFirestore({
+                name: fbUser.displayName,
+                email: fbUser.email,
+                avatarUrl: fbUser.photoURL
+            }, fbUser.uid);
+            
+            if (newUser) {
+                setUser(newUser);
+                setFirebaseUser(fbUser);
+                handleLoginChecks(newUser);
+            } else {
+                throw new Error("Could not create user document for Google Sign-In.");
+            }
+        }
+        return true;
     } catch (error: any) {
-        console.error("Google Sign-In Start Error:", error);
-        toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not start the Google sign-in process. Please check your connection and try again." });
+        let description = "An unknown error occurred during Google Sign-In.";
+        if (error.code === 'auth/popup-closed-by-user') {
+            description = "The sign-in window was closed before completing. Please try again.";
+        } else if (error.code === 'auth/account-exists-with-different-credential') {
+            description = "An account with this email already exists but was created with a different method (e.g., password). Please log in using your original method.";
+        }
+        toast({ variant: 'destructive', title: "Sign-In Failed", description });
+        setIsLoading(false);
         return false;
     }
   };
-
 
   const logout = useCallback(async () => {
     await signOut(auth);
