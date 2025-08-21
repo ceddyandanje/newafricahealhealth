@@ -83,31 +83,27 @@ export default function EmergencyDashboardPage() {
                                 <TabsTrigger value="units">Unit Status ({unitStatuses.length})</TabsTrigger>
                             </TabsList>
                             <TabsContent value="alerts" className="flex-grow overflow-hidden mt-2">
-                                <Card className="h-full flex flex-col">
-                                    <CardHeader className="p-4">
-                                        <CardTitle>Incoming Alerts</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="p-0 flex-grow overflow-y-auto">
-                                        <div className="space-y-3 p-4">
-                                            {incomingAlerts.map(alert => (
-                                                <DialogTrigger key={alert.id} asChild onClick={() => setSelectedAlert(alert)}>
-                                                    <div className="border p-3 rounded-lg bg-background cursor-pointer hover:bg-muted/50 transition-colors">
+                                <DialogTrigger asChild>
+                                    <Card className="h-full flex flex-col cursor-pointer hover:bg-muted/50 transition-colors">
+                                        <CardHeader className="p-4">
+                                            <CardTitle>Incoming Alerts</CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="p-0 flex-grow overflow-y-auto">
+                                            <div className="space-y-3 p-4">
+                                                {incomingAlerts.map(alert => (
+                                                     <div key={alert.id} className="border p-3 rounded-lg bg-background">
                                                         <div className="flex justify-between items-start">
                                                             <Badge variant="destructive">{alert.serviceType}</Badge>
                                                             <span className="text-xs text-muted-foreground">{formatTimeAgo(alert.createdAt)}</span>
                                                         </div>
                                                         <p className="text-sm my-2 flex items-center gap-2"><MapPin className="h-4 w-4"/> Lat: {alert.location.latitude}, Lon: {alert.location.longitude}</p>
                                                         <p className="text-sm text-muted-foreground flex items-center gap-2"><User className="h-4 w-4"/> For: {alert.requestor}</p>
-                                                        <div className="flex gap-2 mt-3">
-                                                            <Button size="sm" variant="outline" className="w-full text-xs h-8"><Check className="h-4 w-4 mr-1"/> Acknowledge</Button>
-                                                            <Button size="sm" className="w-full text-xs h-8"><Send className="h-4 w-4 mr-1"/> Dispatch</Button>
-                                                        </div>
                                                     </div>
-                                                </DialogTrigger>
-                                            ))}
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                                ))}
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                </DialogTrigger>
                             </TabsContent>
                             <TabsContent value="units" className="flex-grow overflow-hidden mt-2">
                                 <Card className="h-full flex flex-col">
@@ -158,7 +154,7 @@ export default function EmergencyDashboardPage() {
                     </Card>
                 </div>
             </div>
-            {selectedAlert && <AlertDetailsDialog alert={selectedAlert} />}
+            {<AlertDetailsDialog alerts={incomingAlerts} />}
         </Dialog>
     );
 }
