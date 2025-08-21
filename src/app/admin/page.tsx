@@ -32,12 +32,6 @@ const revenueChartData = [
     { name: '16 May', value: 349, income: 90, expense: 65 },
 ];
 
-const availableDoctors = [
-    { name: "Dr. Jaylon Stanton", specialty: "Dentist", avatar: "https://i.pravatar.cc/150?u=doc1" },
-    { name: "Dr. Carla Schleifer", specialty: "Oculist", avatar: "https://i.pravatar.cc/150?u=doc2" },
-    { name: "Dr. Hanna Geidt", specialty: "Surgeon", avatar: "https://i.pravatar.cc/150?u=doc3" },
-];
-
 const statusColors: { [key in OrderStatus]: string } = {
     'Pending Verification': 'hsl(var(--chart-5))',
     'Processing': 'hsl(var(--chart-4))',
@@ -64,6 +58,8 @@ export default function AdminDashboardPage() {
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
     const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+
+    const availableDoctors = users.filter(user => user.role === 'doctor');
 
     const summaryData = [
         { title: "Total Users", value: users.length.toString(), icon: Users, color: "text-pink-500", bgColor: "bg-pink-100 dark:bg-pink-900/50", clickable: true },
@@ -243,25 +239,29 @@ export default function AdminDashboardPage() {
                 <Card className="lg:col-span-1">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <CardTitle>Available Doctors</CardTitle>
-                        <Link href="#" className="text-sm text-muted-foreground hover:underline">Today</Link>
+                        <Link href="/admin/doctors" className="text-sm text-muted-foreground hover:underline">View all</Link>
                     </CardHeader>
                     <CardContent>
                         <ul className="space-y-4">
-                            {availableDoctors.map(doc => (
-                                <li key={doc.name} className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar>
-                                            <AvatarImage src={doc.avatar} />
-                                            <AvatarFallback>{doc.name.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div>
-                                            <p className="font-semibold text-sm">{doc.name}</p>
-                                            <p className="text-xs text-muted-foreground">{doc.specialty}</p>
+                            {availableDoctors.length > 0 ? (
+                                availableDoctors.slice(0, 3).map(doc => (
+                                    <li key={doc.id} className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <Avatar>
+                                                <AvatarImage src={doc.avatarUrl} />
+                                                <AvatarFallback>{doc.name.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div>
+                                                <p className="font-semibold text-sm">{doc.name}</p>
+                                                <p className="text-xs text-muted-foreground">{doc.specialty || 'No specialty'}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <button className="text-muted-foreground hover:text-foreground">...</button>
-                                </li>
-                            ))}
+                                        <button className="text-muted-foreground hover:text-foreground">...</button>
+                                    </li>
+                                ))
+                             ) : (
+                                <li className="text-center text-sm text-muted-foreground py-4">No doctors found in the system.</li>
+                            )}
                         </ul>
                     </CardContent>
                 </Card>
