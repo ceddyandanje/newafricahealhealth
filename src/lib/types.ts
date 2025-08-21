@@ -184,7 +184,8 @@ export type EmergencyServiceType = 'First Aid' | 'Ground Ambulance' | 'Air Ambul
 export type EmergencyRequest = {
   id: string; // Firestore ID
   userId?: string; // Optional if non-user requests
-  requestor: 'Me' | 'Someone Else';
+  userName: string;
+  patientName: string;
   serviceType: EmergencyServiceType;
   location: {
     latitude: number;
@@ -192,6 +193,7 @@ export type EmergencyRequest = {
   };
   bloodGroup?: string;
   allergies?: string;
+  situationDescription?: string;
   status: 'Pending' | 'Acknowledged' | 'Unit Dispatched' | 'On Scene' | 'Resolved' | 'Cancelled';
   createdAt: string; // ISO String
   dispatchedUnitId?: string;

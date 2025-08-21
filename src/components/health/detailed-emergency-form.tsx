@@ -9,29 +9,34 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Siren, Ambulance, Phone, HeartPulse, User, Users, MapPin, Droplets } from 'lucide-react';
+import { Siren, Ambulance, Phone, HeartPulse, User, Users, MapPin, Droplets, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { ScrollArea } from '../ui/scroll-area';
 import { Badge } from '../ui/badge';
+import { addEmergencyRequest } from '@/lib/emergency';
+import { useAuth } from '@/hooks/use-auth';
 
 const emergencyServices = [
-    { id: 'first-aid', name: 'First Aid', icon: HeartPulse },
-    { id: 'ground-ambulance', name: 'Ground Ambulance', icon: Ambulance, count: 3 },
-    { id: 'air-ambulance', name: 'Air Ambulance', icon: Siren, count: 1 },
+    { id: 'First Aid', name: 'First Aid', icon: HeartPulse },
+    { id: 'Ground Ambulance', name: 'Ground Ambulance', icon: Ambulance, count: 3 },
+    { id: 'Air Ambulance', name: 'Air Ambulance', icon: Siren, count: 1 },
 ];
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"];
 
 export default function DetailedEmergencyForm() {
+    const { user } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
     const [selectedService, setSelectedService] = useState<string | null>(null);
     const [requestFor, setRequestFor] = useState('me');
-    const [location, setLocation] = useState<string | null>(null);
+    const [patientName, setPatientName] = useState(user?.name || '');
+    const [location, setLocation] = useState<{ latitude: number; longitude: number; } | null>(null);
     const [isLocating, setIsLocating] = useState(false);
     const [bloodGroup, setBloodGroup] = useState<string>("");
     const [allergies, setAllergies] = useState("");
+    const [situation, setSituation] = useState("");
     const { toast } = useToast();
 
     const handleLocation = () => {
@@ -39,7 +44,7 @@ export default function DetailedEmergencyForm() {
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
-                setLocation(`Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`);
+                setLocation({ latitude, longitude });
                 toast({ title: "Location Acquired", description: "Your location has been successfully pinpointed." });
                 setIsLocating(false);
             },
@@ -52,13 +57,12 @@ export default function DetailedEmergencyForm() {
     };
 
     const handleCall = () => {
-        // In a real app, this would initiate a call.
         toast({ title: "Calling Emergency Line", description: "Connecting you now..."});
         window.location.href = "tel:+254712345678";
     }
 
-    const handleSubmit = () => {
-        if (!selectedService || !location) {
+    const handleSubmit = async () => {
+        if (!selectedService || !location || !user) {
             toast({
                 variant: 'destructive',
                 title: "Incomplete Request",
@@ -67,19 +71,30 @@ export default function DetailedEmergencyForm() {
             return;
         }
 
-        console.log({
-            service: selectedService,
-            for: requestFor,
-            location,
-            bloodGroup,
-            allergies
-        });
+        try {
+            await addEmergencyRequest({
+                userId: user.id,
+                userName: user.name,
+                patientName: requestFor === 'me' ? user.name : patientName,
+                serviceType: selectedService as 'First Aid' | 'Ground Ambulance' | 'Air Ambulance',
+                location,
+                bloodGroup,
+                allergies,
+                situationDescription: situation
+            });
 
-        toast({
-            title: "Emergency Request Sent",
-            description: `A ${selectedService} request has been dispatched to your location. Help is on the way.`,
-        });
-        setIsOpen(false);
+            toast({
+                title: "Emergency Request Sent",
+                description: `A ${selectedService} request has been dispatched. Help is on the way.`,
+            });
+            setIsOpen(false);
+        } catch (error) {
+             toast({
+                variant: 'destructive',
+                title: "Submission Failed",
+                description: "There was a problem sending your request. Please try again.",
+            });
+        }
     };
 
     return (
@@ -115,6 +130,13 @@ export default function DetailedEmergencyForm() {
                             </RadioGroup>
                         </div>
 
+                         {requestFor === 'someone' && (
+                             <div>
+                                <Label htmlFor="patient-name" className="text-xs">Patient's Name</Label>
+                                <Input id="patient-name" value={patientName} onChange={(e) => setPatientName(e.target.value)} placeholder="Enter patient's full name" />
+                            </div>
+                        )}
+
                         <div>
                             <Label className="font-semibold mb-2 block">2. What service do you need?</Label>
                             <div className="grid grid-cols-3 gap-2">
@@ -141,12 +163,17 @@ export default function DetailedEmergencyForm() {
                             <Label className="font-semibold mb-2 block">3. Confirm Location</Label>
                             <Button variant="outline" className="w-full" onClick={handleLocation} disabled={isLocating}>
                                 <MapPin className="mr-2 h-4 w-4" />
-                                {isLocating ? 'Acquiring Location...' : (location || 'Get Active Location')}
+                                {isLocating ? 'Acquiring Location...' : (location ? `Lat: ${location.latitude.toFixed(4)}, Lon: ${location.longitude.toFixed(4)}` : 'Get Active Location')}
                             </Button>
+                        </div>
+                        
+                        <div>
+                             <Label htmlFor="situation" className="font-semibold mb-2 block">4. Describe the Situation</Label>
+                             <Textarea id="situation" value={situation} onChange={(e) => setSituation(e.target.value)} placeholder="Briefly describe the emergency (e.g., 'suspected heart attack', 'fall from height', 'severe bleeding')." />
                         </div>
 
                         <div>
-                            <Label className="font-semibold mb-2 block">4. Medical Information (Optional)</Label>
+                            <Label className="font-semibold mb-2 block">5. Medical Information (Optional)</Label>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                 <Label htmlFor="blood-group" className="text-xs">Blood Group</Label>
@@ -161,7 +188,7 @@ export default function DetailedEmergencyForm() {
                                 </div>
                                 <div>
                                     <Label htmlFor="allergies" className="text-xs">Allergies</Label>
-                                    <Input id="allergies" value={allergies} onChange={(e) => setAllergies(e.target.value)} placeholder="e.g., Penicillin, Peanuts" />
+                                    <Input id="allergies" value={allergies} onChange={(e) => setAllergies(e.target.value)} placeholder="e.g., Penicillin" />
                                 </div>
                             </div>
                         </div>

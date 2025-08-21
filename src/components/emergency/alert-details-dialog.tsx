@@ -1,15 +1,16 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type EmergencyRequest, type EmergencyUnit } from '@/lib/types';
-import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse } from 'lucide-react';
+import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { suggestEmergencyResponse } from '@/ai/flows/suggest-emergency-response-flow';
+import { formatDistanceToNow } from 'date-fns';
 
 // Mock data, in a real app this would come from a data source
 const availableUnits: EmergencyUnit[] = [
@@ -28,18 +29,18 @@ interface AlertDetailsDialogProps {
     alerts: EmergencyRequest[];
 }
 
-type Suggestion = {
-    id: string;
-    suggestion: string;
-}
-
 export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyRequest[] }) {
     const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
     const [suggestions, setSuggestions] = useState<Map<string, string>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
 
+    const timeSinceRequest = useMemo(() => {
+        if (!selectedAlert) return '';
+        return formatDistanceToNow(new Date(selectedAlert.createdAt), { addSuffix: true });
+    }, [selectedAlert]);
+
     useEffect(() => {
-        if (alerts.length > 0) {
+        if (alerts.length > 0 && !suggestions.size) {
             setIsLoading(true);
             const fetchSuggestions = async () => {
                 const newSuggestions = new Map<string, string>();
@@ -47,15 +48,20 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
                     await Promise.all(alerts.map(async (alert) => {
                         const response = await suggestEmergencyResponse({
                             serviceType: alert.serviceType,
-                            location: alert.location
+                            location: alert.location,
+                            patientName: alert.patientName,
+                            situationDescription: alert.situationDescription,
+                            bloodGroup: alert.bloodGroup,
+                            allergies: alert.allergies,
+                            timeSinceRequest: formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true }),
                         });
-                        newSuggestions.set(alert.id, response.suggestion);
+                        newSuggestions.set(alert.id, response.summary);
                     }));
                 } catch (error) {
                     console.error("AI suggestion failed for one or more alerts:", error);
                     alerts.forEach(alert => {
                         if (!newSuggestions.has(alert.id)) {
-                             newSuggestions.set(alert.id, "Could not load AI suggestion.");
+                             newSuggestions.set(alert.id, "Could not load AI summary.");
                         }
                     });
                 }
@@ -64,11 +70,13 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
             };
             fetchSuggestions();
         }
-    }, [alerts]);
+    }, [alerts, suggestions.size]);
 
     useEffect(() => {
         if (!selectedAlert && alerts.length > 0) {
             setSelectedAlert(alerts[0]);
+        } else if (alerts.length === 0) {
+            setSelectedAlert(null);
         }
     }, [alerts, selectedAlert])
 
@@ -111,7 +119,7 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
                                         </div>
                                         <span className="text-xs text-muted-foreground">{formatTime(alert.createdAt)}</span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground mt-1">For: {alert.requestor}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">For: {alert.patientName}</p>
                                 </button>
                             );
                         })}
@@ -121,19 +129,22 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
                 {/* Right Pane: Details View */}
                 <div className="md:col-span-2 h-full flex flex-col gap-4">
                     {selectedAlert ? (
-                        <ScrollArea className="h-full">
-                           <div className="space-y-4 pr-4">
+                        <ScrollArea className="h-full pr-4">
+                           <div className="space-y-4">
                              <div className="p-4 border rounded-lg">
                                 <h3 className="font-semibold text-lg mb-2">{selectedAlert.serviceType} Request</h3>
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                    <p className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground"/> <strong>For:</strong> {selectedAlert.requestor}</p>
+                                <div className="grid grid-cols-2 gap-y-1 gap-x-4 text-sm">
+                                    <p className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground"/> <strong>Patient:</strong> {selectedAlert.patientName}</p>
                                     <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Time:</strong> {formatTime(selectedAlert.createdAt)}</p>
-                                    <p className="col-span-2 flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground"/> <strong>Location:</strong> {`Lat: ${selectedAlert.location.latitude}, Lon: ${selectedAlert.location.longitude}`}</p>
+                                    <p className="flex items-center gap-2"><Droplets className="h-4 w-4 text-muted-foreground"/> <strong>Blood:</strong> {selectedAlert.bloodGroup || 'N/A'}</p>
+                                    <p className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-muted-foreground"/> <strong>Allergies:</strong> {selectedAlert.allergies || 'None'}</p>
+                                    <p className="col-span-2 flex items-start gap-2"><Info className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Situation:</strong> {selectedAlert.situationDescription || 'No details provided.'}</p>
+                                    <p className="col-span-2 flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Location:</strong> {`Lat: ${selectedAlert.location.latitude}, Lon: ${selectedAlert.location.longitude}`}</p>
                                 </div>
                              </div>
 
                              <div className="p-4 border rounded-lg bg-primary/5">
-                                 <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary"/> AI Recommendation</h3>
+                                 <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary"/> AI Summary & Recommendation</h3>
                                  {isLoading ? (
                                     <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Generating suggestions for all alerts...</div>
                                  ) : (
@@ -173,6 +184,9 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
                     )}
                 </div>
             </div>
+            <DialogFooter className="border-t pt-4">
+                 <Button variant="outline">Close</Button>
+            </DialogFooter>
         </DialogContent>
     );
 }

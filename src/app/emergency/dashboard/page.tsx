@@ -2,23 +2,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Siren, Ambulance, Plane, Clock, MapPin, User, Check, X, Send, HeartPulse } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Siren, Ambulance, Plane, Clock, HeartPulse } from "lucide-react";
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import AlertDetailsDialog from '@/components/emergency/alert-details-dialog';
 import { type EmergencyRequest } from '@/lib/types';
-
+import { useEmergencyRequests } from '@/lib/emergency';
 
 // Mock Data - In a real app, this would come from a real-time Firestore stream
-const incomingAlerts: EmergencyRequest[] = [
-    { id: 'INC-001', serviceType: 'Ground Ambulance', location: { latitude: -1.28, longitude: 36.82 }, requestor: 'Someone Else', createdAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(), status: 'Pending' },
-    { id: 'INC-002', serviceType: 'First Aid', location: { latitude: -1.31, longitude: 36.80 }, requestor: 'Me', createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString(), status: 'Pending' },
-];
-
 const unitStatuses = [
     { id: 'G-01', type: 'Ground', status: 'Available', location: 'HQ' },
     { id: 'G-02', type: 'Ground', status: 'En Route', assignedTo: 'INC-001' },
@@ -58,6 +52,7 @@ const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementTy
 );
 
 export default function EmergencyDashboardPage() {
+    const { requests: incomingAlerts, isLoading } = useEmergencyRequests();
     const [isAlertsDialogOpen, setIsAlertsDialogOpen] = useState(false);
     
     const alertCounts = incomingAlerts.reduce((acc, alert) => {
@@ -84,7 +79,7 @@ export default function EmergencyDashboardPage() {
                 </div>
 
                 <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="md:col-span-1 h-[55vh] flex flex-col">
+                     <div className="md:col-span-1 h-[55vh] flex flex-col">
                          <Tabs defaultValue="alerts" className="flex-grow flex flex-col h-full">
                             <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="alerts" className="flex items-center gap-2">
@@ -115,7 +110,7 @@ export default function EmergencyDashboardPage() {
                                                             </div>
                                                             <span className="text-xs text-muted-foreground">{formatTime(alert.createdAt)}</span>
                                                         </div>
-                                                        <p className="text-xs text-muted-foreground mt-1">For: {alert.requestor}</p>
+                                                        <p className="text-xs text-muted-foreground mt-1">For: {alert.patientName}</p>
                                                         {count > 0 && (
                                                             <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center p-0">{count}</Badge>
                                                         )}
@@ -165,12 +160,11 @@ export default function EmergencyDashboardPage() {
                                 className="rounded-b-lg"
                             ></iframe>
                             {/* Placeholder for map markers */}
-                            <div className="absolute top-1/4 left-1/3">
-                                <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
-                            </div>
-                                <div className="absolute bottom-1/2 right-1/4">
-                                <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
-                            </div>
+                            {incomingAlerts.map(alert => (
+                                <div key={alert.id} className="absolute" style={{ top: `${50 + (alert.location.latitude * 2)}%`, left: `${50 + (alert.location.longitude * 2)}%` }}>
+                                    <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
+                                </div>
+                            ))}
                         </CardContent>
                     </Card>
                 </div>
