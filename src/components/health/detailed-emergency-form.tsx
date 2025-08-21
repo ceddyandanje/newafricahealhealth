@@ -13,11 +13,13 @@ import { Siren, Ambulance, Phone, HeartPulse, User, Users, MapPin, Droplets } fr
 import { cn } from '@/lib/utils';
 import { Card } from '../ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { ScrollArea } from '../ui/scroll-area';
+import { Badge } from '../ui/badge';
 
 const emergencyServices = [
     { id: 'first-aid', name: 'First Aid', icon: HeartPulse },
-    { id: 'ground-ambulance', name: 'Ground Ambulance', icon: Ambulance },
-    { id: 'air-ambulance', name: 'Air Ambulance', icon: Siren },
+    { id: 'ground-ambulance', name: 'Ground Ambulance', icon: Ambulance, count: 3 },
+    { id: 'air-ambulance', name: 'Air Ambulance', icon: Siren, count: 1 },
 ];
 
 const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Unknown"];
@@ -97,69 +99,74 @@ export default function DetailedEmergencyForm() {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-4 py-2 max-h-[60vh] overflow-y-auto pr-2">
-                    <div>
-                        <Label className="font-semibold mb-2 block">1. Who is this request for?</Label>
-                        <RadioGroup defaultValue="me" value={requestFor} onValueChange={setRequestFor} className="flex gap-4">
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="me" id="detail-me" />
-                                <Label htmlFor="detail-me" className="flex items-center gap-2"><User/> Me</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RadioGroupItem value="someone" id="detail-someone" />
-                                <Label htmlFor="detail-someone" className="flex items-center gap-2"><Users/> Someone Else</Label>
-                            </div>
-                        </RadioGroup>
-                    </div>
-
-                    <div>
-                        <Label className="font-semibold mb-2 block">2. What service do you need?</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {emergencyServices.map(service => (
-                                <Card
-                                    key={service.id}
-                                    className={cn(
-                                        "p-2 text-center cursor-pointer transition-all flex flex-col items-center justify-center h-full",
-                                        selectedService === service.id ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'
-                                    )}
-                                    onClick={() => setSelectedService(service.id)}
-                                >
-                                    <service.icon className={cn("w-6 h-6 mb-1", selectedService === service.id ? "text-primary" : "text-muted-foreground")} />
-                                    <p className="text-xs font-semibold">{service.name}</p>
-                                </Card>
-                            ))}
+                <ScrollArea className="max-h-[60vh] -mx-6 px-6">
+                    <div className="space-y-4 py-2">
+                        <div>
+                            <Label className="font-semibold mb-2 block">1. Who is this request for?</Label>
+                            <RadioGroup defaultValue="me" value={requestFor} onValueChange={setRequestFor} className="flex gap-4">
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="me" id="detail-me" />
+                                    <Label htmlFor="detail-me" className="flex items-center gap-2"><User/> Me</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="someone" id="detail-someone" />
+                                    <Label htmlFor="detail-someone" className="flex items-center gap-2"><Users/> Someone Else</Label>
+                                </div>
+                            </RadioGroup>
                         </div>
-                    </div>
 
-                     <div>
-                        <Label className="font-semibold mb-2 block">3. Confirm Location</Label>
-                         <Button variant="outline" className="w-full" onClick={handleLocation} disabled={isLocating}>
-                             <MapPin className="mr-2 h-4 w-4" />
-                             {isLocating ? 'Acquiring Location...' : (location || 'Get Active Location')}
-                         </Button>
-                    </div>
-
-                    <div>
-                        <Label className="font-semibold mb-2 block">4. Medical Information (Optional)</Label>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                               <Label htmlFor="blood-group" className="text-xs">Blood Group</Label>
-                               <Select value={bloodGroup} onValueChange={setBloodGroup}>
-                                   <SelectTrigger id="blood-group">
-                                       <SelectValue placeholder="Select..." />
-                                   </SelectTrigger>
-                                   <SelectContent>
-                                       {bloodGroups.map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
-                                   </SelectContent>
-                               </Select>
-                            </div>
-                            <div>
-                                <Label htmlFor="allergies" className="text-xs">Allergies</Label>
-                                <Input id="allergies" value={allergies} onChange={(e) => setAllergies(e.target.value)} placeholder="e.g., Penicillin, Peanuts" />
+                        <div>
+                            <Label className="font-semibold mb-2 block">2. What service do you need?</Label>
+                            <div className="grid grid-cols-3 gap-2">
+                                {emergencyServices.map(service => (
+                                    <Card
+                                        key={service.id}
+                                        className={cn(
+                                            "p-2 text-center cursor-pointer transition-all flex flex-col items-center justify-center h-full relative",
+                                            selectedService === service.id ? 'border-primary ring-2 ring-primary' : 'hover:border-primary/50'
+                                        )}
+                                        onClick={() => setSelectedService(service.id)}
+                                    >
+                                        {service.count && (
+                                            <Badge variant="destructive" className="absolute -top-2 -right-2">{service.count}</Badge>
+                                        )}
+                                        <service.icon className={cn("w-6 h-6 mb-1", selectedService === service.id ? "text-primary" : "text-muted-foreground")} />
+                                        <p className="text-xs font-semibold">{service.name}</p>
+                                    </Card>
+                                ))}
                             </div>
                         </div>
+
+                        <div>
+                            <Label className="font-semibold mb-2 block">3. Confirm Location</Label>
+                            <Button variant="outline" className="w-full" onClick={handleLocation} disabled={isLocating}>
+                                <MapPin className="mr-2 h-4 w-4" />
+                                {isLocating ? 'Acquiring Location...' : (location || 'Get Active Location')}
+                            </Button>
+                        </div>
+
+                        <div>
+                            <Label className="font-semibold mb-2 block">4. Medical Information (Optional)</Label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                <Label htmlFor="blood-group" className="text-xs">Blood Group</Label>
+                                <Select value={bloodGroup} onValueChange={setBloodGroup}>
+                                    <SelectTrigger id="blood-group">
+                                        <SelectValue placeholder="Select..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {bloodGroups.map(bg => <SelectItem key={bg} value={bg}>{bg}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                                </div>
+                                <div>
+                                    <Label htmlFor="allergies" className="text-xs">Allergies</Label>
+                                    <Input id="allergies" value={allergies} onChange={(e) => setAllergies(e.target.value)} placeholder="e.g., Penicillin, Peanuts" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </ScrollArea>
 
                 <DialogFooter className="grid grid-cols-2 gap-2 pt-4">
                     <Button type="button" variant="outline" onClick={handleCall}>
