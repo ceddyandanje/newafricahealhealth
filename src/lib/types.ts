@@ -162,4 +162,20 @@ export type Order = {
     createdAt: string; // ISO 8601 string
     updatedAt: string; // ISO 8601 string
 };
+
+export type AppointmentStatus = 'Upcoming' | 'Completed' | 'Cancelled' | 'Confirmed' | 'Pending';
+
+export type Appointment = {
+    id: string; // Firestore ID
+    appointmentId: string; // Human-readable ID like APT001
+    patientId: string;
+    patientName: string;
+    patientAvatar?: string;
+    doctorId: string;
+    doctorName: string;
+    appointmentDate: string; // ISO String for date and time
+    type: string; // e.g., 'Virtual Consultation'
+    status: AppointmentStatus;
+    notes?: string;
+};
     
