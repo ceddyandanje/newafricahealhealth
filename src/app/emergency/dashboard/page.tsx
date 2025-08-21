@@ -59,6 +59,11 @@ const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementTy
 
 export default function EmergencyDashboardPage() {
     const [isAlertsDialogOpen, setIsAlertsDialogOpen] = useState(false);
+    
+    const alertCounts = incomingAlerts.reduce((acc, alert) => {
+        acc[alert.serviceType] = (acc[alert.serviceType] || 0) + 1;
+        return acc;
+    }, {} as Record<EmergencyRequest['serviceType'], number>);
 
     return (
         <Dialog open={isAlertsDialogOpen} onOpenChange={setIsAlertsDialogOpen}>
@@ -72,9 +77,9 @@ export default function EmergencyDashboardPage() {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCard icon={Siren} value={3} label="Active Incidents" variant="destructive" />
-                    <StatCard icon={Ambulance} value={1} label="Available Ground Units" variant="default" />
-                    <StatCard icon={Plane} value={1} label="Available Air Units" variant="default" />
+                    <StatCard icon={Siren} value={incomingAlerts.length} label="Active Incidents" variant="destructive" />
+                    <StatCard icon={Ambulance} value={unitStatuses.filter(u => u.status === 'Available' && u.type === 'Ground').length} label="Available Ground Units" variant="default" />
+                    <StatCard icon={Plane} value={unitStatuses.filter(u => u.status === 'Available' && u.type === 'Air').length} label="Available Air Units" variant="default" />
                     <StatCard icon={Clock} value="7m 32s" label="Avg. Response Time" variant="default" />
                 </div>
 
@@ -100,8 +105,9 @@ export default function EmergencyDashboardPage() {
                                         <CardContent className="p-2 flex-grow overflow-y-auto space-y-2">
                                             {incomingAlerts.map(alert => {
                                                 const Icon = serviceIcons[alert.serviceType];
+                                                const count = alertCounts[alert.serviceType] || 0;
                                                 return (
-                                                    <div key={alert.id} className="p-2 border rounded-md bg-background/50">
+                                                    <div key={alert.id} className="p-2 border rounded-md bg-background/50 relative">
                                                         <div className="flex justify-between items-center text-sm font-semibold">
                                                             <div className="flex items-center gap-2">
                                                                 <Icon className="h-4 w-4"/>
@@ -110,6 +116,9 @@ export default function EmergencyDashboardPage() {
                                                             <span className="text-xs text-muted-foreground">{formatTime(alert.createdAt)}</span>
                                                         </div>
                                                         <p className="text-xs text-muted-foreground mt-1">For: {alert.requestor}</p>
+                                                        {count > 0 && (
+                                                            <Badge variant="destructive" className="absolute -top-2 -right-2 h-5 w-5 justify-center p-0">{count}</Badge>
+                                                        )}
                                                     </div>
                                                 );
                                             })}
