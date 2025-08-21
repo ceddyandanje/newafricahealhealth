@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClipboardList, BarChart3, LineChart as LineChartIcon, CheckCircle, Package, ListOrdered, Users } from "lucide-react";
 import Link from "next/link";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import UserInsightsDialog from "@/components/admin/patient-insights-dialog";
 import { useProducts } from "@/hooks/use-products";
 import InventoryStatusDialog from "@/components/admin/inventory-status-dialog";
-import { useOrdersForAdmin as useOrders } from "@/lib/orders";
+import { useOrdersForAdmin as useOrders, OrderStatus } from "@/lib/orders";
 import { useRouter } from "next/navigation";
 import OrdersOverviewDialog from "@/components/admin/orders-overview-dialog";
 
@@ -38,6 +38,15 @@ const availableDoctors = [
     { name: "Dr. Hanna Geidt", specialty: "Surgeon", avatar: "https://i.pravatar.cc/150?u=doc3" },
 ];
 
+const statusColors: { [key in OrderStatus]: string } = {
+    'Pending Verification': 'hsl(var(--chart-5))',
+    'Processing': 'hsl(var(--chart-4))',
+    'Shipped': 'hsl(var(--chart-2))',
+    'Delivered': 'hsl(var(--chart-1))',
+    'Cancelled': 'hsl(var(--destructive))',
+    'On Hold': 'hsl(var(--muted-foreground))',
+};
+
 
 export default function AdminDashboardPage() {
     const [isClient, setIsClient] = useState(false);
@@ -54,8 +63,6 @@ export default function AdminDashboardPage() {
     const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
     const pendingRequests = requests.filter(r => r.status === 'Pending');
-    const patients = users.filter(u => u.role === 'user');
-    const patientCount = patients.length;
     const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 10).length;
 
     const summaryData = [
@@ -65,23 +72,12 @@ export default function AdminDashboardPage() {
         { title: "Total Orders", value: orders.length.toString(), icon: ListOrdered, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50", clickable: true },
     ];
     
-    // Note: The breakdown is illustrative. In a real app, this would come from patient status data.
-    const newPatients = Math.round(patientCount * 0.1);
-    const recoveredPatients = Math.round(patientCount * 0.6);
-    const inTreatmentPatients = patientCount - newPatients - recoveredPatients > 0 ? patientCount - newPatients - recoveredPatients : 0;
-
-    const patientsChartData = [
-        { name: 'Total', value: patientCount, fill: '#6B7280' },
-        { name: 'New', value: newPatients, fill: '#3B82F6' },
-        { name: 'Recovered', value: recoveredPatients, fill: '#10B981' },
-        { name: 'In Treatment', value: inTreatmentPatients, fill: '#F59E0B' },
-    ];
-    const a_patientsChartData = [
-        { name: 'New', value: newPatients, fill: '#3B82F6' },
-        { name: 'Recovered', value: recoveredPatients, fill: '#10B981' },
-        { name: 'In Treatment', value: inTreatmentPatients, fill: '#F59E0B' },
-        { name: 'Other', value: Math.max(0, patientCount - newPatients - recoveredPatients - inTreatmentPatients), fill: '#e5e7eb' },
-    ];
+    const orderStatusDistribution = Object.entries(
+        orders.reduce((acc, order) => {
+            acc[order.status] = (acc[order.status] || 0) + 1;
+            return acc;
+        }, {} as Record<OrderStatus, number>)
+    ).map(([name, value]) => ({ name, value, fill: statusColors[name as OrderStatus] }));
   
     useEffect(() => {
         setIsClient(true)
@@ -140,26 +136,24 @@ export default function AdminDashboardPage() {
                 {/* Middle Row: Charts */}
                 <Card className="lg:col-span-1 flex flex-col">
                     <CardHeader>
-                        <CardTitle>Patients</CardTitle>
+                        <CardTitle>Order Status Funnel</CardTitle>
+                        <CardDescription>A real-time overview of the order fulfillment process.</CardDescription>
                     </CardHeader>
                     <CardContent className="flex-grow flex flex-col items-center justify-center">
                         {!isClient ? <Skeleton className="w-[200px] h-[200px] rounded-full" /> :
                         <>
-                            <div className="relative">
-                                <PieChartComponent width={200} height={200}>
-                                    <Pie data={a_patientsChartData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
-                                        {a_patientsChartData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.fill} stroke={entry.fill} />
+                            <ChartContainer config={{}} className="h-[200px] w-full">
+                                <PieChartComponent>
+                                    <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
+                                    <Pie data={orderStatusDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
+                                        {orderStatusDistribution.map((entry) => (
+                                            <Cell key={`cell-${entry.name}`} fill={entry.fill} stroke={entry.fill} />
                                         ))}
                                     </Pie>
                                 </PieChartComponent>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <p className="text-muted-foreground text-sm">Total</p>
-                                    <p className="font-bold text-2xl">{patientCount}</p>
-                                </div>
-                            </div>
-                            <div className="flex flex-wrap justify-center gap-4 mt-4 text-sm">
-                                {patientsChartData.slice(1).map(item => (
+                            </ChartContainer>
+                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm">
+                                {orderStatusDistribution.map(item => (
                                      <div key={item.name} className="flex items-center gap-2">
                                         <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
                                         <span>{item.name}: {item.value}</span>

@@ -87,3 +87,5 @@ export const updateOrderStatus = async (orderId: string, status: OrderStatus) =>
         updatedAt: new Date().toISOString()
     });
 };
+
+export { type OrderStatus };
