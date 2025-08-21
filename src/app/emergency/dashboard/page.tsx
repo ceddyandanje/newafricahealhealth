@@ -67,14 +67,17 @@ export default function EmergencyDashboardPage() {
                         <CardHeader>
                             <CardTitle>Live Incident Map</CardTitle>
                         </CardHeader>
-                        <CardContent className="flex-grow relative">
-                            <Image
-                                src="https://images.unsplash.com/photo-1579532589638-68f7d9831a26?q=80&w=870&auto=format&fit=crop&ixlib=rb-4.1.0"
-                                alt="Map of a city"
-                                fill
-                                className="object-cover rounded-md"
-                                data-ai-hint="city map"
-                            />
+                        <CardContent className="flex-grow relative p-0">
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8167982.724280536!2d33.56150249609376!3d0.023559!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182780aa73dcf839%3A0x8634440b87c6f09!2sKenya!5e0!3m2!1sen!2sus!4v1754555852465"
+                                width="100%"
+                                height="100%"
+                                style={{ border: 0 }}
+                                allowFullScreen={false}
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                className="rounded-b-lg"
+                            ></iframe>
                             {/* Placeholder for map markers */}
                             <div className="absolute top-1/4 left-1/3">
                                 <Siren className="h-8 w-8 text-white bg-red-600 p-1.5 rounded-full animate-pulse" />
