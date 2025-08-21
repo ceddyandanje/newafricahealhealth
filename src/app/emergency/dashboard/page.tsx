@@ -60,8 +60,8 @@ export default function EmergencyDashboardPage() {
                 <StatCard icon={Clock} value="7m 32s" label="Avg. Response Time" variant="default" />
             </div>
 
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <Card className="lg:col-span-2 h-[55vh] flex flex-col">
+            <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="md:col-span-2 h-[55vh] flex flex-col">
                     <CardHeader>
                         <CardTitle>Live Incident Map</CardTitle>
                     </CardHeader>
@@ -86,7 +86,7 @@ export default function EmergencyDashboardPage() {
                     </CardContent>
                 </Card>
 
-                <div className="lg:col-span-1 h-[55vh] flex flex-col">
+                <div className="md:col-span-1 h-[55vh] flex flex-col">
                      <Tabs defaultValue="alerts" className="flex-grow flex flex-col h-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="alerts">Incoming Alerts ({incomingAlerts.length})</TabsTrigger>
