@@ -60,21 +60,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const handleRedirect = useCallback((loggedInUser: User) => {
     const roleMap: { [key: string]: string | undefined } = {
-        'admin': 'admin',
-        'doctor': 'doctor/dashboard',
-        'user': 'patient/dashboard',
-        'delivery-driver': 'delivery/dashboard',
-        'lab-technician': 'labs/dashboard',
-        'emergency-services': 'emergency/dashboard'
+        'admin': '/admin',
+        'doctor': '/doctor/dashboard',
+        'user': '/patient/dashboard',
+        'delivery-driver': '/delivery/dashboard',
+        'lab-technician': '/labs/dashboard',
+        'emergency-services': '/emergency/dashboard'
     }
     const destination = roleMap[loggedInUser.role];
-    if (destination) {
-      const dashboardPath = `/${destination}`;
-      if (!pathname.startsWith(dashboardPath)) {
-        router.push(dashboardPath);
-      }
-    } else {
-      router.push('/login');
+
+    // If there's a destination and we are not already there, redirect.
+    if (destination && !pathname.startsWith(destination)) {
+      router.push(destination);
     }
   }, [router, pathname]);
 
@@ -91,55 +88,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [handleRedirect]);
 
   useEffect(() => {
-    const processUser = async (fbUser: FirebaseUser | null) => {
-      if (fbUser) {
+    const processUser = async (fbUser: FirebaseUser) => {
         setFirebaseUser(fbUser);
         const userDocRef = doc(db, "users", fbUser.uid);
         const userDoc = await getDoc(userDocRef);
+
         if (userDoc.exists()) {
-          const userData = { id: userDoc.id, ...userDoc.data() } as User;
-          setUser(userData);
-          handleLoginChecks(userData);
+            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+            setUser(userData);
+            handleLoginChecks(userData);
         } else {
-           // This case can happen if a user is created in Auth but not Firestore
-           // Let's create the user doc now.
-           const newUser = await createUserInFirestore({
+            const newUser = await createUserInFirestore({
                 name: fbUser.displayName || 'New User',
                 email: fbUser.email!,
                 avatarUrl: fbUser.photoURL
             }, fbUser.uid);
+
             if (newUser) {
                 setUser(newUser);
                 handleLoginChecks(newUser);
             } else {
-                setUser(null);
+                // Failed to create user doc, log out to be safe
+                await signOut(auth);
             }
         }
-      } else {
-        setFirebaseUser(null);
-        setUser(null);
-        setShowOnboarding(false);
-        setShowTerms(false);
-      }
-      setIsLoading(false);
     };
 
-    const unsubscribe = onAuthStateChanged(auth, processUser);
-    
-    // Check for redirect result on initial load
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result) {
-          // If there's a redirect result, it means a sign-in just happened.
-          // onAuthStateChanged will handle the user processing.
-          toast({ title: "Signing In...", description: "Finalizing your Google sign-in." });
+    // This effect runs once on mount to check for redirect results and set up the listener.
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+        if (fbUser) {
+            // User is signed in. `processUser` will handle fetching/creating the doc and redirecting.
+            await processUser(fbUser);
+        } else {
+            // No user is signed in.
+            // Let's check if a redirect just happened.
+            try {
+                const result = await getRedirectResult(auth);
+                if (result) {
+                    // This means a sign-in just completed.
+                    // The onAuthStateChanged listener above will be re-triggered with the new user.
+                    // We don't need to do anything else here.
+                } else {
+                    // No user and no redirect result, so they are truly logged out.
+                    setFirebaseUser(null);
+                    setUser(null);
+                    setIsLoading(false);
+                }
+            } catch (error) {
+                console.error("Error getting redirect result:", error);
+                toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not process Google Sign-In. Please try again." });
+                setIsLoading(false);
+            }
         }
-      })
-      .catch((error) => {
-        console.error("Google Sign-In Redirect Error:", error);
-        toast({ variant: 'destructive', title: "Sign-In Failed", description: error.message });
-        setIsLoading(false);
-      });
+    });
 
     return () => unsubscribe();
   }, [handleLoginChecks, toast]);
@@ -212,15 +213,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   const signInWithGoogle = async (): Promise<boolean> => {
     const provider = new GoogleAuthProvider();
-    setIsLoading(true); // Set loading state immediately before redirect
+    // No need to set isLoading here, as the page will reload anyway
     try {
       await signInWithRedirect(auth, provider);
-      // The browser will redirect. The result is handled by the `onAuthStateChanged` and `getRedirectResult` useEffect.
+      // The browser redirects away, so this promise may not resolve.
       return true;
     } catch (error: any) {
         console.error("Google Sign-In Start Error:", error);
         toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not start the Google sign-in process. Please check your connection and try again." });
-        setIsLoading(false);
         return false;
     }
   };
@@ -230,6 +230,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await signOut(auth);
     setUser(null);
     setFirebaseUser(null);
+    setShowOnboarding(false);
+    setShowTerms(false);
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.push("/login");
   }, [router, toast]);
