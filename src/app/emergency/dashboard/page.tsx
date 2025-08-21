@@ -8,6 +8,7 @@ import { Siren, Ambulance, Plane, Clock, MapPin, User, Check, X, Send } from "lu
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 
 // Mock Data - In a real app, this would come from a real-time Firestore stream
 const incomingAlerts = [
