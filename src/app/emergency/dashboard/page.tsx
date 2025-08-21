@@ -62,8 +62,9 @@ export default function EmergencyDashboardPage() {
             </div>
 
             <div className="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
-                <div className="lg:col-span-2 w-full aspect-square">
-                    <Card className="h-full flex flex-col">
+                <div className="lg:col-span-2 w-full">
+                   <div className="w-full max-w-[70%] aspect-square mx-auto lg:mx-0">
+                     <Card className="h-full flex flex-col">
                         <CardHeader>
                             <CardTitle>Live Incident Map</CardTitle>
                         </CardHeader>
@@ -87,6 +88,7 @@ export default function EmergencyDashboardPage() {
                             </div>
                         </CardContent>
                     </Card>
+                   </div>
                 </div>
 
                 <div className="flex flex-col h-full overflow-hidden">
@@ -124,7 +126,7 @@ export default function EmergencyDashboardPage() {
                             <Card className="h-full flex flex-col">
                                  <CardHeader className="p-4">
                                     <CardTitle>Unit Status</CardTitle>
-                                </CardHeader>
+                                 </CardHeader>
                                 <CardContent className="p-0 flex-grow overflow-y-auto">
                                     <div className="space-y-0">
                                         {unitStatuses.map(unit => (
