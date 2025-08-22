@@ -13,7 +13,8 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential,
     GoogleAuthProvider,
-    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -34,7 +35,7 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   signup: (credentials: SignUpCredentials) => Promise<boolean>;
   logout: () => void;
-  signInWithGoogle: () => Promise<boolean>;
+  signInWithGoogle: () => Promise<void>;
   reauthenticateAndChangePassword: (currentPass: string, newPass: string) => Promise<boolean>;
   isLoading: boolean;
 }
@@ -96,10 +97,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
                 handleLoginChecks(userData);
+            } else {
+                // This case handles a new user returning from Google redirect
+                // The userDoc doesn't exist yet, so we process the redirect result.
+                 try {
+                    const result = await getRedirectResult(auth);
+                    if (result) {
+                        const newFbUser = result.user;
+                        const newUserDoc = await createUserInFirestore({
+                            name: newFbUser.displayName,
+                            email: newFbUser.email,
+                            avatarUrl: newFbUser.photoURL
+                        }, newFbUser.uid);
+
+                        if (newUserDoc) {
+                             setUser(newUserDoc);
+                             handleLoginChecks(newUserDoc);
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error processing redirect result", error);
+                }
             }
-            // Note: New user creation is handled by the signup/signInWithGoogle functions
-            // to ensure all necessary details are passed. This listener just syncs state
-            // for already existing users.
         } else {
             setUser(null);
             setFirebaseUser(null);
@@ -174,43 +193,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const signInWithGoogle = async (): Promise<boolean> => {
+  const signInWithGoogle = async (): Promise<void> => {
     const provider = new GoogleAuthProvider();
     setIsLoading(true);
     try {
-        const result = await signInWithPopup(auth, provider);
-        const fbUser = result.user;
-        
-        const userDocRef = doc(db, "users", fbUser.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        let finalUserData: User;
-
-        if (userDoc.exists()) {
-            // Existing user
-            finalUserData = { id: userDoc.id, ...userDoc.data() } as User;
-        } else {
-            // New user via Google
-            const newUser = await createUserInFirestore({
-                name: fbUser.displayName,
-                email: fbUser.email,
-                avatarUrl: fbUser.photoURL
-            }, fbUser.uid);
-            
-            if (!newUser) {
-                throw new Error("Could not create user document for Google Sign-In.");
-            }
-            finalUserData = newUser;
-        }
-        
-        // This centralized block ensures user state is set before any checks are run.
-        setUser(finalUserData);
-        setFirebaseUser(fbUser);
-        handleLoginChecks(finalUserData);
-        // Loading state is set to false by the main onAuthStateChanged listener
-        
-        return true;
-
+        await signInWithRedirect(auth, provider);
+        // The user will be redirected. The onAuthStateChanged listener will handle the result.
     } catch (error: any) {
         let description = "An unknown error occurred during Google Sign-In.";
         if (error.code === 'auth/popup-closed-by-user') {
@@ -220,7 +208,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         toast({ variant: 'destructive', title: "Sign-In Failed", description });
         setIsLoading(false);
-        return false;
     }
   };
 

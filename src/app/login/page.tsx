@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -38,9 +38,8 @@ const signupSchema = z.object({
 
 
 function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { login, signInWithGoogle } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
-    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const { login, signInWithGoogle, isLoading } = useAuth();
+    const [isSubmitting, setIsSubmitting] = useState(false);
     
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -48,15 +47,15 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     });
 
     async function onSubmit(values: z.infer<typeof loginSchema>) {
-        setIsLoading(true);
+        setIsSubmitting(true);
         await login(values);
-        setIsLoading(false);
+        setIsSubmitting(false);
     }
     
     async function handleGoogleSignIn() {
-        setIsGoogleLoading(true);
+        setIsSubmitting(true);
         await signInWithGoogle();
-        setIsGoogleLoading(false);
+        // The page will redirect, so no need to set isSubmitting to false
     }
 
     return (
@@ -74,8 +73,8 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                         <FormField name="password" control={form.control} render={({ field }) => (
                             <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                        <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
+                            {(isLoading || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Login
                         </Button>
                     </form>
@@ -88,8 +87,8 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                         <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
                     </div>
                 </div>
-                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
-                    {isGoogleLoading ? (
+                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isSubmitting}>
+                    {(isLoading || isSubmitting) ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                         <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
@@ -105,9 +104,8 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 }
 
 function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { signup, signInWithGoogle } = useAuth();
-    const [isLoading, setIsLoading] = useState(false);
-    const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+    const { signup, signInWithGoogle, isLoading } = useAuth();
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof signupSchema>>({
         resolver: zodResolver(signupSchema),
@@ -115,7 +113,7 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     });
 
      async function onSubmit(values: z.infer<typeof signupSchema>) {
-        setIsLoading(true);
+        setIsSubmitting(true);
         await signup({
             name: `${values.firstName} ${values.lastName}`,
             email: values.email,
@@ -124,13 +122,13 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
             age: values.ageRange,
             location: values.location,
         });
-        setIsLoading(false);
+        setIsSubmitting(false);
     }
     
     async function handleGoogleSignIn() {
-        setIsGoogleLoading(true);
+        setIsSubmitting(true);
         await signInWithGoogle();
-        setIsGoogleLoading(false);
+        // The page will redirect, so no need to set isSubmitting to false
     }
 
     return (
@@ -197,8 +195,8 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                             </FormItem>
                         )} />
 
-                        <Button type="submit" className="w-full" size="lg" disabled={isLoading || isGoogleLoading}>
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Button type="submit" className="w-full" size="lg" disabled={isLoading || isSubmitting}>
+                            {(isLoading || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create an account
                         </Button>
                          <div className="relative my-2">
@@ -209,8 +207,8 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                                 <span className="bg-card px-2 text-muted-foreground">Or</span>
                             </div>
                         </div>
-                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={handleGoogleSignIn} disabled={isLoading || isGoogleLoading}>
-                             {isGoogleLoading ? (
+                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={handleGoogleSignIn} disabled={isLoading || isSubmitting}>
+                             {(isLoading || isSubmitting) ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                              ) : (
                                 <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
@@ -230,21 +228,26 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("login");
+  const { isLoading } = useAuth();
 
   return (
     <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[calc(100vh-128px)]">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-lg">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-                <LoginForm onSwitchTab={() => setActiveTab("signup")} />
-            </TabsContent>
-            <TabsContent value="signup">
-                <SignUpForm onSwitchTab={() => setActiveTab("login")} />
-            </TabsContent>
-        </Tabs>
+        {isLoading && !activeTab ? (
+            <Loader2 className="h-16 w-16 animate-spin text-primary" />
+        ) : (
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-lg">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="login">Login</TabsTrigger>
+                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                </TabsList>
+                <TabsContent value="login">
+                    <LoginForm onSwitchTab={() => setActiveTab("signup")} />
+                </TabsContent>
+                <TabsContent value="signup">
+                    <SignUpForm onSwitchTab={() => setActiveTab("login")} />
+                </TabsContent>
+            </Tabs>
+        )}
     </div>
   );
 }
