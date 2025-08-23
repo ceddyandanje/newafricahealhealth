@@ -53,7 +53,7 @@ const whoArticles: Omit<BlogPost, 'id' | 'slug' | 'content'>[] = [
     {
         title: 'Fact sheet on Organ Transplantation',
         description: 'Key facts about organ transplantation from WHO, covering global practices, safety, and ethical considerations.',
-        image: 'https://images.unsplash.com/photo-1582719471384-894c86c97e54?q=80&w=870&auto=format&fit=crop',
+        image: 'https://images.unsplash.com/photo-1582719471384-8634440b87c6f09?q=80&w=870&auto=format&fit=crop',
         dataAiHint: 'surgical team',
         category: 'Transplants',
         date: '2023-07-26T10:00:00Z',
