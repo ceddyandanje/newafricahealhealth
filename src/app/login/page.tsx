@@ -55,7 +55,7 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     async function handleGoogleSignIn() {
         setIsSubmitting(true);
         await signInWithGoogle();
-        // The page will redirect, so no need to set isSubmitting to false
+        setIsSubmitting(false);
     }
 
     return (
@@ -128,7 +128,7 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     async function handleGoogleSignIn() {
         setIsSubmitting(true);
         await signInWithGoogle();
-        // The page will redirect, so no need to set isSubmitting to false
+        setIsSubmitting(false);
     }
 
     return (

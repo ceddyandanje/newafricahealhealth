@@ -13,8 +13,7 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential,
     GoogleAuthProvider,
-    signInWithRedirect,
-    getRedirectResult,
+    signInWithPopup,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -88,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+        setIsLoading(true);
         if (fbUser) {
             setFirebaseUser(fbUser);
             const userDocRef = doc(db, "users", fbUser.uid);
@@ -98,26 +98,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUser(userData);
                 handleLoginChecks(userData);
             } else {
-                // This case handles a new user returning from Google redirect
-                // The userDoc doesn't exist yet, so we process the redirect result.
-                 try {
-                    const result = await getRedirectResult(auth);
-                    if (result) {
-                        const newFbUser = result.user;
-                        const newUserDoc = await createUserInFirestore({
-                            name: newFbUser.displayName,
-                            email: newFbUser.email,
-                            avatarUrl: newFbUser.photoURL
-                        }, newFbUser.uid);
-
-                        if (newUserDoc) {
-                             setUser(newUserDoc);
-                             handleLoginChecks(newUserDoc);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error processing redirect result", error);
-                }
+                // User is authenticated with Firebase, but has no user doc. 
+                // This can happen if doc creation failed during signup.
+                // We'll treat them as logged out and let them sign up again.
+                setUser(null);
+                setFirebaseUser(null);
             }
         } else {
             setUser(null);
@@ -173,8 +158,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-          setUser(newUser);
-          handleLoginChecks(newUser);
+          // onAuthStateChanged will handle setting state and redirection
           return true;
         } else {
           throw new Error("Could not create user document in Firestore.");
@@ -197,8 +181,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const provider = new GoogleAuthProvider();
     setIsLoading(true);
     try {
-        await signInWithRedirect(auth, provider);
-        // The user will be redirected. The onAuthStateChanged listener will handle the result.
+        const result = await signInWithPopup(auth, provider);
+        const fbUser = result.user;
+        
+        const userDocRef = doc(db, "users", fbUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            // Existing user
+            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+            setUser(userData);
+            handleLoginChecks(userData);
+            toast({ title: `Welcome back, ${userData.name.split(' ')[0]}!` });
+        } else {
+            // New user via Google
+            const newUser = await createUserInFirestore({
+                name: fbUser.displayName,
+                email: fbUser.email,
+                avatarUrl: fbUser.photoURL
+            }, fbUser.uid);
+
+            if (newUser) {
+                setUser(newUser);
+                handleLoginChecks(newUser);
+                toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+                 addLog("INFO", `New user signed up with Google: ${newUser.name} (${newUser.email}).`);
+                addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User (Google)', description: `An account for ${newUser.name} has been created.`});
+            } else {
+                 throw new Error("Failed to create user document after Google sign-in.");
+            }
+        }
     } catch (error: any) {
         let description = "An unknown error occurred during Google Sign-In.";
         if (error.code === 'auth/popup-closed-by-user') {
@@ -207,6 +219,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             description = "An account with this email already exists but was created with a different method (e.g., password). Please log in using your original method.";
         }
         toast({ variant: 'destructive', title: "Sign-In Failed", description });
+    } finally {
         setIsLoading(false);
     }
   };
