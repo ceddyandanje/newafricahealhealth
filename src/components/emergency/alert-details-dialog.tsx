@@ -108,7 +108,7 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
     if (!isOpen) return null;
 
     return (
-        <DialogContent className="sm:max-w-4xl h-[80vh]">
+        <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col">
             <DialogHeader>
                 <DialogTitle className="font-headline text-2xl flex items-center gap-2">
                     <Siren className="text-destructive"/> AI Dispatch Center
@@ -150,9 +150,10 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                 </ScrollArea>
                 
                 {/* Right Pane: Details View */}
-                <div className="md:col-span-2 h-full flex flex-col gap-4">
+                <div className="md:col-span-2 h-full flex flex-col gap-4 overflow-hidden">
                     {selectedAlert ? (
-                        <ScrollArea className="h-full pr-4">
+                       <>
+                         <ScrollArea className="flex-grow pr-4">
                            <div className="space-y-4">
                              <div className="p-4 border rounded-lg">
                                 <h3 className="font-semibold text-lg mb-2">{selectedAlert.serviceType} Request</h3>
@@ -192,31 +193,31 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                                      </div>
                                  )}
                              </div>
-
-                             <div className="p-4 border rounded-lg">
-                                <h3 className="font-semibold mb-3">Actions</h3>
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <Select>
-                                            <SelectTrigger><SelectValue placeholder="Assign Available Unit..." /></SelectTrigger>
-                                            <SelectContent>
-                                                {availableUnits.filter(u => u.status === 'Available').map(unit => (
-                                                    <SelectItem key={unit.id} value={unit.id}>{unit.id} ({unit.type}) - {unit.licensePlate}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <Button className="bg-red-600 hover:bg-red-700 flex-shrink-0"><Send className="h-4 w-4 mr-2"/> Dispatch</Button>
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <Button variant="outline"><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
-                                        <Button variant="outline"><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
-                                        <Button variant="outline"><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
-                                        <Button variant="outline" className="text-green-600 border-green-600/50 hover:bg-green-50 hover:text-green-700" onClick={handleResolve}><CheckCircle className="h-4 w-4 mr-2"/> Mark as Resolved</Button>
-                                    </div>
-                                </div>
-                             </div>
                            </div>
                         </ScrollArea>
+                        <div className="p-4 border rounded-lg flex-shrink-0">
+                            <h3 className="font-semibold mb-3">Actions</h3>
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-2">
+                                    <Select>
+                                        <SelectTrigger><SelectValue placeholder="Assign Available Unit..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {availableUnits.filter(u => u.status === 'Available').map(unit => (
+                                                <SelectItem key={unit.id} value={unit.id}>{unit.id} ({unit.type}) - {unit.licensePlate}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <Button className="bg-red-600 hover:bg-red-700 flex-shrink-0"><Send className="h-4 w-4 mr-2"/> Dispatch</Button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button variant="outline"><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
+                                    <Button variant="outline"><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
+                                    <Button variant="outline"><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
+                                    <Button variant="outline" className="text-green-600 border-green-600/50 hover:bg-green-50 hover:text-green-700" onClick={handleResolve}><CheckCircle className="h-4 w-4 mr-2"/> Mark as Resolved</Button>
+                                </div>
+                            </div>
+                         </div>
+                       </>
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground bg-muted/30 rounded-lg">
                             <Siren className="h-12 w-12 mb-4" />
@@ -226,9 +227,11 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                     )}
                 </div>
             </div>
-            <DialogFooter className="border-t pt-4">
+            <DialogFooter className="border-t pt-4 mt-auto">
                  <Button variant="outline" onClick={onClose}>Close</Button>
             </DialogFooter>
         </DialogContent>
     );
 }
+
+    
