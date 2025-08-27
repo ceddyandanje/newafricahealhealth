@@ -9,6 +9,7 @@
 
 const {setGlobalOptions} = require("firebase-functions");
 const {onDocumentCreated} = require("firebase-functions/v2/firestore");
+const {onCall} = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const admin = require("firebase-admin");
 const twilio = require("twilio");
@@ -80,4 +81,11 @@ exports.sendEmergencySmsNotification = onDocumentCreated("emergencies/{emergency
   });
 
   await Promise.all(notificationPromises);
+});
+
+// A simple callable function to test the environment
+exports.helloWorld = onCall((request) => {
+  const name = request.data.name || "World";
+  logger.info(`Received helloWorld call with name: ${name}`);
+  return {message: `Hello, ${name}!`};
 });

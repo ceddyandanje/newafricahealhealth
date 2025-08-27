@@ -2,11 +2,12 @@
 'use client';
 
 import { useState } from 'react';
-import { db } from '@/lib/firebase';
+import { db, app } from '@/lib/firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { collection, addDoc, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Database, Edit, List, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { Database, Edit, List, CheckCircle, XCircle, MessageSquare, Cloud } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { addLog } from '@/lib/logs';
@@ -16,9 +17,11 @@ export default function FirestoreTestPage() {
     const [isLoadingRead, setIsLoadingRead] = useState(false);
     const [isLoadingTest, setIsLoadingTest] = useState(false);
     const [isLoadingLog, setIsLoadingLog] = useState(false);
+    const [isLoadingFunction, setIsLoadingFunction] = useState(false);
     const [readData, setReadData] = useState<any[]>([]);
     const { toast } = useToast();
     const testCollectionName = "test-collection";
+    const functions = getFunctions(app);
 
     const handleConnectionTest = async () => {
         setIsLoadingTest(true);
@@ -113,6 +116,28 @@ export default function FirestoreTestPage() {
             setIsLoadingLog(false);
         }
     }
+    
+    const handleTestFunction = async () => {
+        setIsLoadingFunction(true);
+        try {
+            const helloWorld = httpsCallable(functions, 'helloWorld');
+            const result = await helloWorld({ name: 'Admin' });
+            const data = result.data as { message: string };
+            toast({
+                title: "Function Executed Successfully",
+                description: `Response: "${data.message}"`,
+            });
+        } catch (error: any) {
+            console.error("Error calling function:", error);
+            toast({
+                variant: "destructive",
+                title: "Function Call Failed",
+                description: `An error occurred: ${error.message}`,
+            });
+        } finally {
+            setIsLoadingFunction(false);
+        }
+    }
 
     return (
         <div className="p-6">
@@ -170,6 +195,19 @@ export default function FirestoreTestPage() {
                         <Button onClick={handleGenerateLog} disabled={isLoadingLog} variant="secondary">
                             {isLoadingLog && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Generate Test Log
+                        </Button>
+                    </CardContent>
+                </Card>
+                
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Cloud className="w-5 h-5 text-purple-500"/> 5. Test Cloud Function</CardTitle>
+                        <CardDescription>Click this to call a simple 'helloWorld' Cloud Function and see the response.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <Button onClick={handleTestFunction} disabled={isLoadingFunction} variant="secondary">
+                            {isLoadingFunction && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Test Cloud Function
                         </Button>
                     </CardContent>
                 </Card>
