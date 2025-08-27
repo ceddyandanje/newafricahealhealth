@@ -73,7 +73,9 @@ export default function EmergencyDashboardPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <DialogTrigger asChild>
-                        <StatCard icon={Siren} value={incomingAlerts.length} label="Active Incidents" variant="destructive" className="cursor-pointer hover:shadow-lg"/>
+                       <button>
+                         <StatCard icon={Siren} value={incomingAlerts.length} label="Active Incidents" variant="destructive" className="cursor-pointer hover:shadow-lg w-full"/>
+                       </button>
                     </DialogTrigger>
                     <StatCard icon={Ambulance} value={unitStatuses.filter(u => u.status === 'Available' && u.type === 'Ground').length} label="Available Ground Units" variant="default" />
                     <StatCard icon={Plane} value={unitStatuses.filter(u => u.status === 'Available' && u.type === 'Air').length} label="Available Air Units" variant="default" />
@@ -171,7 +173,7 @@ export default function EmergencyDashboardPage() {
                     </Card>
                 </div>
             </div>
-            {<AlertDetailsDialog alerts={incomingAlerts} />}
+            <AlertDetailsDialog alerts={incomingAlerts} isOpen={isAlertsDialogOpen} onClose={() => setIsAlertsDialogOpen(false)} />
         </Dialog>
     );
 }
