@@ -51,8 +51,8 @@
     {
         "id": "task-7",
         "title": "Implement Cloud Functions for Notifications",
-        "description": "Write and deploy Firebase Cloud Functions to send real email/SMS notifications for important events. \n\n**Data Handling:** A function will trigger on document creation in collections like `refillRequests` or `orders`. It will then use a service like SendGrid or Twilio to dispatch the notification.",
-        "status": "Todo",
+        "description": "Write and deploy Firebase Cloud Functions to send real email/SMS notifications for important events. \n\n**Data Handling:** A function will trigger on document creation in collections like `refillRequests`, `emergencies` or `orders`. It will then use a service like SendGrid or Twilio to dispatch the notification.",
+        "status": "In Progress",
         "category": "AI & Automation",
         "createdAt": "2023-10-28T10:06:00Z"
     },
