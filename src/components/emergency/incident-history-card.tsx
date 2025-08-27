@@ -46,7 +46,7 @@ export default function IncidentHistoryCard({ incident }: IncidentHistoryCardPro
                 </div>
             </CardHeader>
             <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
-                <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Status:</strong> <Badge variant={statusVariant[incident.status] || 'secondary'}>{incident.status}</Badge></p>
+                <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Status:</strong> <Badge variant={statusVariant[incident.status] || 'secondary'}>{incident.status}</Badge></div>
                  <p className="flex items-center gap-2"><Droplets className="h-4 w-4 text-muted-foreground"/> <strong>Blood Group:</strong> {incident.bloodGroup || 'N/A'}</p>
                  <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground"/> <strong>Location:</strong> {`${incident.location.latitude.toFixed(4)}, ${incident.location.longitude.toFixed(4)}`}</p>
                  <p className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-muted-foreground"/> <strong>Allergies:</strong> {incident.allergies || 'None'}</p>
