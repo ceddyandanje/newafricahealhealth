@@ -4,14 +4,14 @@
 
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, query, onSnapshot, orderBy, where, addDoc, limit } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, where, addDoc, doc, updateDoc, limit } from 'firebase/firestore';
 import { type EmergencyRequest, type EmergencyStatus } from './types';
 import { addLog } from './logs';
 
 const emergencyCollectionRef = collection(db, 'emergencies');
 
-// Hook to fetch pending emergency requests for the admin dashboard
-export const useEmergencyRequests = () => {
+// Hook to fetch emergency requests. Can fetch all active or only pending.
+export const useEmergencyRequests = (fetchAllActive = false) => {
     const [requests, setRequests] = useState<EmergencyRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -24,9 +24,16 @@ export const useEmergencyRequests = () => {
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const allRecentRequests: EmergencyRequest[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EmergencyRequest));
             
-            const pendingRequests = allRecentRequests.filter(req => req.status === 'Pending');
+            if (fetchAllActive) {
+                // Return all requests that are not resolved or cancelled
+                const activeRequests = allRecentRequests.filter(req => req.status !== 'Resolved' && req.status !== 'Cancelled');
+                setRequests(activeRequests);
+            } else {
+                // Default behavior: only return pending requests
+                const pendingRequests = allRecentRequests.filter(req => req.status === 'Pending');
+                setRequests(pendingRequests);
+            }
             
-            setRequests(pendingRequests);
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching emergency requests:", error);
@@ -34,10 +41,11 @@ export const useEmergencyRequests = () => {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [fetchAllActive]);
 
     return { requests, isLoading };
 };
+
 
 // Hook to fetch incident history for a specific provider
 export const useIncidentHistory = (providerId?: string) => {
@@ -58,14 +66,24 @@ export const useIncidentHistory = (providerId?: string) => {
             limit(50)
         );
         
-        // ... rest of the hook
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const incidentsData: EmergencyRequest[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EmergencyRequest));
+            setIncidents(incidentsData);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching incident history:", error);
+            setIsLoading(false);
+        });
+
+        return () => unsubscribe();
+
     }, [providerId]);
     
     return { incidents, isLoading };
 }
 
 
-type NewRequestPayload = Omit<EmergencyRequest, 'id' | 'status' | 'createdAt'>;
+type NewRequestPayload = Omit<EmergencyRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>;
 
 export const addEmergencyRequest = async (payload: NewRequestPayload) => {
     const now = new Date().toISOString();
@@ -80,5 +98,9 @@ export const addEmergencyRequest = async (payload: NewRequestPayload) => {
 };
 
 export const updateEmergencyStatus = async (id: string, updates: Partial<Pick<EmergencyRequest, 'status' | 'resolvedBy' | 'resolvedAt' | 'dispatchedUnitId'>>) => {
-    // This function will be needed in a future step to manage the incident lifecycle
+    const emergencyDoc = doc(db, 'emergencies', id);
+    await updateDoc(emergencyDoc, {
+        ...updates,
+        updatedAt: new Date().toISOString(),
+    });
 };
