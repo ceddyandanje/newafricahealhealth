@@ -36,9 +36,9 @@ export default function AdminLayout({
   return (
      <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex-grow flex">
+        <div className="flex-grow flex items-start">
             <AdminSidebar />
-            <main className="flex-grow bg-muted/40 pl-64">
+            <main className="flex-grow bg-muted/40">
                 {children}
             </main>
         </div>

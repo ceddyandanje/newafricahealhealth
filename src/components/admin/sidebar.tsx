@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect } from "react";
@@ -36,7 +37,7 @@ export default function AdminSidebar() {
 
   return (
         <aside className={cn(
-            "bg-muted/40 text-foreground flex-col transition-all duration-300 ease-in-out border-r fixed top-16 bottom-0 left-0 flex",
+            "bg-muted/40 text-foreground flex-col transition-all duration-300 ease-in-out border-r flex sticky top-16 h-[calc(100vh-4rem)]",
             isSidebarOpen ? "w-64" : "w-20"
         )}>
             <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="absolute -right-3 top-8 bg-primary text-primary-foreground rounded-full p-1 z-10 hidden lg:block">
