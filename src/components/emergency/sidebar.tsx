@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { 
-    LayoutDashboard, ListChecks, Bell, Settings, LogOut, Ambulance
+    LayoutDashboard, ListChecks, Bell, Settings, LogOut, Ambulance, Truck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 
 const navItems = [
     { href: '/emergency/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/emergency/fleet', icon: Truck, label: 'Fleet Management' },
     { href: '/emergency/alerts', icon: Bell, label: 'Active Alerts' },
     { href: '/emergency/history', icon: ListChecks, label: 'Incident History' },
 ];

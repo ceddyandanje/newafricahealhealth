@@ -200,13 +200,15 @@ export type EmergencyRequest = {
 };
 
 export type EmergencyUnit = {
-    id: string; // e.g., G-01 for Ground 1
-    type: 'Ground' | 'Air' | 'Medevac';
+    id: string; // Firestore ID
+    providerId: string; // ID of the emergency-services user
+    type: 'Ground' | 'Air' | 'Motorbike Medic' | 'Other';
+    licensePlate: string;
+    capacity: number;
+    responseTime: number; // in minutes
+    hasLifeSupport: boolean;
     status: 'Available' | 'En Route' | 'At Scene' | 'Transporting' | 'At Hospital' | 'Unavailable';
-    currentLocation: {
-        latitude: number;
-        longitude: number;
-    };
-    assignedIncidentId?: string;
+    stationedLocation: string;
+    createdAt: string;
+    updatedAt: string;
 };
-    

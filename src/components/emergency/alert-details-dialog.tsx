@@ -12,13 +12,6 @@ import { cn } from '@/lib/utils';
 import { suggestEmergencyResponse } from '@/ai/flows/suggest-emergency-response-flow';
 import { formatDistanceToNow } from 'date-fns';
 
-// Mock data, in a real app this would come from a data source
-const availableUnits: EmergencyUnit[] = [
-    { id: 'G-01', type: 'Ground', status: 'Available', currentLocation: { latitude: 0, longitude: 0 } },
-    { id: 'A-01', type: 'Air', status: 'Available', currentLocation: { latitude: 0, longitude: 0 } },
-    { id: 'G-02', type: 'Ground', status: 'Available', currentLocation: { latitude: 0, longitude: 0 } },
-];
-
 const serviceIcons: { [key in EmergencyRequest['serviceType']]: React.ElementType } = {
     'First Aid': HeartPulse,
     'Ground Ambulance': Ambulance,
@@ -27,11 +20,12 @@ const serviceIcons: { [key in EmergencyRequest['serviceType']]: React.ElementTyp
 
 interface AlertDetailsDialogProps {
     alerts: EmergencyRequest[];
+    availableUnits: EmergencyUnit[];
     isOpen: boolean;
     onClose: () => void;
 }
 
-export default function AlertDetailsDialog({ alerts, isOpen, onClose }: AlertDetailsDialogProps) {
+export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onClose }: AlertDetailsDialogProps) {
     const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
     const [suggestions, setSuggestions] = useState<Map<string, any>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
@@ -185,8 +179,8 @@ export default function AlertDetailsDialog({ alerts, isOpen, onClose }: AlertDet
                                         <Select>
                                             <SelectTrigger><SelectValue placeholder="Assign Available Unit..." /></SelectTrigger>
                                             <SelectContent>
-                                                {availableUnits.map(unit => (
-                                                    <SelectItem key={unit.id} value={unit.id}>{unit.id} ({unit.type}) - {unit.status}</SelectItem>
+                                                {availableUnits.filter(u => u.status === 'Available').map(unit => (
+                                                    <SelectItem key={unit.id} value={unit.id}>{unit.id} ({unit.type}) - {unit.licensePlate}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
