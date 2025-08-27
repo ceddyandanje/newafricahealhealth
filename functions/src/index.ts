@@ -7,9 +7,9 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-import {setGlobalOptions} from "firebase-functions/v2";
-import {onDocumentCreated} from "firebase-functions/v2/firestore";
-import {onCall} from "firebase-functions/v2/https";
+import { setGlobalOptions } from "firebase-functions/v2";
+import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import twilio from "twilio";
@@ -23,7 +23,7 @@ const db = admin.firestore();
 // traffic spikes by instead downgrading performance. This limit is a
 // per-function limit. You can override the limit for each function using the
 // `maxInstances` option in the function's options.
-setGlobalOptions({maxInstances: 10});
+setGlobalOptions({ maxInstances: 10 });
 
 
 // Configure Twilio client
@@ -89,5 +89,5 @@ export const sendEmergencySmsNotification = onDocumentCreated("emergencies/{emer
 export const helloWorld = onCall((request) => {
   const name = request.data.name || "World";
   logger.info(`Received helloWorld call with name: ${name}`);
-  return {message: `Hello, ${name}!`};
+  return { message: `Hello, ${name}!` };
 });
