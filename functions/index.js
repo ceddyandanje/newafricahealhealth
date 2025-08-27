@@ -8,25 +8,76 @@
  */
 
 const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
+const {onDocumentCreated} = require("firebase-functions/v2/firestore");
 const logger = require("firebase-functions/logger");
+const admin = require("firebase-admin");
+const twilio = require("twilio");
+
+// Initialize Firebase Admin SDK
+admin.initializeApp();
+const db = admin.firestore();
 
 // For cost control, you can set the maximum number of containers that can be
 // running at the same time. This helps mitigate the impact of unexpected
 // traffic spikes by instead downgrading performance. This limit is a
 // per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// `maxInstances` option in the function's options.
+setGlobalOptions({maxInstances: 10});
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+// Configure Twilio client
+// IMPORTANT: Replace placeholder values with your actual Twilio credentials.
+// It is highly recommended to store these as environment variables/secrets.
+// https://firebase.google.com/docs/functions/config-env
+const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID || "YOUR_TWILIO_ACCOUNT_SID";
+const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN || "YOUR_TWILIO_AUTH_TOKEN";
+const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER || "YOUR_TWILIO_PHONE_NUMBER";
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+const twilioClient = twilio(twilioAccountSid, twilioAuthToken);
+
+
+exports.sendEmergencySmsNotification = onDocumentCreated("emergencies/{emergencyId}", async (event) => {
+  const snapshot = event.data;
+  if (!snapshot) {
+    logger.log("No data associated with the event");
+    return;
+  }
+  const emergencyData = snapshot.data();
+  logger.info(`New emergency created: ${event.params.emergencyId}`, emergencyData);
+
+
+  // Find all emergency service providers to notify them.
+  // In a real-world scenario, you would have a more sophisticated system
+  // to find the *nearest* or *most appropriate* providers.
+  const usersRef = db.collection("users");
+  const querySnapshot = await usersRef.where("role", "==", "emergency-services").get();
+
+  if (querySnapshot.empty) {
+    logger.warn("No emergency service providers found to notify.");
+    return;
+  }
+
+  const notificationPromises = querySnapshot.docs.map(async (doc) => {
+    const provider = doc.data();
+
+    // Check if the provider has a phone number and has enabled SMS notifications
+    if (!provider.phone || !provider.smsAlertsEnabled) {
+      logger.log(`Provider ${provider.name} (${provider.id}) has no phone number or has SMS alerts disabled. Skipping.`);
+      return;
+    }
+
+    const messageBody = `New Africa Heal Health Alert: ${emergencyData.serviceType} for ${emergencyData.patientName}. Situation: ${emergencyData.situationDescription || "N/A"}. Please check the dashboard.`;
+
+    try {
+      await twilioClient.messages.create({
+        body: messageBody,
+        from: twilioPhoneNumber,
+        to: provider.phone, // Assumes phone number is in E.164 format
+      });
+      logger.info(`Successfully sent SMS to ${provider.name} at ${provider.phone}`);
+    } catch (error) {
+      logger.error(`Failed to send SMS to ${provider.name}. Error:`, error);
+    }
+  });
+
+  await Promise.all(notificationPromises);
+});

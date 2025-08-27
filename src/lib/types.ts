@@ -39,6 +39,7 @@ export type User = {
     emergencyUnit?: string; // For emergency services
     certificationLevel?: 'EMT' | 'Paramedic' | 'First Responder';
     termsAccepted?: boolean;
+    smsAlertsEnabled?: boolean;
 };
 
 export type LoginCredentials = Pick<User, 'email' | 'password'>;

@@ -46,7 +46,7 @@ export default function EmergencySettingsPage() {
     // State for notifications
     const [notificationPermission, setNotificationPermission] = useState('default');
     const [desktopNotificationsEnabled, setDesktopNotificationsEnabled] = useState(false);
-    const [smsNotificationsEnabled, setSmsNotificationsEnabled] = useState(false);
+    const [smsAlertsEnabled, setSmsAlertsEnabled] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -60,9 +60,7 @@ export default function EmergencySettingsPage() {
             setPhone(user.phone || '');
             setServiceName(user.name); // Default service name to user name
             setCertificationLevel(user.certificationLevel || 'EMT');
-            // Assuming preferences are stored on the user object, e.g., user.preferences.desktopNotifications
-            // setDesktopNotificationsEnabled(user.preferences?.desktopNotifications ?? false);
-            // setSmsNotificationsEnabled(user.preferences?.smsNotifications ?? false);
+            setSmsAlertsEnabled((user as any).smsAlertsEnabled ?? false);
         }
     }, [user]);
 
@@ -92,7 +90,7 @@ export default function EmergencySettingsPage() {
         }
         
         setIsPasswordSubmitting(true);
-        const success = await reauthenticateAndChangePassword(currentPassword, newPassword);
+        const success = await reauthenticateAndChangePassword(currentPassword, newPass);
         setIsPasswordSubmitting(false);
 
         if (success) {
@@ -144,7 +142,6 @@ export default function EmergencySettingsPage() {
             setNotificationPermission(permission);
             if (permission === 'granted') {
                 setDesktopNotificationsEnabled(true);
-                // This would be saved to user profile in a real app
                 toast({ title: 'Notifications Enabled!', description: 'You will now receive desktop alerts.' });
                 new Notification('Africa Heal Health', { body: 'Desktop notifications are now active!' });
             } else {
@@ -153,8 +150,20 @@ export default function EmergencySettingsPage() {
             }
         } else if (notificationPermission === 'granted') {
             setDesktopNotificationsEnabled(checked);
-            // This would be saved to user profile in a real app
             toast({ title: `Desktop notifications ${checked ? 'enabled' : 'disabled'}.` });
+        }
+    };
+
+    const handleSmsToggle = async (checked: boolean) => {
+        if (!user) return;
+        setSmsAlertsEnabled(checked);
+        const success = await updateUserInFirestore(user.id, { smsAlertsEnabled: checked });
+        if (success) {
+            setUser(prev => prev ? { ...prev, smsAlertsEnabled: checked } as any : null);
+            toast({ title: `SMS alerts ${checked ? 'enabled' : 'disabled'}.` });
+        } else {
+            setSmsAlertsEnabled(!checked); // Revert on failure
+            toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your SMS preference." });
         }
     };
 
@@ -205,8 +214,8 @@ export default function EmergencySettingsPage() {
                                     <Input id="service-name" value={serviceName} onChange={(e) => setServiceName(e.target.value)} placeholder="e.g. Phoenix Aviation" />
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="phone">Contact Phone</Label>
-                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+254 712 345 678" />
+                                    <Label htmlFor="phone">Contact Phone (with country code)</Label>
+                                    <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+254712345678" />
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="certificationLevel">Top Certification Level</Label>
@@ -268,8 +277,8 @@ export default function EmergencySettingsPage() {
                                  </Label>
                                 <Switch 
                                     id="sms-notifications" 
-                                    checked={smsNotificationsEnabled} 
-                                    onCheckedChange={setSmsNotificationsEnabled}
+                                    checked={smsAlertsEnabled} 
+                                    onCheckedChange={handleSmsToggle}
                                 />
                             </div>
                         </CardContent>
