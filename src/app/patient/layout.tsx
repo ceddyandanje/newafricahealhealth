@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect } from 'react';
@@ -8,6 +9,8 @@ import { Loader2 } from 'lucide-react';
 import PatientSidebar from "@/components/patient/sidebar";
 import { cn } from '@/lib/utils';
 import { useSidebar } from '@/hooks/use-sidebar';
+import Header from '@/components/layout/header';
+import Footer from '@/components/layout/footer';
 
 export default function PatientLayout({
   children,
@@ -45,11 +48,18 @@ export default function PatientLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <div className="flex-grow flex relative">
         <PatientSidebar />
-        <main className="pl-20 transition-all duration-300 pb-24">
+        <main className={cn(
+          "flex-grow bg-muted/40 transition-all duration-300 pb-24",
+          isExpanded ? "pl-80" : "pl-24"
+        )}>
           {children}
         </main>
+      </div>
+       <Footer />
     </div>
   )
 }

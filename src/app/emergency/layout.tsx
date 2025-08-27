@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect } from 'react';
@@ -7,6 +8,8 @@ import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import EmergencySidebar from "@/components/emergency/sidebar";
 import { cn } from '@/lib/utils';
+import Header from '@/components/layout/header';
+import Footer from '@/components/layout/footer';
 
 export default function EmergencyLayout({
   children,
@@ -32,13 +35,17 @@ export default function EmergencyLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/40 flex">
+     <div className="flex flex-col min-h-screen">
+      <Header />
+      <div className="flex-grow flex">
         <EmergencySidebar />
         <main className={cn(
-          "flex-1 pl-20 transition-all duration-300",
+          "flex-1 pl-20 transition-all duration-300 bg-muted/40",
         )}>
             {children}
         </main>
+      </div>
+      <Footer />
     </div>
   )
 }

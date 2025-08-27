@@ -7,8 +7,6 @@ import { CartProvider } from '@/hooks/use-cart';
 import { AuthProvider } from '@/hooks/use-auth';
 import AiChatWidget from '@/components/health/ai-chat-widget';
 import { EmergencyRequestWidget } from '@/components/health/emergency-request-widget';
-import Header from '@/components/layout/header';
-import Footer from '@/components/layout/footer';
 
 export const metadata: Metadata = {
   title: 'Africa Heal Health',
@@ -36,13 +34,7 @@ export default function RootLayout({
         >
           <AuthProvider>
             <CartProvider>
-              <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-grow">
-                    {children}
-                </main>
-                <Footer />
-              </div>
+              {children}
               <Toaster />
               <AiChatWidget />
               <EmergencyRequestWidget />

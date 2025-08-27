@@ -10,13 +10,16 @@ import { cn } from "@/lib/utils"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import ConsultationForm from "@/components/forms/consultation-form"
 import GetStartedButton from "@/components/health/get-started-button"
+import Header from "@/components/layout/header"
+import Footer from "@/components/layout/footer"
 
 
 export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      
+      <Header />
+      <div className="flex-grow">
         {/* Hero Section */}
         <section className="relative">
           <div className="relative h-[70vh] min-h-[500px]">
@@ -467,6 +470,8 @@ export default function Home() {
             </div>
           </div>
         </section>
+      </div>
+      <Footer />
     </div>
   )
 }

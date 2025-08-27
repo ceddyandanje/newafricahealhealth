@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect } from 'react';
@@ -6,6 +7,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import DoctorSidebar from "@/components/doctor/sidebar";
+import Header from '@/components/layout/header';
+import Footer from '@/components/layout/footer';
 
 export default function DoctorLayout({
   children,
@@ -31,11 +34,15 @@ export default function DoctorLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/40 flex">
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <div className="flex-grow flex">
         <DoctorSidebar />
         <main className="flex-1 pl-20 transition-all duration-300">
             {children}
         </main>
+      </div>
+       <Footer />
     </div>
   )
 }
