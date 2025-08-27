@@ -42,7 +42,17 @@ export default function EmergencySettingsPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isPasswordChangeDialogOpen, setIsPasswordChangeDialogOpen] = useState(false);
     const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+    
+    // State for notifications
+    const [notificationPermission, setNotificationPermission] = useState('default');
+    const [desktopNotificationsEnabled, setDesktopNotificationsEnabled] = useState(false);
+    const [smsNotificationsEnabled, setSmsNotificationsEnabled] = useState(false);
 
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            setNotificationPermission(Notification.permission);
+        }
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -50,6 +60,9 @@ export default function EmergencySettingsPage() {
             setPhone(user.phone || '');
             setServiceName(user.name); // Default service name to user name
             setCertificationLevel(user.certificationLevel || 'EMT');
+            // Assuming preferences are stored on the user object, e.g., user.preferences.desktopNotifications
+            // setDesktopNotificationsEnabled(user.preferences?.desktopNotifications ?? false);
+            // setSmsNotificationsEnabled(user.preferences?.smsNotifications ?? false);
         }
     }, [user]);
 
@@ -119,7 +132,31 @@ export default function EmergencySettingsPage() {
             setIsUploading(false);
         }
     };
+    
+    const handleDesktopNotificationToggle = async (checked: boolean) => {
+        if (notificationPermission === 'denied') {
+            toast({ variant: 'destructive', title: 'Permission Denied', description: 'Please enable notifications in your browser settings.' });
+            return;
+        }
 
+        if (notificationPermission === 'default') {
+            const permission = await Notification.requestPermission();
+            setNotificationPermission(permission);
+            if (permission === 'granted') {
+                setDesktopNotificationsEnabled(true);
+                // This would be saved to user profile in a real app
+                toast({ title: 'Notifications Enabled!', description: 'You will now receive desktop alerts.' });
+                new Notification('Africa Heal Health', { body: 'Desktop notifications are now active!' });
+            } else {
+                setDesktopNotificationsEnabled(false);
+                 toast({ variant: 'destructive', title: 'Permission Denied', description: 'You have blocked notifications.' });
+            }
+        } else if (notificationPermission === 'granted') {
+            setDesktopNotificationsEnabled(checked);
+            // This would be saved to user profile in a real app
+            toast({ title: `Desktop notifications ${checked ? 'enabled' : 'disabled'}.` });
+        }
+    };
 
     return (
         <div className="p-6">
@@ -209,11 +246,19 @@ export default function EmergencySettingsPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <Label htmlFor="push-notifications" className="flex flex-col">
-                                    <span>Desktop Notifications</span>
+                                <div className="flex flex-col">
+                                    <Label htmlFor="push-notifications">Desktop Notifications</Label>
                                     <span className="text-xs text-muted-foreground">For new incidents.</span>
-                                </Label>
-                                <Switch id="push-notifications" defaultChecked />
+                                     {notificationPermission === 'denied' && (
+                                        <span className="text-xs text-destructive">You have blocked notifications.</span>
+                                    )}
+                                </div>
+                                <Switch 
+                                    id="push-notifications" 
+                                    checked={desktopNotificationsEnabled && notificationPermission === 'granted'}
+                                    onCheckedChange={handleDesktopNotificationToggle}
+                                    disabled={notificationPermission === 'denied'}
+                                />
                             </div>
                             <Separator />
                             <div className="flex items-center justify-between">
@@ -221,7 +266,11 @@ export default function EmergencySettingsPage() {
                                     <span>SMS Alerts</span>
                                      <span className="text-xs text-muted-foreground">For critical incidents.</span>
                                  </Label>
-                                <Switch id="sms-notifications" />
+                                <Switch 
+                                    id="sms-notifications" 
+                                    checked={smsNotificationsEnabled} 
+                                    onCheckedChange={setSmsNotificationsEnabled}
+                                />
                             </div>
                         </CardContent>
                     </Card>
@@ -282,3 +331,4 @@ export default function EmergencySettingsPage() {
         </div>
     );
 }
+
