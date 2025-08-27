@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type EmergencyRequest, type EmergencyUnit } from '@/lib/types';
@@ -27,9 +27,11 @@ const serviceIcons: { [key in EmergencyRequest['serviceType']]: React.ElementTyp
 
 interface AlertDetailsDialogProps {
     alerts: EmergencyRequest[];
+    isOpen: boolean;
+    onClose: () => void;
 }
 
-export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyRequest[] }) {
+export default function AlertDetailsDialog({ alerts, isOpen, onClose }: AlertDetailsDialogProps) {
     const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
     const [suggestions, setSuggestions] = useState<Map<string, any>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
@@ -40,7 +42,7 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
     }, [selectedAlert]);
 
     useEffect(() => {
-        if (alerts.length > 0 && !suggestions.size) {
+        if (isOpen && alerts.length > 0 && !suggestions.size) {
             setIsLoading(true);
             const fetchSuggestions = async () => {
                 const newSuggestions = new Map<string, any>();
@@ -70,21 +72,25 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
             };
             fetchSuggestions();
         }
-    }, [alerts, suggestions.size]);
+    }, [isOpen, alerts, suggestions.size]);
 
     useEffect(() => {
-        if (!selectedAlert && alerts.length > 0) {
-            setSelectedAlert(alerts[0]);
-        } else if (alerts.length === 0) {
-            setSelectedAlert(null);
+        if (isOpen) {
+             if (!selectedAlert && alerts.length > 0) {
+                setSelectedAlert(alerts[0]);
+            } else if (alerts.length === 0) {
+                setSelectedAlert(null);
+            }
         }
-    }, [alerts, selectedAlert])
+    }, [isOpen, alerts, selectedAlert])
 
     const formatTime = (dateString: string) => {
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
     const currentSuggestion = selectedAlert ? suggestions.get(selectedAlert.id) : null;
+
+    if (!isOpen) return null;
 
     return (
         <DialogContent className="sm:max-w-4xl h-[80vh]">
@@ -205,7 +211,7 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
                 </div>
             </div>
             <DialogFooter className="border-t pt-4">
-                 <Button variant="outline">Close</Button>
+                 <Button variant="outline" onClick={onClose}>Close</Button>
             </DialogFooter>
         </DialogContent>
     );
