@@ -25,12 +25,9 @@ export default function EmergencySidebar() {
     const { user, logout } = useAuth();
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-20 flex flex-col items-center py-4 bg-background border-r z-50">
-            <Link href="/emergency/dashboard" className="mb-6">
-                 <Ambulance className="h-8 w-8 text-destructive" />
-            </Link>
+        <aside className="fixed left-0 top-16 bottom-0 w-20 flex flex-col items-center py-4 bg-background border-r z-40">
             <TooltipProvider delayDuration={0}>
-                <nav className="flex flex-col items-center gap-2 flex-grow">
+                <nav className="flex flex-col items-center gap-2 flex-grow mt-4">
                     {navItems.map(item => (
                         <Tooltip key={item.label}>
                             <TooltipTrigger asChild>

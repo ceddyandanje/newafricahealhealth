@@ -37,11 +37,9 @@ export default function EmergencyLayout({
   return (
      <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="flex-grow flex">
+      <div className="flex-grow flex relative">
         <EmergencySidebar />
-        <main className={cn(
-          "flex-1 pl-20 transition-all duration-300 bg-muted/40",
-        )}>
+        <main className="flex-1 pl-20 bg-muted/40">
             {children}
         </main>
       </div>
