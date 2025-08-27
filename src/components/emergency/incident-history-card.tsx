@@ -47,9 +47,9 @@ export default function IncidentHistoryCard({ incident }: IncidentHistoryCardPro
             </CardHeader>
             <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
                 <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Status:</strong> <Badge variant={statusVariant[incident.status] || 'secondary'}>{incident.status}</Badge></div>
-                 <p className="flex items-center gap-2"><Droplets className="h-4 w-4 text-muted-foreground"/> <strong>Blood Group:</strong> {incident.bloodGroup || 'N/A'}</p>
-                 <p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground"/> <strong>Location:</strong> {`${incident.location.latitude.toFixed(4)}, ${incident.location.longitude.toFixed(4)}`}</p>
-                 <p className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-muted-foreground"/> <strong>Allergies:</strong> {incident.allergies || 'None'}</p>
+                 <div className="flex items-center gap-2"><Droplets className="h-4 w-4 text-muted-foreground"/> <strong>Blood Group:</strong> {incident.bloodGroup || 'N/A'}</div>
+                 <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-muted-foreground"/> <strong>Location:</strong> {`${incident.location.latitude.toFixed(4)}, ${incident.location.longitude.toFixed(4)}`}</div>
+                 <div className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-muted-foreground"/> <strong>Allergies:</strong> {incident.allergies || 'None'}</div>
                  <p className="md:col-span-2 flex items-start gap-2"><Info className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Situation:</strong> {incident.situationDescription || 'No details provided.'}</p>
             </CardContent>
             {incident.resolvedAt && (
