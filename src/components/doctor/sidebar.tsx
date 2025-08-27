@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Button } from '../ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import Image from 'next/image';
 
 
 const navItems = [
@@ -24,11 +25,12 @@ const navItems = [
 export default function DoctorSidebar() {
     const pathname = usePathname();
     const { user, logout } = useAuth();
+    const logoUrl = "https://firebasestorage.googleapis.com/v0/b/africa-heal-health-x8xrn.firebasestorage.app/o/FB_IMG_1754584185750.jpg?alt=media&token=447d8b93-7b65-4236-832b-9d9d89411946";
 
     return (
         <aside className="fixed left-0 top-0 h-full w-20 flex flex-col items-center py-4 bg-background border-r z-50">
             <Link href="/doctor/dashboard" className="mb-6">
-                 <HeartPulse className="h-8 w-8 text-primary" />
+                 <Image src={logoUrl} alt="Africa Heal Health Logo" width={40} height={40} className="rounded-full" />
             </Link>
             <TooltipProvider delayDuration={0}>
                 <nav className="flex flex-col items-center gap-2 flex-grow">
