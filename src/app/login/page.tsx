@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,6 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { kenyanCounties } from "@/lib/counties";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -231,23 +234,29 @@ export default function LoginPage() {
   const { isLoading } = useAuth();
 
   return (
-    <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[calc(100vh-128px)]">
-        {isLoading && !activeTab ? (
-            <Loader2 className="h-16 w-16 animate-spin text-primary" />
-        ) : (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-lg">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="login">Login</TabsTrigger>
-                    <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                </TabsList>
-                <TabsContent value="login">
-                    <LoginForm onSwitchTab={() => setActiveTab("signup")} />
-                </TabsContent>
-                <TabsContent value="signup">
-                    <SignUpForm onSwitchTab={() => setActiveTab("login")} />
-                </TabsContent>
-            </Tabs>
-        )}
+    <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+            <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[calc(100vh-128px)]">
+                {isLoading && !activeTab ? (
+                    <Loader2 className="h-16 w-16 animate-spin text-primary" />
+                ) : (
+                    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-lg">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="login">Login</TabsTrigger>
+                            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="login">
+                            <LoginForm onSwitchTab={() => setActiveTab("signup")} />
+                        </TabsContent>
+                        <TabsContent value="signup">
+                            <SignUpForm onSwitchTab={() => setActiveTab("login")} />
+                        </TabsContent>
+                    </Tabs>
+                )}
+            </div>
+        </main>
+      <Footer />
     </div>
   );
 }
