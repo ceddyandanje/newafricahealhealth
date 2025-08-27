@@ -6,7 +6,7 @@ import { DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFoot
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type EmergencyRequest, type EmergencyUnit } from '@/lib/types';
-import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical } from 'lucide-react';
+import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical, Hospital, Shield } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { suggestEmergencyResponse } from '@/ai/flows/suggest-emergency-response-flow';
@@ -31,7 +31,7 @@ interface AlertDetailsDialogProps {
 
 export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyRequest[] }) {
     const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
-    const [suggestions, setSuggestions] = useState<Map<string, string>>(new Map());
+    const [suggestions, setSuggestions] = useState<Map<string, any>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
 
     const timeSinceRequest = useMemo(() => {
@@ -43,7 +43,7 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
         if (alerts.length > 0 && !suggestions.size) {
             setIsLoading(true);
             const fetchSuggestions = async () => {
-                const newSuggestions = new Map<string, string>();
+                const newSuggestions = new Map<string, any>();
                 try {
                     await Promise.all(alerts.map(async (alert) => {
                         const response = await suggestEmergencyResponse({
@@ -55,13 +55,13 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
                             allergies: alert.allergies,
                             timeSinceRequest: formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true }),
                         });
-                        newSuggestions.set(alert.id, response.summary);
+                        newSuggestions.set(alert.id, response);
                     }));
                 } catch (error) {
                     console.error("AI suggestion failed for one or more alerts:", error);
                     alerts.forEach(alert => {
                         if (!newSuggestions.has(alert.id)) {
-                             newSuggestions.set(alert.id, "Could not load AI summary.");
+                             newSuggestions.set(alert.id, { summary: "Could not load AI summary.", lawEnforcementNeeded: false, nearestHospital: "N/A" });
                         }
                     });
                 }
@@ -83,6 +83,8 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
     const formatTime = (dateString: string) => {
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
+
+    const currentSuggestion = selectedAlert ? suggestions.get(selectedAlert.id) : null;
 
     return (
         <DialogContent className="sm:max-w-4xl h-[80vh]">
@@ -148,7 +150,25 @@ export default function AlertDetailsDialog({ alerts }: { alerts: EmergencyReques
                                  {isLoading ? (
                                     <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Generating suggestions for all alerts...</div>
                                  ) : (
-                                    <p className="text-sm font-medium whitespace-pre-wrap">{suggestions.get(selectedAlert.id)}</p>
+                                     <div className="space-y-3">
+                                        <p className="text-sm font-medium whitespace-pre-wrap">{currentSuggestion?.summary}</p>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div className="flex items-start gap-2 p-2 bg-background/50 rounded-md">
+                                                <Hospital className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5"/>
+                                                <div>
+                                                    <p className="font-semibold">Nearest Hospital</p>
+                                                    <p>{currentSuggestion?.nearestHospital}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-start gap-2 p-2 bg-background/50 rounded-md">
+                                                <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5"/>
+                                                 <div>
+                                                    <p className="font-semibold">Police Needed?</p>
+                                                    <p>{currentSuggestion?.lawEnforcementNeeded ? "Yes, Recommended" : "No"}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                     </div>
                                  )}
                              </div>
 

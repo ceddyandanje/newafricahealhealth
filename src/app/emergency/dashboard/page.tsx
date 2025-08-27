@@ -39,8 +39,8 @@ const formatTime = (dateString: string) => {
 };
 
 
-const StatCard = ({ icon: Icon, value, label, variant }: { icon: React.ElementType, value: string | number, label: string, variant: 'default' | 'destructive' }) => (
-    <Card className={cn('bg-background', variant === 'destructive' && 'bg-destructive/10')}>
+const StatCard = ({ icon: Icon, value, label, variant, asChild, ...props }: { icon: React.ElementType, value: string | number, label: string, variant: 'default' | 'destructive', asChild?: boolean, [key: string]: any }) => (
+    <Card className={cn('bg-background', variant === 'destructive' && 'bg-destructive/10')} {...props}>
         <CardContent className="p-4 flex items-center gap-4">
             <Icon className={cn("h-8 w-8", variant === 'destructive' ? 'text-destructive' : 'text-primary')} />
             <div>
@@ -72,7 +72,9 @@ export default function EmergencyDashboardPage() {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <StatCard icon={Siren} value={incomingAlerts.length} label="Active Incidents" variant="destructive" />
+                    <DialogTrigger asChild>
+                        <StatCard icon={Siren} value={incomingAlerts.length} label="Active Incidents" variant="destructive" className="cursor-pointer hover:shadow-lg"/>
+                    </DialogTrigger>
                     <StatCard icon={Ambulance} value={unitStatuses.filter(u => u.status === 'Available' && u.type === 'Ground').length} label="Available Ground Units" variant="default" />
                     <StatCard icon={Plane} value={unitStatuses.filter(u => u.status === 'Available' && u.type === 'Air').length} label="Available Air Units" variant="default" />
                     <StatCard icon={Clock} value="7m 32s" label="Avg. Response Time" variant="default" />
