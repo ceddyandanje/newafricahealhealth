@@ -17,7 +17,6 @@ const navItems = [
     { href: '/emergency/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/emergency/fleet', icon: Truck, label: 'Fleet Management' },
     { href: '/emergency/alerts', icon: Bell, label: 'Active Alerts' },
-    { href: '/emergency/history', icon: ListChecks, label: 'Incident History' },
 ];
 
 export default function EmergencySidebar() {

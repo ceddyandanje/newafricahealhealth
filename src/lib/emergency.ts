@@ -46,43 +46,6 @@ export const useEmergencyRequests = (fetchAllActive = false) => {
 };
 
 
-// Hook to fetch incident history for a specific provider
-export const useIncidentHistory = (responderId?: string) => {
-    const [incidents, setIncidents] = useState<EmergencyRequest[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        if (!responderId) {
-            setIsLoading(false);
-            return;
-        }
-
-        // This requires a composite index on responderId (asc) and createdAt (desc)
-        const q = query(
-            emergencyCollectionRef,
-            where('responderId', '==', responderId),
-            orderBy('createdAt', 'desc'),
-            limit(50)
-        );
-        
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const incidentsData: EmergencyRequest[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EmergencyRequest));
-            setIncidents(incidentsData);
-            setIsLoading(false);
-        }, (error) => {
-            console.error("Error fetching incident history:", error);
-            addLog("ERROR", `Firestore query failed for incident history. Check indexes for responderId. Details: ${error.message}`);
-            setIsLoading(false);
-        });
-
-        return () => unsubscribe();
-
-    }, [responderId]);
-    
-    return { incidents, isLoading };
-}
-
-
 type NewRequestPayload = Omit<EmergencyRequest, 'id' | 'status' | 'createdAt' | 'updatedAt'>;
 
 export const addEmergencyRequest = async (payload: NewRequestPayload) => {
