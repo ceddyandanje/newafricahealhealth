@@ -9,6 +9,8 @@ import { ListOrdered, Loader2, Package, CheckCircle, RefreshCw, Truck, XCircle, 
 import { Badge } from '@/components/ui/badge';
 import { type Order, OrderStatus } from '@/lib/types';
 import Image from 'next/image';
+import Header from '@/components/layout/header';
+import Footer from '@/components/layout/footer';
 
 const formatPrice = (priceInCents: number) => {
     return new Intl.NumberFormat("en-KE", {
@@ -73,29 +75,39 @@ export default function MyOrdersPage() {
 
     if (!isClient || isLoading) {
         return (
-            <div className="flex h-[50vh] w-full items-center justify-center">
-                <Loader2 className="h-16 w-16 animate-spin text-primary" />
+            <div className="flex flex-col min-h-screen">
+                <Header />
+                <div className="flex-grow flex items-center justify-center">
+                    <Loader2 className="h-16 w-16 animate-spin text-primary" />
+                </div>
+                <Footer />
             </div>
         )
     }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="max-w-3xl mx-auto">
-         <header className="text-center mb-8">
-            <h1 className="text-4xl font-bold font-headline flex items-center justify-center gap-3"><ListOrdered /> My Orders</h1>
-            <p className="text-muted-foreground mt-2">Track your current and past orders.</p>
-         </header>
-         {orders.length > 0 ? (
-            <div className="space-y-6">
-                {orders.map(order => <OrderItem key={order.id} order={order} />)}
+    <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+            <div className="container mx-auto px-4 py-12">
+            <div className="max-w-3xl mx-auto">
+                <header className="text-center mb-8">
+                    <h1 className="text-4xl font-bold font-headline flex items-center justify-center gap-3"><ListOrdered /> My Orders</h1>
+                    <p className="text-muted-foreground mt-2">Track your current and past orders.</p>
+                </header>
+                {orders.length > 0 ? (
+                    <div className="space-y-6">
+                        {orders.map(order => <OrderItem key={order.id} order={order} />)}
+                    </div>
+                ) : (
+                    <div className="text-center glassmorphic p-12">
+                        <p className="text-xl text-muted-foreground">You haven't placed any orders yet.</p>
+                    </div>
+                )}
             </div>
-         ) : (
-             <div className="text-center glassmorphic p-12">
-                <p className="text-xl text-muted-foreground">You haven't placed any orders yet.</p>
-             </div>
-         )}
-      </div>
+            </div>
+        </main>
+        <Footer />
     </div>
   );
 }

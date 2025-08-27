@@ -18,6 +18,8 @@ import { Loader2, ClipboardCheck } from 'lucide-react';
 import { addOrder } from "@/lib/orders";
 import { addLog } from "@/lib/logs";
 import { addNotification } from "@/lib/notifications";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
 
 const checkoutSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -103,93 +105,111 @@ export default function CheckoutPage() {
 
   if (!isClient) {
     // Render nothing or a loader on the server and initial client render
-    return null;
+    return (
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow"></main>
+            <Footer />
+        </div>
+    );
   }
   
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-12 text-center">
-        <div className="glassmorphic p-12 max-w-md mx-auto">
-          <h1 className="font-headline text-3xl mb-4">Your cart is empty.</h1>
-          <p className="mb-6">Please add items to your cart before checking out.</p>
-          <Button asChild><Link href="/products">Continue Shopping</Link></Button>
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow">
+                <div className="container mx-auto px-4 py-12 text-center">
+                    <div className="glassmorphic p-12 max-w-md mx-auto">
+                    <h1 className="font-headline text-3xl mb-4">Your cart is empty.</h1>
+                    <p className="mb-6">Please add items to your cart before checking out.</p>
+                    <Button asChild><Link href="/products">Continue Shopping</Link></Button>
+                    </div>
+                </div>
+            </main>
+            <Footer />
         </div>
-      </div>
     )
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div>
-          <h1 className="font-headline text-3xl font-bold mb-6">Checkout</h1>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                <div className="glassmorphic p-8">
-                    <h2 className="font-headline text-xl font-bold mb-4">1. Shipping Details</h2>
-                     <FormField name="name" control={form.control} render={({ field }) => (
-                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField name="email" control={form.control} render={({ field }) => (
-                        <FormItem className="mt-4"><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField name="address" control={form.control} render={({ field }) => (
-                        <FormItem className="mt-4"><FormLabel>Address</FormLabel><FormControl><Input {...field} placeholder="e.g. 123 Health St, Apartment 4B" /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <FormField name="city" control={form.control} render={({ field }) => (
-                        <FormItem className="mt-4"><FormLabel>City/Town</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                </div>
-              
-              <div className="glassmorphic p-8">
-                <h2 className="font-headline text-xl font-bold mb-4">2. Payment via M-Pesa</h2>
-                <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-sm">
-                    <p><strong>Paybill Number:</strong> 123456</p>
-                    <p><strong>Account Number:</strong> <span className="font-mono bg-background p-1 rounded">{orderId}</span></p>
-                    <p><strong>Amount:</strong> <span className="font-bold">{formatPrice(totalPrice)}</span></p>
-                    <p className="text-xs text-muted-foreground pt-2">Use the Account Number above in your M-Pesa transaction to help us identify your payment.</p>
-                </div>
-                 <FormField name="mpesaCode" control={form.control} render={({ field }) => (
-                  <FormItem className="mt-6">
-                    <FormLabel>M-Pesa Transaction Code</FormLabel>
-                    <FormControl><Input {...field} placeholder="e.g. SABC123DEF" /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-              </div>
-              <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ClipboardCheck className="mr-2 h-4 w-4" />}
-                Submit for Verification
-              </Button>
-            </form>
-          </Form>
-        </div>
-        <div className="lg:sticky top-24 h-fit">
-            <div className="glassmorphic p-8">
-                <h2 className="font-headline text-2xl font-bold mb-6">Your Order Summary</h2>
-                <div className="space-y-4 mb-6 max-h-64 overflow-y-auto pr-2">
-                {items.map(item => (
-                    <div key={item.product.id} className="flex items-center gap-4">
-                        <div className="relative h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
-                        <Image src={item.product.image} alt={item.product.name} fill className="object-cover" data-ai-hint={item.product.dataAiHint}/>
-                        <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">{item.quantity}</span>
+    <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+            <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <div>
+                <h1 className="font-headline text-3xl font-bold mb-6">Checkout</h1>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                        <div className="glassmorphic p-8">
+                            <h2 className="font-headline text-xl font-bold mb-4">1. Shipping Details</h2>
+                            <FormField name="name" control={form.control} render={({ field }) => (
+                                <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField name="email" control={form.control} render={({ field }) => (
+                                <FormItem className="mt-4"><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField name="address" control={form.control} render={({ field }) => (
+                                <FormItem className="mt-4"><FormLabel>Address</FormLabel><FormControl><Input {...field} placeholder="e.g. 123 Health St, Apartment 4B" /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField name="city" control={form.control} render={({ field }) => (
+                                <FormItem className="mt-4"><FormLabel>City/Town</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
                         </div>
-                        <div className="flex-grow">
-                        <p className="font-semibold">{item.product.name}</p>
-                        <p className="text-sm text-muted-foreground">{formatPrice(item.product.price)}</p>
+                    
+                    <div className="glassmorphic p-8">
+                        <h2 className="font-headline text-xl font-bold mb-4">2. Payment via M-Pesa</h2>
+                        <div className="bg-muted/50 p-4 rounded-lg space-y-2 text-sm">
+                            <p><strong>Paybill Number:</strong> 123456</p>
+                            <p><strong>Account Number:</strong> <span className="font-mono bg-background p-1 rounded">{orderId}</span></p>
+                            <p><strong>Amount:</strong> <span className="font-bold">{formatPrice(totalPrice)}</span></p>
+                            <p className="text-xs text-muted-foreground pt-2">Use the Account Number above in your M-Pesa transaction to help us identify your payment.</p>
                         </div>
-                        <p className="font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                        <FormField name="mpesaCode" control={form.control} render={({ field }) => (
+                        <FormItem className="mt-6">
+                            <FormLabel>M-Pesa Transaction Code</FormLabel>
+                            <FormControl><Input {...field} placeholder="e.g. SABC123DEF" /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )} />
                     </div>
-                ))}
+                    <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                        {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : <ClipboardCheck className="mr-2 h-4 w-4" />}
+                        Submit for Verification
+                    </Button>
+                    </form>
+                </Form>
                 </div>
-                <div className="border-t border-border my-4"></div>
-                <div className="flex justify-between font-bold text-lg">
-                <p>Total</p>
-                <p>{formatPrice(totalPrice)}</p>
+                <div className="lg:sticky top-24 h-fit">
+                    <div className="glassmorphic p-8">
+                        <h2 className="font-headline text-2xl font-bold mb-6">Your Order Summary</h2>
+                        <div className="space-y-4 mb-6 max-h-64 overflow-y-auto pr-2">
+                        {items.map(item => (
+                            <div key={item.product.id} className="flex items-center gap-4">
+                                <div className="relative h-16 w-16 rounded-md overflow-hidden flex-shrink-0">
+                                <Image src={item.product.image} alt={item.product.name} fill className="object-cover" data-ai-hint={item.product.dataAiHint}/>
+                                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">{item.quantity}</span>
+                                </div>
+                                <div className="flex-grow">
+                                <p className="font-semibold">{item.product.name}</p>
+                                <p className="text-sm text-muted-foreground">{formatPrice(item.product.price)}</p>
+                                </div>
+                                <p className="font-semibold">{formatPrice(item.product.price * item.quantity)}</p>
+                            </div>
+                        ))}
+                        </div>
+                        <div className="border-t border-border my-4"></div>
+                        <div className="flex justify-between font-bold text-lg">
+                        <p>Total</p>
+                        <p>{formatPrice(totalPrice)}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-      </div>
+            </div>
+        </main>
+        <Footer />
     </div>
   )
 }

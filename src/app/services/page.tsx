@@ -14,6 +14,8 @@ import { useBookingStore } from '@/hooks/use-booking-store';
 import { Scissors, ShieldPlus, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Header from '@/components/layout/header';
+import Footer from '@/components/layout/footer';
 
 export default function ServicesPage() {
     const { user } = useAuth();
@@ -41,78 +43,84 @@ export default function ServicesPage() {
     };
 
     return (
-        <div className="bg-background">
-            <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
-                <Image
-                    src="https://images.unsplash.com/photo-1659019479941-1fd644624339?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                    alt="Doctor with a stethoscope"
-                    fill
-                    className="object-cover"
-                    data-ai-hint="doctor stethoscope"
-                    priority
-                />
-                <div className="absolute inset-0 bg-black/60" />
-                <div className="relative z-10 p-4">
-                    <h1 className="text-4xl md:text-6xl font-bold font-headline">Our Services</h1>
-                    <p className="text-lg md:text-xl max-w-3xl mx-auto mt-4">
-                        Comprehensive healthcare solutions designed to meet your needs, from chronic care to specialized medical services.
-                    </p>
-                </div>
-            </section>
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow">
+                <div className="bg-background">
+                    <section className="relative h-[50vh] min-h-[400px] flex items-center justify-center text-center text-white">
+                        <Image
+                            src="https://images.unsplash.com/photo-1659019479941-1fd644624339?q=80&w=871&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+                            alt="Doctor with a stethoscope"
+                            fill
+                            className="object-cover"
+                            data-ai-hint="doctor stethoscope"
+                            priority
+                        />
+                        <div className="absolute inset-0 bg-black/60" />
+                        <div className="relative z-10 p-4">
+                            <h1 className="text-4xl md:text-6xl font-bold font-headline">Our Services</h1>
+                            <p className="text-lg md:text-xl max-w-3xl mx-auto mt-4">
+                                Comprehensive healthcare solutions designed to meet your needs, from chronic care to specialized medical services.
+                            </p>
+                        </div>
+                    </section>
 
-            <div className="container mx-auto px-4 py-16">
-                 <div className="py-8 text-center bg-muted/30 rounded-2xl mb-16">
-                    <h2 className="text-3xl font-bold font-headline mb-4">Professional Surgical Equipment</h2>
-                    <p className="text-muted-foreground mb-10 max-w-3xl mx-auto">
-                        We supply a comprehensive range of high-quality surgical equipment to medical professionals and facilities, ensuring they have the tools they need for optimal patient outcomes.
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-10">
-                        <div className="glassmorphic p-6">
-                            <Scissors className="h-10 w-10 text-primary mx-auto mb-3" />
-                            <h3 className="font-semibold text-lg">Precision Instruments</h3>
-                            <p className="text-sm text-muted-foreground">Scalpels, forceps, retractors, and more, crafted for accuracy.</p>
+                    <div className="container mx-auto px-4 py-16">
+                        <div className="py-8 text-center bg-muted/30 rounded-2xl mb-16">
+                            <h2 className="text-3xl font-bold font-headline mb-4">Professional Surgical Equipment</h2>
+                            <p className="text-muted-foreground mb-10 max-w-3xl mx-auto">
+                                We supply a comprehensive range of high-quality surgical equipment to medical professionals and facilities, ensuring they have the tools they need for optimal patient outcomes.
+                            </p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto mb-10">
+                                <div className="glassmorphic p-6">
+                                    <Scissors className="h-10 w-10 text-primary mx-auto mb-3" />
+                                    <h3 className="font-semibold text-lg">Precision Instruments</h3>
+                                    <p className="text-sm text-muted-foreground">Scalpels, forceps, retractors, and more, crafted for accuracy.</p>
+                                </div>
+                                <div className="glassmorphic p-6">
+                                    <ShieldPlus className="h-10 w-10 text-primary mx-auto mb-3" />
+                                    <h3 className="font-semibold text-lg">Sterilization & Disposables</h3>
+                                    <p className="text-sm text-muted-foreground">Autoclaves, surgical gloves, gowns, and sterile drapes.</p>
+                                </div>
+                                <div className="glassmorphic p-6">
+                                    <Package className="h-10 w-10 text-primary mx-auto mb-3" />
+                                    <h3 className="font-semibold text-lg">General Supplies</h3>
+                                    <p className="text-sm text-muted-foreground">Sutures, staples, sponges, and other essential operating room supplies.</p>
+                                </div>
+                            </div>
+                            <Button size="lg" asChild>
+                                <Link href="/products?category=Surgical+Equipment">Browse Surgical Equipment</Link>
+                            </Button>
                         </div>
-                        <div className="glassmorphic p-6">
-                            <ShieldPlus className="h-10 w-10 text-primary mx-auto mb-3" />
-                            <h3 className="font-semibold text-lg">Sterilization & Disposables</h3>
-                            <p className="text-sm text-muted-foreground">Autoclaves, surgical gloves, gowns, and sterile drapes.</p>
+
+                        <div className="text-center mb-12">
+                            <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">Explore Our Medical Specialties</h2>
+                            <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
+                                We offer a wide range of specialized services to cater to your unique health needs. Click on any specialty to learn more.
+                            </p>
                         </div>
-                         <div className="glassmorphic p-6">
-                            <Package className="h-10 w-10 text-primary mx-auto mb-3" />
-                            <h3 className="font-semibold text-lg">General Supplies</h3>
-                            <p className="text-sm text-muted-foreground">Sutures, staples, sponges, and other essential operating room supplies.</p>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {serviceCategories.map((category) => (
+                                <Card
+                                    key={category.id}
+                                    className="glassmorphic p-4 text-center group cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all"
+                                    onClick={() => handleServiceClick(category)}
+                                >
+                                    <CardContent className="p-2 flex flex-col items-center justify-center h-full">
+                                        <div className="p-3 bg-primary/10 rounded-full mb-3 text-primary">
+                                            <category.icon className="h-8 w-8" />
+                                        </div>
+                                        <h3 className="font-headline font-semibold text-base">{category.name}</h3>
+                                    </CardContent>
+                                </Card>
+                            ))}
                         </div>
                     </div>
-                     <Button size="lg" asChild>
-                        <Link href="/products?category=Surgical+Equipment">Browse Surgical Equipment</Link>
-                    </Button>
+                    {/* The dialog is now managed globally and opened on the appointments page */}
                 </div>
-
-                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold font-headline text-primary">Explore Our Medical Specialties</h2>
-                    <p className="mt-4 text-lg text-muted-foreground max-w-3xl mx-auto">
-                        We offer a wide range of specialized services to cater to your unique health needs. Click on any specialty to learn more.
-                    </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {serviceCategories.map((category) => (
-                        <Card
-                            key={category.id}
-                            className="glassmorphic p-4 text-center group cursor-pointer hover:shadow-2xl hover:-translate-y-1 transition-all"
-                            onClick={() => handleServiceClick(category)}
-                        >
-                            <CardContent className="p-2 flex flex-col items-center justify-center h-full">
-                                 <div className="p-3 bg-primary/10 rounded-full mb-3 text-primary">
-                                    <category.icon className="h-8 w-8" />
-                                </div>
-                                <h3 className="font-headline font-semibold text-base">{category.name}</h3>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            </div>
-            {/* The dialog is now managed globally and opened on the appointments page */}
+            </main>
+            <Footer />
         </div>
     );
 }

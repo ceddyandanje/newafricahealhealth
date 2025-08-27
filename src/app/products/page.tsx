@@ -1,6 +1,8 @@
 
 import { getAllProducts, getBrands, getCategories, getMaxPrice } from "@/lib/products";
 import ProductsClient from "./products-client";
+import Header from "@/components/layout/header";
+import Footer from "@/components/layout/footer";
 
 export const dynamic = 'force-dynamic';
 
@@ -29,16 +31,22 @@ export default async function ProductsPage({
   const sortBy = searchParams?.sortBy as string || "featured";
 
   return (
-    <ProductsClient 
-      initialProducts={allProducts} 
-      brands={brands} 
-      categories={categories}
-      maxPrice={maxPrice}
-      initialSearch={searchTerm}
-      initialPriceRange={priceRange}
-      initialCategories={selectedCategories}
-      initialBrands={selectedBrands}
-      initialSortBy={sortBy}
-    />
+    <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow">
+            <ProductsClient 
+            initialProducts={allProducts} 
+            brands={brands} 
+            categories={categories}
+            maxPrice={maxPrice}
+            initialSearch={searchTerm}
+            initialPriceRange={priceRange}
+            initialCategories={selectedCategories}
+            initialBrands={selectedBrands}
+            initialSortBy={sortBy}
+            />
+        </main>
+        <Footer />
+    </div>
   );
 }
