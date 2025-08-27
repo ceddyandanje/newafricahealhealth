@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type EmergencyRequest, type EmergencyUnit } from '@/lib/types';
-import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical, Hospital, Shield } from 'lucide-react';
+import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical, Hospital, Shield, Pill } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { suggestEmergencyResponse } from '@/ai/flows/suggest-emergency-response-flow';
@@ -179,25 +179,26 @@ export default function AlertDetailsDialog({ alerts, isOpen, onClose }: AlertDet
                              </div>
 
                              <div className="p-4 border rounded-lg">
-                                <h3 className="font-semibold mb-2">Actions</h3>
-                                {selectedAlert.serviceType !== 'First Aid' ? (
-                                    <div className="flex flex-col gap-2">
+                                <h3 className="font-semibold mb-3">Actions</h3>
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
                                         <Select>
-                                            <SelectTrigger><SelectValue placeholder="Assign Unit..." /></SelectTrigger>
+                                            <SelectTrigger><SelectValue placeholder="Assign Available Unit..." /></SelectTrigger>
                                             <SelectContent>
                                                 {availableUnits.map(unit => (
                                                     <SelectItem key={unit.id} value={unit.id}>{unit.id} ({unit.type}) - {unit.status}</SelectItem>
                                                 ))}
                                             </SelectContent>
                                         </Select>
-                                        <Button size="sm"><Send className="h-4 w-4 mr-2"/> Dispatch Unit</Button>
+                                        <Button className="bg-red-600 hover:bg-red-700 flex-shrink-0"><Send className="h-4 w-4 mr-2"/> Dispatch</Button>
                                     </div>
-                                ) : (
-                                    <div className="flex flex-col gap-2">
-                                         <Button variant="outline" size="sm">Open First Aid Protocol</Button>
-                                         <Button size="sm">Mark as Resolved</Button>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <Button variant="outline"><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
+                                        <Button variant="outline"><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
+                                        <Button variant="outline"><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
+                                        <Button variant="outline" className="text-muted-foreground">Mark as Resolved</Button>
                                     </div>
-                                )}
+                                </div>
                              </div>
                            </div>
                         </ScrollArea>
