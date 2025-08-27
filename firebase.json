@@ -1,3 +1,4 @@
+
 {
   "database": {
     "rules": "database.rules.json"
@@ -21,21 +22,6 @@
       ],
       "predeploy": [
         "npm --prefix \"$RESOURCE_DIR\" run lint"
-      ]
-    },
-    {
-      "source": "code1",
-      "codebase": "code1",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.local"
-      ],
-      "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run lint",
-        "npm --prefix \"$RESOURCE_DIR\" run build"
       ]
     }
   ],
