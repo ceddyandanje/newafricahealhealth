@@ -1,18 +1,18 @@
 /**
  * Import function triggers from their respective submodules:
  *
- * const {onCall} = require("firebase-functions/v2/https");
- * const {onDocumentWritten} = require("firebase-functions/v2/firestore");
+ * import {onCall} from "firebase-functions/v2/https";
+ * import {onDocumentWritten} from "firebase-functions/v2/firestore";
  *
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onDocumentCreated} = require("firebase-functions/v2/firestore");
-const {onCall} = require("firebase-functions/v2/https");
-const logger = require("firebase-functions/logger");
-const admin = require("firebase-admin");
-const twilio = require("twilio");
+import {setGlobalOptions} from "firebase-functions/v2";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
+import {onCall} from "firebase-functions/v2/https";
+import * as logger from "firebase-functions/logger";
+import * as admin from "firebase-admin";
+import twilio from "twilio";
 
 // Initialize Firebase Admin SDK
 admin.initializeApp();
@@ -25,6 +25,7 @@ const db = admin.firestore();
 // `maxInstances` option in the function's options.
 setGlobalOptions({maxInstances: 10});
 
+
 // Configure Twilio client
 // IMPORTANT: Replace placeholder values with your actual Twilio credentials.
 // It is highly recommended to store these as environment variables/secrets.
@@ -36,7 +37,7 @@ const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER || "YOUR_TWILIO_PHONE_
 const twilioClient = twilio(twilioAccountSid, twilioAuthToken);
 
 
-exports.sendEmergencySmsNotification = onDocumentCreated("emergencies/{emergencyId}", async (event) => {
+export const sendEmergencySmsNotification = onDocumentCreated("emergencies/{emergencyId}", async (event) => {
   const snapshot = event.data;
   if (!snapshot) {
     logger.log("No data associated with the event");
@@ -61,7 +62,7 @@ exports.sendEmergencySmsNotification = onDocumentCreated("emergencies/{emergency
     const provider = doc.data();
 
     // Check if the provider has a phone number and has enabled SMS notifications
-    if (!provider.phone || !provider.smsAlertsEnabled) {
+    if (!provider.phone || !(provider as any).smsAlertsEnabled) {
       logger.log(`Provider ${provider.name} (${provider.id}) has no phone number or has SMS alerts disabled. Skipping.`);
       return;
     }
@@ -83,8 +84,9 @@ exports.sendEmergencySmsNotification = onDocumentCreated("emergencies/{emergency
   await Promise.all(notificationPromises);
 });
 
+
 // A simple callable function to test the environment
-exports.helloWorld = onCall((request) => {
+export const helloWorld = onCall((request) => {
   const name = request.data.name || "World";
   logger.info(`Received helloWorld call with name: ${name}`);
   return {message: `Hello, ${name}!`};
