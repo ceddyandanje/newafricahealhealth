@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Siren, Ambulance, Plane, Clock } from "lucide-react";
+import { Siren, Ambulance, Plane, Clock, HeartPulse } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogTrigger } from '@/components/ui/dialog';
 import AlertDetailsDialog from '@/components/emergency/alert-details-dialog';
