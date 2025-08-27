@@ -25,7 +25,7 @@ export default function EmergencySidebar() {
     const { user, logout } = useAuth();
 
     return (
-        <aside className="fixed left-0 top-16 bottom-0 w-20 flex flex-col items-center py-4 bg-background border-r z-40">
+        <aside className="fixed left-0 top-16 w-20 flex flex-col items-center py-4 bg-background border-r z-40" style={{ height: 'calc(100vh - 8rem)' }}>
             <TooltipProvider delayDuration={0}>
                 <nav className="flex flex-col items-center gap-2 flex-grow mt-4">
                     {navItems.map(item => (
