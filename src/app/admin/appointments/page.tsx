@@ -19,7 +19,7 @@ const statusVariant = {
 } as const;
 
 export default function AppointmentsPage() {
-    const { appointments, isLoading } = useAppointments();
+    const { appointments, isLoading } = useAppointments(true); // Pass true to fetch all appointments for admin view
 
   return (
     <div className="p-6">
@@ -35,7 +35,7 @@ export default function AppointmentsPage() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>Upcoming & Recent Appointments</CardTitle>
+            <CardTitle>All Appointments</CardTitle>
             <CardDescription>
               Manage all patient appointments from this dashboard.
             </CardDescription>

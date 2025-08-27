@@ -5,18 +5,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { HeartPulse, PlusCircle, Search, Edit, Trash2 } from "lucide-react";
+import { HeartPulse, PlusCircle, Search, Edit, Trash2, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-
-const doctors = [
-  { id: 'DOC001', name: 'Dr. John Smith', specialty: 'Cardiology', email: 'j.smith@health.com', status: 'Active', avatar: 'https://i.pravatar.cc/150?u=doc1' },
-  { id: 'DOC002', name: 'Dr. Emily Jones', specialty: 'Neurology', email: 'e.jones@health.com', status: 'Active', avatar: 'https://i.pravatar.cc/150?u=doc2' },
-  { id: 'DOC003', name: 'Dr. Michael Brown', specialty: 'Pediatrics', email: 'm.brown@health.com', status: 'On Leave', avatar: 'https://i.pravatar.cc/150?u=doc3' },
-  { id: 'DOC004', name: 'Dr. Sarah Wilson', specialty: 'Dermatology', email: 's.wilson@health.com', status: 'Active', avatar: 'https://i.pravatar.cc/150?u=doc4' },
-];
+import { useUsers } from "@/lib/users";
+import { useMemo } from "react";
 
 export default function DoctorsPage() {
+  const { users, isLoading } = useUsers();
+  const doctors = useMemo(() => users.filter(user => user.role === 'doctor'), [users]);
+
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
@@ -36,44 +34,50 @@ export default function DoctorsPage() {
           </div>
         </CardHeader>
         <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Doctor</TableHead>
-                    <TableHead>Specialty</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {doctors.map((doctor) => (
-                    <TableRow key={doctor.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={doctor.avatar} alt={doctor.name} />
-                            <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-semibold whitespace-nowrap">{doctor.name}</p>
-                            <p className="text-sm text-muted-foreground">{doctor.email}</p>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{doctor.specialty}</TableCell>
-                      <TableCell>
-                        <Badge variant={doctor.status === 'Active' ? 'default' : 'secondary'}>{doctor.status}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                      </TableCell>
+            {isLoading ? (
+                <div className="flex items-center justify-center h-48">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+            ) : (
+                <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                    <TableRow>
+                        <TableHead>Doctor</TableHead>
+                        <TableHead>Specialty</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                    </TableHeader>
+                    <TableBody>
+                    {doctors.map((doctor) => (
+                        <TableRow key={doctor.id}>
+                        <TableCell>
+                            <div className="flex items-center gap-3">
+                            <Avatar>
+                                <AvatarImage src={doctor.avatarUrl} alt={doctor.name} />
+                                <AvatarFallback>{doctor.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <p className="font-semibold whitespace-nowrap">{doctor.name}</p>
+                                <p className="text-sm text-muted-foreground">{doctor.email}</p>
+                            </div>
+                            </div>
+                        </TableCell>
+                        <TableCell>{doctor.specialty || 'Not Set'}</TableCell>
+                        <TableCell>
+                            <Badge variant={doctor.status === 'active' ? 'default' : 'secondary'}>{doctor.status}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                            <Button variant="ghost" size="icon" className="text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                        </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                </div>
+            )}
         </CardContent>
       </Card>
     </div>
