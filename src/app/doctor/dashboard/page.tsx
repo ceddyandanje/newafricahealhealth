@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateUserInFirestore } from '@/lib/users';
 import { serviceCategories } from '@/lib/serviceCategories';
 import AvailabilityDialog from '@/components/doctor/availability-dialog';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 
 // Mock data - replace with real data fetching
 const agenda = [
@@ -89,24 +90,44 @@ function WelcomeDialog({ user, onSave }: { user: any; onSave: (specialty: string
 }
 
 function AgendaTimeline() {
-    // This would be dynamically generated from agenda data
-    const hours = Array.from({ length: 9 }, (_, i) => i + 9); // 9 AM to 5 PM
+    const hours = Array.from({ length: 9 }, (_, i) => i + 9); // 9 AM to 5 PM (17:00)
+    
+    const calculatePosition = (time: string) => {
+        const [hour, minute] = time.split(':').map(Number);
+        const totalMinutes = (hour * 60) + minute;
+        const startMinute = 9 * 60;
+        const endMinute = 17 * 60; // 5 PM
+        const duration = endMinute - startMinute;
+        const percentage = ((totalMinutes - startMinute) / duration) * 100;
+        return percentage;
+    }
+
     return (
-        <div className="relative w-full h-10 bg-muted rounded-full">
-            {agenda.map(item => {
-                const [hour, minute] = item.time.split(':').map(Number);
-                const totalMinutes = (hour * 60) + minute;
-                const startMinute = 9 * 60;
-                const endMinute = 17 * 60;
-                const percentage = ((totalMinutes - startMinute) / (endMinute - startMinute)) * 100;
-                
-                return (
-                    <div key={item.time} className="absolute h-full flex items-center" style={{ left: `${percentage}%`}}>
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full"></div>
-                    </div>
-                )
-            })}
-        </div>
+        <TooltipProvider>
+            <div className="w-full space-y-2 pt-2">
+                <div className="relative h-4 bg-muted rounded-full">
+                     {agenda.map(item => (
+                        <Tooltip key={item.time}>
+                            <TooltipTrigger asChild>
+                                <div 
+                                    className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full hover:scale-125 transition-transform" 
+                                    style={{ left: `${calculatePosition(item.time)}%` }}
+                                />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="font-semibold">{item.patient}</p>
+                                <p className="text-sm text-muted-foreground">{item.time}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    ))}
+                </div>
+                 <div className="flex justify-between text-xs text-muted-foreground px-1">
+                    {hours.map(hour => (
+                        <span key={hour} className="w-8 text-center">{hour % 12 === 0 ? 12 : hour % 12}{hour < 12 ? 'a' : 'p'}</span>
+                    ))}
+                </div>
+            </div>
+        </TooltipProvider>
     )
 }
 
@@ -269,5 +290,7 @@ export default function DoctorDashboardPage() {
         </>
     );
 }
+
+    
 
     
