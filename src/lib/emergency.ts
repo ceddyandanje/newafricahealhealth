@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, query, onSnapshot, orderBy, where, addDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, where, addDoc, limit } from 'firebase/firestore';
 import { type EmergencyRequest } from './types';
 import { addLog } from './logs';
 
@@ -15,14 +15,20 @@ export const useEmergencyRequests = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // Simplified query: Order by date, then filter for "Pending" on the client.
+        // This avoids the need for a composite index in Firestore.
         const q = query(
             emergencyCollectionRef,
-            where('status', '==', 'Pending'),
-            orderBy('createdAt', 'desc')
+            orderBy('createdAt', 'desc'),
+            limit(50) // Limit to a reasonable number of recent incidents
         );
         const unsubscribe = onSnapshot(q, (snapshot) => {
-            const requestData: EmergencyRequest[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EmergencyRequest));
-            setRequests(requestData);
+            const allRecentRequests: EmergencyRequest[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as EmergencyRequest));
+            
+            // Filter for pending requests on the client side
+            const pendingRequests = allRecentRequests.filter(req => req.status === 'Pending');
+            
+            setRequests(pendingRequests);
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching emergency requests:", error);
