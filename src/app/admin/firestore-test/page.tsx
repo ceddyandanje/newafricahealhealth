@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { db, app } from '@/lib/firebase';
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
 import { collection, addDoc, getDocs, doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,7 +21,7 @@ export default function FirestoreTestPage() {
     const [readData, setReadData] = useState<any[]>([]);
     const { toast } = useToast();
     const testCollectionName = "test-collection";
-    const functions = getFunctions(app);
+    const functions = getFunctions(app, 'us-central1'); // Correctly initialize functions for a specific region
 
     const handleConnectionTest = async () => {
         setIsLoadingTest(true);
