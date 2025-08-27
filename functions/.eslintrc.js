@@ -17,7 +17,6 @@ module.exports = {
   parserOptions: {
     project: ["tsconfig.json", "tsconfig.dev.json"],
     sourceType: "module",
-    ecmaVersion: 2020,
   },
   ignorePatterns: [
     "/lib/**/*", // Ignore built files.
@@ -28,6 +27,6 @@ module.exports = {
     "import/no-unresolved": 0,
     "indent": ["error", 2],
     "object-curly-spacing": ["error", "always"],
-    "require-jsdoc": 0, // Turning off JSDoc requirement for this file
+    "require-jsdoc": 0,
   },
 };
