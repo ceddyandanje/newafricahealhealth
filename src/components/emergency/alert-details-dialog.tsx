@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -89,6 +88,12 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
+    const handleAction = (action: string) => {
+        if (!selectedAlert || !user) return;
+        addLog("INFO", `Dispatcher ${user.name} initiated '${action}' for incident ${selectedAlert.id}.`);
+        toast({ title: "Action Logged", description: `'${action}' has been logged for this incident.`});
+    };
+    
     const handleResolve = async () => {
         if (!selectedAlert || !user) return;
         
@@ -152,23 +157,25 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                 {/* Right Pane: Details View */}
                 <div className="md:col-span-2 h-full flex flex-col gap-4 overflow-hidden">
                     {selectedAlert ? (
-                       <>
+                       <div className="h-full flex flex-col gap-4">
                          <ScrollArea className="flex-grow pr-4">
                            <div className="space-y-4">
+                             {/* Section 1: Incident Report */}
                              <div className="p-4 border rounded-lg">
-                                <h3 className="font-semibold text-lg mb-2">{selectedAlert.serviceType} Request</h3>
+                                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><Info className="text-muted-foreground"/> Incident Report</h3>
                                 <div className="grid grid-cols-2 gap-y-1 gap-x-4 text-sm">
                                     <p className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground"/> <strong>Patient:</strong> {selectedAlert.patientName}</p>
-                                    <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Time:</strong> {formatTime(selectedAlert.createdAt)}</p>
+                                    <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Time:</strong> {formatTime(selectedAlert.createdAt)} ({timeSinceRequest})</p>
                                     <p className="flex items-center gap-2"><Droplets className="h-4 w-4 text-muted-foreground"/> <strong>Blood:</strong> {selectedAlert.bloodGroup || 'N/A'}</p>
                                     <p className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-muted-foreground"/> <strong>Allergies:</strong> {selectedAlert.allergies || 'None'}</p>
-                                    <p className="col-span-2 flex items-start gap-2"><Info className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Situation:</strong> {selectedAlert.situationDescription || 'No details provided.'}</p>
                                     <p className="col-span-2 flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Location:</strong> {`Lat: ${selectedAlert.location.latitude}, Lon: ${selectedAlert.location.longitude}`}</p>
+                                    <p className="col-span-2 flex items-start gap-2"><Info className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Situation:</strong> {selectedAlert.situationDescription || 'No details provided.'}</p>
                                 </div>
                              </div>
 
+                             {/* Section 2: AI Triage */}
                              <div className="p-4 border rounded-lg bg-primary/5">
-                                 <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary"/> AI Summary & Recommendation</h3>
+                                 <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary"/> AI Triage & Recommendation</h3>
                                  {isLoading ? (
                                     <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Generating suggestions for all alerts...</div>
                                  ) : (
@@ -195,29 +202,31 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                              </div>
                            </div>
                         </ScrollArea>
+
+                        {/* Section 3: Dispatch Actions */}
                         <div className="p-4 border rounded-lg flex-shrink-0">
-                            <h3 className="font-semibold mb-3">Actions</h3>
+                            <h3 className="font-semibold mb-3">Dispatch Actions</h3>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
                                     <Select>
                                         <SelectTrigger><SelectValue placeholder="Assign Available Unit..." /></SelectTrigger>
                                         <SelectContent>
                                             {availableUnits.filter(u => u.status === 'Available').map(unit => (
-                                                <SelectItem key={unit.id} value={unit.id}>{unit.id} ({unit.type}) - {unit.licensePlate}</SelectItem>
+                                                <SelectItem key={unit.id} value={unit.id}>{unit.licensePlate} ({unit.type})</SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <Button className="bg-red-600 hover:bg-red-700 flex-shrink-0"><Send className="h-4 w-4 mr-2"/> Dispatch</Button>
+                                    <Button className="bg-red-600 hover:bg-red-700 flex-shrink-0" onClick={() => handleAction('Dispatch Unit')}><Send className="h-4 w-4 mr-2"/> Dispatch</Button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <Button variant="outline"><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
-                                    <Button variant="outline"><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
-                                    <Button variant="outline"><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
+                                    <Button variant="outline" onClick={() => handleAction('Notify Hospital')}><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
+                                    <Button variant="outline" onClick={() => handleAction('Notify Police')}><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
+                                    <Button variant="outline" onClick={() => handleAction('Request Meds')}><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
                                     <Button variant="outline" className="text-green-600 border-green-600/50 hover:bg-green-50 hover:text-green-700" onClick={handleResolve}><CheckCircle className="h-4 w-4 mr-2"/> Mark as Resolved</Button>
                                 </div>
                             </div>
                          </div>
-                       </>
+                       </div>
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground bg-muted/30 rounded-lg">
                             <Siren className="h-12 w-12 mb-4" />
@@ -233,5 +242,3 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
         </DialogContent>
     );
 }
-
-    
