@@ -78,6 +78,7 @@ export type RefillRequest = {
     status: 'Pending' | 'Approved' | 'Rejected' | 'Completed';
     approverId?: string;
     approverName?: string;
+    actionDate?: string;
     paymentStatus: 'Unpaid' | 'Paid';
   };
 

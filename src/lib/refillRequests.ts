@@ -2,8 +2,7 @@
 'use client';
 
 import { type RefillRequest } from './types';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { db } from './firebase';
 import { useState, useEffect } from 'react';
 
@@ -11,6 +10,7 @@ import { useState, useEffect } from 'react';
 // This is now a hook that provides live-synced requests from Firestore
 export const useRequests = () => {
     const [requests, setRequests] = useState<RefillRequest[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const q = query(collection(db, "refillRequests"), orderBy("requestDate", "desc"));
@@ -20,13 +20,17 @@ export const useRequests = () => {
                 requestsData.push({ id: doc.id, ...doc.data() } as RefillRequest);
             });
             setRequests(requestsData);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Failed to fetch refill requests:", error);
+            setIsLoading(false);
         });
 
         // Cleanup subscription on unmount
         return () => unsubscribe();
     }, []);
 
-    return {requests, setRequests};
+    return {requests, setRequests, isLoading};
 };
 
 
@@ -53,4 +57,14 @@ export const addRequest = async (payload: NewRequestPayload) => {
         console.error("Error adding refill request to Firestore: ", error);
         throw error; // Re-throw the error so the calling function can handle it
     }
+};
+
+export const updateRequestStatus = async (requestId: string, status: 'Approved' | 'Rejected', approverId: string, approverName: string) => {
+    const requestDocRef = doc(db, "refillRequests", requestId);
+    await updateDoc(requestDocRef, {
+        status: status,
+        approverId: approverId,
+        approverName: approverName,
+        actionDate: new Date().toISOString(),
+    });
 };

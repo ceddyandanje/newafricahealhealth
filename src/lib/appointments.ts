@@ -10,13 +10,14 @@ const appointmentsCollectionRef = collection(db, 'appointments');
 
 // Hook to fetch appointments. 
 // If forAdmin is true, it fetches all appointments.
+// If a doctorId is provided, it fetches appointments for that doctor.
 // Otherwise, it fetches for a specific patient.
-export const useAppointments = (forAdmin = false, patientId?: string) => {
+export const useAppointments = (forAdmin = false, userId?: string) => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!forAdmin && !patientId) {
+        if (!forAdmin && !userId) {
             setIsLoading(false);
             return;
         }
@@ -25,7 +26,9 @@ export const useAppointments = (forAdmin = false, patientId?: string) => {
         if (forAdmin) {
             q = query(appointmentsCollectionRef, orderBy('appointmentDate', 'desc'));
         } else {
-            q = query(appointmentsCollectionRef, where('patientId', '==', patientId), orderBy('appointmentDate', 'desc'));
+            // This query now works for both patients and doctors based on the passed userId
+            const userRole = userId?.startsWith('doc-') ? 'doctorId' : 'patientId';
+            q = query(appointmentsCollectionRef, where(userRole, '==', userId), orderBy('appointmentDate', 'desc'));
         }
         
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -38,7 +41,7 @@ export const useAppointments = (forAdmin = false, patientId?: string) => {
         });
 
         return () => unsubscribe();
-    }, [forAdmin, patientId]);
+    }, [forAdmin, userId]);
 
     return { appointments, isLoading };
 };

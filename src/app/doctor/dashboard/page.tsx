@@ -5,12 +5,12 @@ import { useAuth } from '@/hooks/use-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Edit, FileText, ListTodo, Users, MessageSquare, Pill, HandHeart, Bot, UserCheck } from 'lucide-react';
+import { Calendar, Clock, Edit, FileText, ListTodo, Users, MessageSquare, Pill, Bot, UserCheck } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useForm, Controller } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -19,21 +19,9 @@ import { updateUserInFirestore } from '@/lib/users';
 import { serviceCategories } from '@/lib/serviceCategories';
 import AvailabilityDialog from '@/components/doctor/availability-dialog';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-
-// Mock data - replace with real data fetching
-const agenda = [
-    { time: '09:00', patient: 'John Doe', type: 'Virtual Consultation', status: 'Confirmed' },
-    { time: '10:30', patient: 'Jane Smith', type: 'Follow-up', status: 'Confirmed' },
-    { time: '11:15', patient: 'Alex Johnson', type: 'New Patient Assessment', status: 'Arrived' },
-    { time: '14:00', patient: 'Peter Pan', type: 'Lab Results Review', status: 'Confirmed' },
-    { time: '15:30', patient: 'Mary Poppins', type: 'Post-Op Check-in', status: 'Confirmed' },
-];
-
-const actionItems = [
-    { text: 'Approve 3 pending prescription refills', icon: Pill, href: '/doctor/prescriptions' },
-    { text: 'Review new lab results for Jane Smith', icon: FileText, href: '/doctor/patients/jane-smith' },
-    { text: 'Respond to 5 unread patient messages', icon: MessageSquare, href: '/doctor/messages' },
-];
+import { useAppointments } from '@/lib/appointments';
+import { useRequests } from '@/lib/refillRequests';
+import { Appointment } from '@/lib/types';
 
 const specialtySchema = z.object({
     specialty: z.string().min(1, { message: "Please select your specialty" }),
@@ -89,34 +77,36 @@ function WelcomeDialog({ user, onSave }: { user: any; onSave: (specialty: string
     );
 }
 
-function AgendaTimeline() {
+function AgendaTimeline({ appointments }: { appointments: Appointment[] }) {
     const hours = Array.from({ length: 9 }, (_, i) => i + 9); // 9 AM to 5 PM (17:00)
     
     const calculatePosition = (time: string) => {
-        const [hour, minute] = time.split(':').map(Number);
+        const appointmentTime = new Date(time);
+        const hour = appointmentTime.getHours();
+        const minute = appointmentTime.getMinutes();
         const totalMinutes = (hour * 60) + minute;
         const startMinute = 9 * 60;
         const endMinute = 17 * 60; // 5 PM
         const duration = endMinute - startMinute;
         const percentage = ((totalMinutes - startMinute) / duration) * 100;
-        return percentage;
+        return Math.max(0, Math.min(100, percentage)); // Clamp between 0 and 100
     }
 
     return (
         <TooltipProvider>
             <div className="w-full space-y-2 pt-2">
                 <div className="relative h-4 bg-muted rounded-full">
-                     {agenda.map(item => (
-                        <Tooltip key={item.time}>
+                     {appointments.map(item => (
+                        <Tooltip key={item.id}>
                             <TooltipTrigger asChild>
                                 <div 
                                     className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-primary rounded-full hover:scale-125 transition-transform" 
-                                    style={{ left: `${calculatePosition(item.time)}%` }}
+                                    style={{ left: `${calculatePosition(item.appointmentDate)}%` }}
                                 />
                             </TooltipTrigger>
                             <TooltipContent>
-                                <p className="font-semibold">{item.patient}</p>
-                                <p className="text-sm text-muted-foreground">{item.time}</p>
+                                <p className="font-semibold">{item.patientName}</p>
+                                <p className="text-sm text-muted-foreground">{new Date(item.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'})}</p>
                             </TooltipContent>
                         </Tooltip>
                     ))}
@@ -133,9 +123,28 @@ function AgendaTimeline() {
 
 export default function DoctorDashboardPage() {
     const { user, setUser } = useAuth();
+    const { appointments } = useAppointments(false, user?.id);
+    const { requests: refillRequests } = useRequests();
     const [showWelcome, setShowWelcome] = useState(false);
     const [isAvailabilityOpen, setIsAvailabilityOpen] = useState(false);
     const { toast } = useToast();
+
+    const todaysAppointments = useMemo(() => {
+        const today = new Date();
+        return appointments
+            .filter(apt => new Date(apt.appointmentDate).toDateString() === today.toDateString())
+            .sort((a,b) => new Date(a.appointmentDate).getTime() - new Date(b.appointmentDate).getTime());
+    }, [appointments]);
+
+    const pendingRefillRequests = useMemo(() => {
+        return refillRequests.filter(req => req.status === 'Pending');
+    }, [refillRequests]);
+
+    const actionItems = [
+        { text: `Approve ${pendingRefillRequests.length} pending prescription refills`, icon: Pill, href: '/doctor/prescriptions', count: pendingRefillRequests.length },
+        { text: 'Review 2 new lab results', icon: FileText, href: '#', count: 2 },
+        { text: 'Respond to 5 unread patient messages', icon: MessageSquare, href: '/doctor/messages', count: 5 },
+    ].filter(item => item.count > 0);
 
     useEffect(() => {
         if (user && !user.specialty) {
@@ -173,7 +182,7 @@ export default function DoctorDashboardPage() {
             <div className="p-6">
                 <header className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold">Welcome back, {user?.name}</h1>
+                        <h1 className="text-3xl font-bold">Welcome back, Dr. {user?.name.split(' ').slice(-1)}</h1>
                         <p className="text-muted-foreground">Here’s what’s on your plate today. {user?.specialty && <span className="font-semibold text-primary">({user.specialty})</span>}</p>
                     </div>
                     <Button onClick={() => setIsAvailabilityOpen(true)}>
@@ -191,22 +200,23 @@ export default function DoctorDashboardPage() {
                                 <CardDescription>A summary of your confirmed appointments for today.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <AgendaTimeline />
-                               <ul className="space-y-2 mt-4">
-                                    {agenda.map(item => (
-                                        <li key={item.time} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border transition-all">
+                                <AgendaTimeline appointments={todaysAppointments} />
+                               {todaysAppointments.length > 0 ? (
+                                <ul className="space-y-2 mt-4">
+                                    {todaysAppointments.map(item => (
+                                        <li key={item.id} className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border transition-all">
                                             <div className="flex flex-col items-center w-20">
                                                 <div className="flex items-center gap-1 text-sm font-semibold text-primary">
                                                     <Clock className="w-4 h-4"/>
-                                                    {item.time}
+                                                    {new Date(item.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit'})}
                                                 </div>
-                                                {item.status === 'Arrived' && (
-                                                    <div className="text-xs font-bold text-green-600 bg-green-100 dark:bg-green-900/50 px-2 py-0.5 rounded-full mt-1">ARRIVED</div>
+                                                {item.status === 'Confirmed' && ( // Example status
+                                                    <div className="text-xs font-bold text-blue-600 bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded-full mt-1">CONFIRMED</div>
                                                 )}
                                             </div>
                                             <div className="w-px bg-border h-10"></div>
                                             <div className="flex-grow">
-                                                <p className="font-semibold">{item.patient}</p>
+                                                <p className="font-semibold">{item.patientName}</p>
                                                 <p className="text-sm text-muted-foreground">{item.type}</p>
                                             </div>
                                             <div className="flex items-center gap-2">
@@ -216,6 +226,9 @@ export default function DoctorDashboardPage() {
                                         </li>
                                     ))}
                                </ul>
+                               ) : (
+                                <div className="text-center py-8 text-muted-foreground">No appointments scheduled for today.</div>
+                               )}
                             </CardContent>
                         </Card>
                          <Card>
@@ -223,21 +236,25 @@ export default function DoctorDashboardPage() {
                                 <CardTitle className="flex items-center gap-2"><ListTodo className="w-5 h-5"/> Action Items</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <ul className="space-y-3">
-                                    {actionItems.map(item => {
-                                        const Icon = item.icon;
-                                        return (
-                                        <li key={item.text} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted">
-                                            <div className="flex items-center gap-3">
-                                                <Icon className="w-5 h-5 text-muted-foreground"/>
-                                                <p>{item.text}</p>
-                                            </div>
-                                            <Link href={item.href}>
-                                                <Button variant="secondary" size="sm">Go</Button>
-                                            </Link>
-                                        </li>
-                                    )})}
-                               </ul>
+                                {actionItems.length > 0 ? (
+                                    <ul className="space-y-3">
+                                        {actionItems.map(item => {
+                                            const Icon = item.icon;
+                                            return (
+                                            <li key={item.text} className="flex items-center justify-between p-3 rounded-lg hover:bg-muted">
+                                                <div className="flex items-center gap-3">
+                                                    <Icon className="w-5 h-5 text-muted-foreground"/>
+                                                    <p>{item.text}</p>
+                                                </div>
+                                                <Link href={item.href}>
+                                                    <Button variant="secondary" size="sm">Go</Button>
+                                                </Link>
+                                            </li>
+                                        )})}
+                                   </ul>
+                                ) : (
+                                    <div className="text-center py-4 text-muted-foreground">No pending action items.</div>
+                                )}
                             </CardContent>
                         </Card>
                     </div>
@@ -260,7 +277,7 @@ export default function DoctorDashboardPage() {
                                         <p className="text-xs text-muted-foreground">New This Month</p>
                                     </div>
                                 </div>
-                                <Button className="w-full">Manage Patient Roster</Button>
+                                <Button className="w-full" asChild><Link href="/doctor/patients">Manage Patient Roster</Link></Button>
                             </CardContent>
                         </Card>
                          <Card>
@@ -290,7 +307,3 @@ export default function DoctorDashboardPage() {
         </>
     );
 }
-
-    
-
-    
