@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
@@ -6,11 +7,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type EmergencyRequest, type EmergencyUnit } from '@/lib/types';
-import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical, Hospital, Shield, Pill } from 'lucide-react';
+import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical, Hospital, Shield, Pill, CheckCircle } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { suggestEmergencyResponse } from '@/ai/flows/suggest-emergency-response-flow';
 import { formatDistanceToNow } from 'date-fns';
+import { useAuth } from '@/hooks/use-auth';
+import { updateEmergencyStatus } from '@/lib/emergency';
+import { useToast } from '@/hooks/use-toast';
+import { addLog } from '@/lib/logs';
 
 const serviceIcons: { [key in EmergencyRequest['serviceType']]: React.ElementType } = {
     'First Aid': HeartPulse,
@@ -26,6 +31,8 @@ interface AlertDetailsDialogProps {
 }
 
 export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onClose }: AlertDetailsDialogProps) {
+    const { user } = useAuth();
+    const { toast } = useToast();
     const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
     const [suggestions, setSuggestions] = useState<Map<string, any>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
@@ -80,6 +87,20 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
 
     const formatTime = (dateString: string) => {
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
+    const handleResolve = async () => {
+        if (!selectedAlert || !user) return;
+        
+        await updateEmergencyStatus(selectedAlert.id, {
+            status: 'Resolved',
+            resolvedBy: user.id,
+            resolvedAt: new Date().toISOString()
+        });
+
+        addLog("INFO", `Incident ${selectedAlert.id} for patient ${selectedAlert.patientName} was marked as resolved by ${user.name}.`);
+        toast({ title: "Incident Resolved", description: `Incident for ${selectedAlert.patientName} has been closed.` });
+        onClose();
     };
 
     const currentSuggestion = selectedAlert ? suggestions.get(selectedAlert.id) : null;
@@ -190,7 +211,7 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                                         <Button variant="outline"><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
                                         <Button variant="outline"><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
                                         <Button variant="outline"><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
-                                        <Button variant="outline" className="text-muted-foreground">Mark as Resolved</Button>
+                                        <Button variant="outline" className="text-green-600 border-green-600/50 hover:bg-green-50 hover:text-green-700" onClick={handleResolve}><CheckCircle className="h-4 w-4 mr-2"/> Mark as Resolved</Button>
                                     </div>
                                 </div>
                              </div>

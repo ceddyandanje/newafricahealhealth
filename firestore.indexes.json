@@ -1,4 +1,5 @@
 
+
 {
   "indexes": [
     {
@@ -20,11 +21,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "status",
+          "fieldPath": "resolvedBy",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "createdAt",
+          "fieldPath": "resolvedAt",
           "order": "DESCENDING"
         }
       ]

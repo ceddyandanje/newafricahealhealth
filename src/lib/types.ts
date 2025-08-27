@@ -180,6 +180,8 @@ export type Appointment = {
 };
 
 export type EmergencyServiceType = 'First Aid' | 'Ground Ambulance' | 'Air Ambulance';
+export type EmergencyStatus = 'Pending' | 'Acknowledged' | 'Unit Dispatched' | 'On Scene' | 'Resolved' | 'Cancelled';
+
 
 export type EmergencyRequest = {
   id: string; // Firestore ID
@@ -194,9 +196,12 @@ export type EmergencyRequest = {
   bloodGroup?: string;
   allergies?: string;
   situationDescription?: string;
-  status: 'Pending' | 'Acknowledged' | 'Unit Dispatched' | 'On Scene' | 'Resolved' | 'Cancelled';
+  status: EmergencyStatus;
   createdAt: string; // ISO String
+  updatedAt?: string; // ISO String
   dispatchedUnitId?: string;
+  resolvedBy?: string; // ID of the user who resolved the incident
+  resolvedAt?: string; // ISO String
 };
 
 export type EmergencyUnit = {
