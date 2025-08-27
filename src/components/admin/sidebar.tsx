@@ -44,7 +44,7 @@ export default function AdminSidebar() {
                 <Menu className="h-4 w-4" />
             </button>
             
-            <nav className="flex-grow p-2 space-y-1 mt-4">
+            <nav className="flex-grow p-2 space-y-1 mt-4 overflow-y-auto">
                 <p className={cn("px-4 py-2 text-xs font-semibold text-muted-foreground uppercase transition-all", !isSidebarOpen && "text-center")}>Menu</p>
                 {sidebarNavItems.map(item => (
                     <Link key={item.label} href={item.href} title={item.label} className={cn(
@@ -57,7 +57,7 @@ export default function AdminSidebar() {
                     </Link>
                 ))}
             </nav>
-            <div className="p-2 border-t">
+            <div className="p-2 border-t flex-shrink-0">
                  <Link href="/admin/settings" title="Settings" className={cn(
                         "flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm hover:bg-accent",
                         pathname === '/admin/settings' ? 'bg-primary/20 text-primary font-semibold' : 'hover:bg-accent',
