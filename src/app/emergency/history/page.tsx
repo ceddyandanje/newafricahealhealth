@@ -22,7 +22,7 @@ export default function IncidentHistoryPage() {
                         Incident History
                     </CardTitle>
                     <CardDescription>
-                        A log of all past incidents that you have resolved.
+                        A log of all incidents that you have handled.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow flex flex-col overflow-hidden">
@@ -43,7 +43,7 @@ export default function IncidentHistoryPage() {
                             <div>
                                 <ListChecks className="mx-auto h-12 w-12 mb-4" />
                                 <p className="font-semibold">No History Found</p>
-                                <p className="text-sm">You have not resolved any incidents yet.</p>
+                                <p className="text-sm">You have not handled any incidents yet.</p>
                             </div>
                         </div>
                    )}

@@ -199,6 +199,7 @@ export type EmergencyRequest = {
   status: EmergencyStatus;
   createdAt: string; // ISO String
   updatedAt?: string; // ISO String
+  responderId?: string; // ID of the dispatcher who first handles the request
   dispatchedUnitId?: string;
   resolvedBy?: string; // ID of the user who resolved the incident
   resolvedAt?: string; // ISO String

@@ -1,11 +1,12 @@
 
+
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { type EmergencyRequest, type EmergencyUnit } from '@/lib/types';
+import { type EmergencyRequest, type EmergencyUnit, EmergencyStatus } from '@/lib/types';
 import { User, MapPin, Clock, Info, Send, Check, Siren, Sparkles, Loader2, Ambulance, Plane, HeartPulse, Droplets, FlaskConical, Hospital, Shield, Pill, CheckCircle } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -35,6 +36,7 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
     const [selectedAlert, setSelectedAlert] = useState<EmergencyRequest | null>(null);
     const [suggestions, setSuggestions] = useState<Map<string, any>>(new Map());
     const [isLoading, setIsLoading] = useState(false);
+    const [selectedUnitId, setSelectedUnitId] = useState<string>('');
 
     const timeSinceRequest = useMemo(() => {
         if (!selectedAlert) return '';
@@ -88,10 +90,17 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
         return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     };
 
-    const handleAction = (action: string) => {
+    const handleAction = async (newStatus: EmergencyStatus, details: string, unitId?: string) => {
         if (!selectedAlert || !user) return;
-        addLog("INFO", `Dispatcher ${user.name} initiated '${action}' for incident ${selectedAlert.id}.`);
-        toast({ title: "Action Logged", description: `'${action}' has been logged for this incident.`});
+        
+        await updateEmergencyStatus(selectedAlert.id, { 
+            status: newStatus, 
+            responderId: selectedAlert.responderId || user.id, // Assign responder on first action
+            dispatchedUnitId: unitId || selectedAlert.dispatchedUnitId,
+        });
+
+        addLog("INFO", `Dispatcher ${user.name} updated incident ${selectedAlert.id} to ${newStatus}. Details: ${details}.`);
+        toast({ title: "Action Logged", description: `${details} for incident ${selectedAlert.id}.`});
     };
     
     const handleResolve = async () => {
@@ -160,46 +169,46 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                        <div className="h-full flex flex-col gap-4">
                          <ScrollArea className="flex-grow pr-4">
                            <div className="space-y-4">
-                             {/* Section 1: Incident Report */}
-                             <div className="p-4 border rounded-lg">
-                                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><Info className="text-muted-foreground"/> Incident Report</h3>
-                                <div className="grid grid-cols-2 gap-y-1 gap-x-4 text-sm">
-                                    <p className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground"/> <strong>Patient:</strong> {selectedAlert.patientName}</p>
-                                    <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Time:</strong> {formatTime(selectedAlert.createdAt)} ({timeSinceRequest})</p>
-                                    <p className="flex items-center gap-2"><Droplets className="h-4 w-4 text-muted-foreground"/> <strong>Blood:</strong> {selectedAlert.bloodGroup || 'N/A'}</p>
-                                    <p className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-muted-foreground"/> <strong>Allergies:</strong> {selectedAlert.allergies || 'None'}</p>
-                                    <p className="col-span-2 flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Location:</strong> {`Lat: ${selectedAlert.location.latitude}, Lon: ${selectedAlert.location.longitude}`}</p>
-                                    <p className="col-span-2 flex items-start gap-2"><Info className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Situation:</strong> {selectedAlert.situationDescription || 'No details provided.'}</p>
+                                {/* Section 1: Incident Report */}
+                                <div className="p-4 border rounded-lg">
+                                    <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><Info className="text-muted-foreground"/> Patient Report</h3>
+                                    <div className="grid grid-cols-2 gap-y-1 gap-x-4 text-sm">
+                                        <p className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground"/> <strong>Patient:</strong> {selectedAlert.patientName}</p>
+                                        <p className="flex items-center gap-2"><Clock className="h-4 w-4 text-muted-foreground"/> <strong>Time:</strong> {formatTime(selectedAlert.createdAt)} ({timeSinceRequest})</p>
+                                        <p className="flex items-center gap-2"><Droplets className="h-4 w-4 text-muted-foreground"/> <strong>Blood:</strong> {selectedAlert.bloodGroup || 'N/A'}</p>
+                                        <p className="flex items-center gap-2"><FlaskConical className="h-4 w-4 text-muted-foreground"/> <strong>Allergies:</strong> {selectedAlert.allergies || 'None'}</p>
+                                        <p className="col-span-2 flex items-start gap-2"><MapPin className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Location:</strong> {`Lat: ${selectedAlert.location.latitude}, Lon: ${selectedAlert.location.longitude}`}</p>
+                                        <p className="col-span-2 flex items-start gap-2"><Info className="h-4 w-4 text-muted-foreground mt-0.5"/> <strong>Situation:</strong> {selectedAlert.situationDescription || 'No details provided.'}</p>
+                                    </div>
                                 </div>
-                             </div>
 
-                             {/* Section 2: AI Triage */}
-                             <div className="p-4 border rounded-lg bg-primary/5">
-                                 <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary"/> AI Triage & Recommendation</h3>
-                                 {isLoading ? (
-                                    <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Generating suggestions for all alerts...</div>
-                                 ) : (
-                                     <div className="space-y-3">
-                                        <p className="text-sm font-medium whitespace-pre-wrap">{currentSuggestion?.summary}</p>
-                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                            <div className="flex items-start gap-2 p-2 bg-background/50 rounded-md">
-                                                <Hospital className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5"/>
-                                                <div>
-                                                    <p className="font-semibold">Nearest Hospital</p>
-                                                    <p>{currentSuggestion?.nearestHospital}</p>
+                                {/* Section 2: AI Triage */}
+                                <div className="p-4 border rounded-lg bg-primary/5">
+                                    <h3 className="font-semibold mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary"/> AI Triage & Recommendations</h3>
+                                    {isLoading ? (
+                                        <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="h-4 w-4 animate-spin"/> Generating suggestions...</div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <p className="text-sm font-medium whitespace-pre-wrap">{currentSuggestion?.summary}</p>
+                                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                                <div className="flex items-start gap-2 p-2 bg-background/50 rounded-md">
+                                                    <Hospital className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5"/>
+                                                    <div>
+                                                        <p className="font-semibold">Nearest Hospital</p>
+                                                        <p>{currentSuggestion?.nearestHospital}</p>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex items-start gap-2 p-2 bg-background/50 rounded-md">
-                                                <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5"/>
-                                                 <div>
-                                                    <p className="font-semibold">Police Needed?</p>
-                                                    <p>{currentSuggestion?.lawEnforcementNeeded ? "Yes, Recommended" : "No"}</p>
+                                                <div className="flex items-start gap-2 p-2 bg-background/50 rounded-md">
+                                                    <Shield className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5"/>
+                                                    <div>
+                                                        <p className="font-semibold">Police Needed?</p>
+                                                        <p>{currentSuggestion?.lawEnforcementNeeded ? "Yes, Recommended" : "No"}</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                     </div>
-                                 )}
-                             </div>
+                                    )}
+                                </div>
                            </div>
                         </ScrollArea>
 
@@ -208,7 +217,7 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                             <h3 className="font-semibold mb-3">Dispatch Actions</h3>
                             <div className="space-y-3">
                                 <div className="flex items-center gap-2">
-                                    <Select>
+                                    <Select onValueChange={setSelectedUnitId} value={selectedUnitId}>
                                         <SelectTrigger><SelectValue placeholder="Assign Available Unit..." /></SelectTrigger>
                                         <SelectContent>
                                             {availableUnits.filter(u => u.status === 'Available').map(unit => (
@@ -216,12 +225,12 @@ export default function AlertDetailsDialog({ alerts, availableUnits, isOpen, onC
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    <Button className="bg-red-600 hover:bg-red-700 flex-shrink-0" onClick={() => handleAction('Dispatch Unit')}><Send className="h-4 w-4 mr-2"/> Dispatch</Button>
+                                    <Button className="bg-red-600 hover:bg-red-700 flex-shrink-0" onClick={() => handleAction('Unit Dispatched', `Dispatched unit ${selectedUnitId}`, selectedUnitId)} disabled={!selectedUnitId}><Send className="h-4 w-4 mr-2"/> Dispatch</Button>
                                 </div>
                                 <div className="grid grid-cols-2 gap-2">
-                                    <Button variant="outline" onClick={() => handleAction('Notify Hospital')}><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
-                                    <Button variant="outline" onClick={() => handleAction('Notify Police')}><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
-                                    <Button variant="outline" onClick={() => handleAction('Request Meds')}><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
+                                    <Button variant="outline" onClick={() => handleAction('Acknowledged', 'Notified Hospital')}><Hospital className="h-4 w-4 mr-2"/> Notify Hospital</Button>
+                                    <Button variant="outline" onClick={() => handleAction('Acknowledged', 'Notified Police')}><Shield className="h-4 w-4 mr-2"/> Notify Police</Button>
+                                    <Button variant="outline" onClick={() => handleAction('Acknowledged', 'Requested Meds')}><Pill className="h-4 w-4 mr-2"/> Request Meds</Button>
                                     <Button variant="outline" className="text-green-600 border-green-600/50 hover:bg-green-50 hover:text-green-700" onClick={handleResolve}><CheckCircle className="h-4 w-4 mr-2"/> Mark as Resolved</Button>
                                 </div>
                             </div>

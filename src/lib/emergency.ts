@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -48,21 +47,21 @@ export const useEmergencyRequests = (fetchAllActive = false) => {
 
 
 // Hook to fetch incident history for a specific provider
-export const useIncidentHistory = (providerId?: string) => {
+export const useIncidentHistory = (responderId?: string) => {
     const [incidents, setIncidents] = useState<EmergencyRequest[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!providerId) {
+        if (!responderId) {
             setIsLoading(false);
             return;
         }
 
-        // This requires a composite index on resolvedBy (asc) and resolvedAt (desc)
+        // This requires a composite index on responderId (asc) and createdAt (desc)
         const q = query(
             emergencyCollectionRef,
-            where('resolvedBy', '==', providerId),
-            orderBy('resolvedAt', 'desc'),
+            where('responderId', '==', responderId),
+            orderBy('createdAt', 'desc'),
             limit(50)
         );
         
@@ -72,12 +71,13 @@ export const useIncidentHistory = (providerId?: string) => {
             setIsLoading(false);
         }, (error) => {
             console.error("Error fetching incident history:", error);
+            addLog("ERROR", `Firestore query failed for incident history. Check indexes for responderId. Details: ${error.message}`);
             setIsLoading(false);
         });
 
         return () => unsubscribe();
 
-    }, [providerId]);
+    }, [responderId]);
     
     return { incidents, isLoading };
 }
@@ -97,7 +97,7 @@ export const addEmergencyRequest = async (payload: NewRequestPayload) => {
     addLog('ERROR', `New emergency request received for ${payload.patientName}. Type: ${payload.serviceType}`);
 };
 
-export const updateEmergencyStatus = async (id: string, updates: Partial<Pick<EmergencyRequest, 'status' | 'resolvedBy' | 'resolvedAt' | 'dispatchedUnitId'>>) => {
+export const updateEmergencyStatus = async (id: string, updates: Partial<EmergencyRequest>) => {
     const emergencyDoc = doc(db, 'emergencies', id);
     await updateDoc(emergencyDoc, {
         ...updates,

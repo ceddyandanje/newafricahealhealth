@@ -21,11 +21,11 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
-          "fieldPath": "resolvedBy",
+          "fieldPath": "responderId",
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "resolvedAt",
+          "fieldPath": "createdAt",
           "order": "DESCENDING"
         }
       ]
