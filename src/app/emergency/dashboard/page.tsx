@@ -3,14 +3,17 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Siren, Ambulance, Plane, Clock, HeartPulse } from "lucide-react";
+import { Siren, Ambulance, Plane, Clock, HeartPulse, PlusCircle } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import AlertDetailsDialog from '@/components/emergency/alert-details-dialog';
 import { type EmergencyRequest, type EmergencyUnit } from '@/lib/types';
 import { useEmergencyRequests } from '@/lib/emergency';
-import { useFleet } from '@/lib/fleet';
+import { useFleet, addUnit } from '@/lib/fleet';
 import { useAuth } from '@/hooks/use-auth';
+import UnitForm from '@/components/emergency/unit-form';
+import { useToast } from '@/hooks/use-toast';
+import { addLog } from '@/lib/logs';
 
 const StatCard = ({ icon: Icon, value, label, variant, asChild, ...props }: { icon: React.ElementType, value: string | number, label: string, variant: 'default' | 'destructive', asChild?: boolean, [key: string]: any }) => (
     <Card className={`bg-background ${variant === 'destructive' ? 'bg-destructive/10' : ''}`} {...props}>
@@ -26,15 +29,53 @@ const StatCard = ({ icon: Icon, value, label, variant, asChild, ...props }: { ic
 
 export default function EmergencyDashboardPage() {
     const { user } = useAuth();
+    const { toast } = useToast();
     const { requests: incomingAlerts } = useEmergencyRequests();
     const { units } = useFleet(user?.id);
     const [isAlertsDialogOpen, setIsAlertsDialogOpen] = useState(false);
+    const [isAddUnitDialogOpen, setIsAddUnitDialogOpen] = useState(false);
     
     const availableGroundUnits = units.filter(u => u.type === 'Ground' && u.status === 'Available').length;
     const availableAirUnits = units.filter(u => u.type === 'Air' && u.status === 'Available').length;
 
+    const handleSaveUnit = async (unitData: Omit<EmergencyUnit, 'id' | 'providerId' | 'createdAt' | 'updatedAt'>) => {
+        if (!user) return;
+        
+        try {
+            await addUnit(user.id, unitData);
+            toast({ title: "Unit Added", description: `${unitData.licensePlate} has been added to your fleet.` });
+            addLog("INFO", `New emergency unit ${unitData.licensePlate} added by ${user.name}.`);
+            setIsAddUnitDialogOpen(false);
+        } catch (error) {
+            console.error("Failed to save unit:", error);
+            toast({ variant: 'destructive', title: "Save Failed", description: "Could not save unit details."});
+        }
+    };
+
     return (
-        <Dialog open={isAlertsDialogOpen} onOpenChange={setIsAlertsDialogOpen}>
+        <>
+            <Dialog open={isAlertsDialogOpen} onOpenChange={setIsAlertsDialogOpen}>
+                 <DialogTrigger asChild>
+                    <button className="hidden" />
+                </DialogTrigger>
+                {isAlertsDialogOpen && <AlertDetailsDialog alerts={incomingAlerts} availableUnits={units} isOpen={isAlertsDialogOpen} onClose={() => setIsAlertsDialogOpen(false)} />}
+            </Dialog>
+
+            <Dialog open={isAddUnitDialogOpen} onOpenChange={setIsAddUnitDialogOpen}>
+                <DialogTrigger asChild>
+                    <button className="hidden" />
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Add New Unit</DialogTitle>
+                        <DialogDescription>
+                            Provide the details for a new unit in your fleet.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <UnitForm onSave={handleSaveUnit} onCancel={() => setIsAddUnitDialogOpen(false)} />
+                </DialogContent>
+            </Dialog>
+
             <div className="p-6 h-full flex flex-col gap-6">
                 <header>
                     <h1 className="text-3xl font-bold flex items-center gap-2">
@@ -45,13 +86,15 @@ export default function EmergencyDashboardPage() {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                     <DialogTrigger asChild>
-                       <button className="w-full text-left">
-                         <StatCard icon={Siren} value={incomingAlerts.length} label="Active Incidents" variant="destructive" className="cursor-pointer hover:shadow-lg w-full"/>
-                       </button>
-                    </DialogTrigger>
-                    <StatCard icon={Ambulance} value={availableGroundUnits} label="Available Ground Units" variant="default" />
-                    <StatCard icon={Plane} value={availableAirUnits} label="Available Air Units" variant="default" />
+                     <button onClick={() => setIsAlertsDialogOpen(true)} className="w-full text-left">
+                       <StatCard icon={Siren} value={incomingAlerts.length} label="Active Incidents" variant="destructive" className="cursor-pointer hover:shadow-lg w-full"/>
+                     </button>
+                    <button onClick={() => setIsAddUnitDialogOpen(true)} className="w-full text-left">
+                        <StatCard icon={Ambulance} value={availableGroundUnits} label="Available Ground Units" variant="default" />
+                    </button>
+                     <button onClick={() => setIsAddUnitDialogOpen(true)} className="w-full text-left">
+                        <StatCard icon={Plane} value={availableAirUnits} label="Available Air Units" variant="default" />
+                    </button>
                     <StatCard icon={Clock} value="7m 32s" label="Avg. Response Time" variant="default" />
                 </div>
 
@@ -93,8 +136,7 @@ export default function EmergencyDashboardPage() {
                     </Card>
                 </div>
             </div>
-            {isAlertsDialogOpen && <AlertDetailsDialog alerts={incomingAlerts} availableUnits={units} isOpen={isAlertsDialogOpen} onClose={() => setIsAlertsDialogOpen(false)} />}
-        </Dialog>
+        </>
     );
 }
 
@@ -106,13 +148,13 @@ function AlertsList({ alerts, onAlertClick }: { alerts: EmergencyRequest[], onAl
     }, {} as Record<EmergencyRequest['serviceType'], number>);
     
     return (
-        <DialogTrigger asChild>
-            <Card className="h-full flex flex-col cursor-pointer hover:bg-muted/50 transition-colors" onClick={onAlertClick}>
+        <button className="w-full h-full text-left" onClick={onAlertClick}>
+            <Card className="h-full flex flex-col cursor-pointer hover:bg-muted/50 transition-colors">
                 <CardHeader className="p-4 border-b">
                     <CardTitle className="text-base">Incoming Alerts ({alerts.length})</CardTitle>
                 </CardHeader>
                 <CardContent className="p-2 flex-grow overflow-y-auto space-y-2">
-                    {Object.entries(alertCounts).map(([serviceType, count]) => {
+                    {alerts.length > 0 ? Object.entries(alertCounts).map(([serviceType, count]) => {
                         const Icon = serviceIcons[serviceType as keyof typeof serviceIcons];
                         return (
                             <div key={serviceType} className="p-2 border rounded-md bg-background/50 relative">
@@ -131,10 +173,14 @@ function AlertsList({ alerts, onAlertClick }: { alerts: EmergencyRequest[], onAl
                                 )}
                             </div>
                         )
-                    })}
+                    }) : (
+                         <div className="text-center text-muted-foreground pt-10">
+                            <p>No active incidents.</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
-        </DialogTrigger>
+        </button>
     )
 }
 
