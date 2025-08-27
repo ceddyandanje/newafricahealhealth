@@ -14,6 +14,7 @@ import {
     reauthenticateWithCredential,
     GoogleAuthProvider,
     signInWithPopup,
+    getRedirectResult,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -54,8 +55,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isSaving, setIsSaving] = useState(false);
   
   const router = useRouter();
-  const pathname = usePathname();
   const { toast } = useToast();
+
+  const handleLoginChecks = useCallback((userData: User) => {
+    if (!userData.termsAccepted) {
+        setShowTerms(true);
+    } else if (userData.role === 'user' && !isProfileComplete(userData)) {
+        setShowOnboarding(true);
+    } else {
+        setShowOnboarding(false);
+        setShowTerms(false);
+    }
+  }, []);
 
   const handleRedirect = useCallback((loggedInUser: User) => {
     const roleMap: { [key: string]: string | undefined } = {
@@ -67,23 +78,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         'emergency-services': '/emergency/dashboard'
     }
     const destination = roleMap[loggedInUser.role];
-
-    if (destination && !pathname.startsWith(destination)) {
+    if (destination) {
       router.push(destination);
     }
-  }, [router, pathname]);
+  }, [router]);
 
-  const handleLoginChecks = useCallback((userData: User) => {
-    if (!userData.termsAccepted) {
-        setShowTerms(true);
-    } else if (userData.role === 'user' && !isProfileComplete(userData)) {
-        setShowOnboarding(true);
-    } else {
-        setShowOnboarding(false);
-        setShowTerms(false);
-        handleRedirect(userData);
-    }
-  }, [handleRedirect]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
@@ -98,9 +97,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUser(userData);
                 handleLoginChecks(userData);
             } else {
-                // User is authenticated with Firebase, but has no user doc. 
-                // This can happen if doc creation failed during signup.
-                // We'll treat them as logged out and let them sign up again.
                 setUser(null);
                 setFirebaseUser(null);
             }
@@ -118,9 +114,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     setIsLoading(true);
     try {
-        await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
-        // onAuthStateChanged will handle the rest
-        return true;
+        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
+        const fbUser = userCredential.user;
+        const userDoc = await getDoc(doc(db, "users", fbUser.uid));
+        if (userDoc.exists()) {
+            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+            setUser(userData);
+            handleRedirect(userData); // Redirect only on successful login
+            handleLoginChecks(userData);
+            return true;
+        }
+        return false;
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
@@ -158,7 +162,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-          // onAuthStateChanged will handle setting state and redirection
+          setUser(newUser);
+          handleRedirect(newUser); // Redirect only on successful signup
+          handleLoginChecks(newUser);
           return true;
         } else {
           throw new Error("Could not create user document in Firestore.");
@@ -188,13 +194,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userDoc = await getDoc(userDocRef);
 
         if (userDoc.exists()) {
-            // Existing user
             const userData = { id: userDoc.id, ...userDoc.data() } as User;
             setUser(userData);
-            handleLoginChecks(userData);
             toast({ title: `Welcome back, ${userData.name.split(' ')[0]}!` });
+            handleRedirect(userData); // Redirect on successful login
+            handleLoginChecks(userData);
         } else {
-            // New user via Google
             const newUser = await createUserInFirestore({
                 name: fbUser.displayName,
                 email: fbUser.email,
@@ -203,10 +208,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             if (newUser) {
                 setUser(newUser);
-                handleLoginChecks(newUser);
                 toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
-                 addLog("INFO", `New user signed up with Google: ${newUser.name} (${newUser.email}).`);
+                addLog("INFO", `New user signed up with Google: ${newUser.name} (${newUser.email}).`);
                 addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User (Google)', description: `An account for ${newUser.name} has been created.`});
+                handleRedirect(newUser); // Redirect on new user creation
+                handleLoginChecks(newUser);
             } else {
                  throw new Error("Failed to create user document after Google sign-in.");
             }
