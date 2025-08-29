@@ -34,9 +34,9 @@ export default function EmergencyServicesPage() {
             <div className="container mx-auto px-4 py-16">
                 <div className="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div>
-                    <h2 className="font-headline text-3xl font-semibold mb-4 text-primary">In Partnership with Phoenix Aviation</h2>
+                    <h2 className="font-headline text-3xl font-semibold mb-4 text-primary">Partnered with Leading Emergency Providers</h2>
                     <p className="text-muted-foreground mb-4 leading-relaxed">
-                    Africa Heal Health has partnered with the industry-leading <strong className="font-semibold text-foreground">Phoenix Aviation</strong> to provide world-class emergency medical services. This collaboration ensures that our clients receive the highest standard of care during critical situations, leveraging Phoenix Aviation's extensive experience and state-of-the-art fleet.
+                    Africa Heal Health has partnered with industry-leading emergency service providers to deliver world-class medical response. This collaboration ensures that our clients receive the highest standard of care during critical situations, leveraging our partners' extensive experience and state-of-the-art fleets.
                     </p>
                     <p className="text-muted-foreground leading-relaxed">
                     Whether it's a critical medical evacuation from a remote location or swift ground ambulance transport, our joint services are designed for maximum efficiency and patient safety.
@@ -63,7 +63,7 @@ export default function EmergencyServicesPage() {
                         </div>
                     <h3 className="font-headline text-2xl font-semibold mb-2">Medical Evacuation (Medevac)</h3>
                     <p className="text-muted-foreground">
-                        Air ambulance services for emergency evacuations from any location. Our fleet, operated by Phoenix Aviation, is equipped with advanced medical technology to provide ICU-level care in the air.
+                        Air ambulance services for emergency evacuations from any location. Our partner fleets are equipped with advanced medical technology to provide ICU-level care in the air.
                     </p>
                     </div>
                     <div className="glassmorphic p-8 text-center">
