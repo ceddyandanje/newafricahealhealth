@@ -120,6 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (userDoc.exists()) {
             const userData = { id: userDoc.id, ...userDoc.data() } as User;
             setUser(userData);
+            toast({ title: "Login Successful", description: `Welcome back, ${userData.name.split(' ')[0]}!` });
             handleRedirect(userData); // Redirect only on successful login
             handleLoginChecks(userData);
             return true;
