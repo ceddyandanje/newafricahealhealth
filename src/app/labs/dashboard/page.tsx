@@ -8,6 +8,7 @@ import { useLabRequests } from '@/lib/lab';
 import { type LabRequest } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const StatCard = ({ icon: Icon, value, label }: { icon: React.ElementType, value: string | number, label: string }) => (
     <Card className="bg-background">
@@ -37,6 +38,22 @@ const RecentRequestRow = ({ request }: { request: LabRequest }) => (
     </div>
 );
 
+function RecentActivitySkeleton() {
+    return (
+        <div className="space-y-3">
+            {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-2">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2 flex-grow">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/2" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    )
+}
+
 export default function LabDashboardPage() {
     const { requests, isLoading } = useLabRequests();
 
@@ -63,9 +80,9 @@ export default function LabDashboardPage() {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <StatCard icon={Beaker} value={stats.newRequests} label="New Requests" />
-                <StatCard icon={Clock} value={stats.pendingResults} label="Pending Results" />
-                <StatCard icon={FileCheck2} value={stats.completedToday} label="Completed Today" />
+                <StatCard icon={Beaker} value={isLoading ? '...' : stats.newRequests} label="New Requests" />
+                <StatCard icon={Clock} value={isLoading ? '...' : stats.pendingResults} label="Pending Results" />
+                <StatCard icon={FileCheck2} value={isLoading ? '...' : stats.completedToday} label="Completed Today" />
             </div>
 
             <Card className="flex-grow">
@@ -74,18 +91,27 @@ export default function LabDashboardPage() {
                     <CardDescription>The latest test requests received by the lab.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="space-y-2">
-                        {recentRequests.length > 0 ? (
-                           recentRequests.map(req => <RecentRequestRow key={req.id} request={req} />)
-                        ) : (
-                            <div className="text-center py-8 text-muted-foreground">No recent requests found.</div>
-                        )}
-                    </div>
-                     <div className="text-center mt-6">
-                        <Button asChild variant="outline">
-                            <Link href="/labs/requests">View All Requests</Link>
-                        </Button>
-                    </div>
+                    {isLoading ? (
+                        <RecentActivitySkeleton />
+                    ) : (
+                        <>
+                           <div className="space-y-2">
+                                {recentRequests.length > 0 ? (
+                                    recentRequests.map(req => <RecentRequestRow key={req.id} request={req} />)
+                                ) : (
+                                    <div className="text-center py-8 text-muted-foreground">
+                                        <p>No recent activity.</p>
+                                        <p className="text-xs">New test requests will appear here as they arrive.</p>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="text-center mt-6">
+                                <Button asChild variant="outline">
+                                    <Link href="/labs/requests">View All Requests</Link>
+                                </Button>
+                            </div>
+                        </>
+                    )}
                 </CardContent>
             </Card>
         </div>
