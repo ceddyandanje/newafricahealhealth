@@ -9,19 +9,14 @@ import { addLog } from './logs';
 
 const labRequestsCollectionRef = collection(db, 'labRequests');
 
-// Sample data for seeding
-const sampleLabRequests: Omit<LabRequest, 'id'>[] = [
-  { patientId: 'user-1', patientName: 'John Doe', testName: 'Complete Blood Count (CBC)', status: 'Pending', requestedAt: new Date(new Date().setDate(new Date().getDate() -1)).toISOString() },
-  { patientId: 'user-2', patientName: 'Jane Smith', testName: 'Lipid Panel', status: 'Pending', requestedAt: new Date().toISOString() },
-  { patientId: 'user-3', patientName: 'Peter Jones', testName: 'Thyroid Panel (TSH, T3, T4)', status: 'In Progress', requestedAt: new Date(new Date().setDate(new Date().getDate() -2)).toISOString() },
-  { patientId: 'user-4', patientName: 'Mary Williams', testName: 'Basic Metabolic Panel (BMP)', status: 'Completed', requestedAt: new Date(new Date().setDate(new Date().getDate() -3)).toISOString(), completedAt: new Date(new Date().setDate(new Date().getDate() -1)).toISOString(), resultUrl: '#' },
-];
+// Sample data for seeding - REMOVED DUMMY DATA
+const sampleLabRequests: Omit<LabRequest, 'id'>[] = [];
 
 // Function to seed lab requests if the collection is empty
 const seedLabRequests = async () => {
     const snapshot = await getDocs(labRequestsCollectionRef);
 
-    if (snapshot.empty) {
+    if (snapshot.empty && sampleLabRequests.length > 0) {
         console.log("No lab requests found. Seeding sample requests.");
         addLog('INFO', 'Lab requests collection is empty. Seeding initial data.');
         const batch = writeBatch(db);
@@ -31,8 +26,6 @@ const seedLabRequests = async () => {
         });
         await batch.commit();
         console.log('Sample lab requests seeded successfully.');
-    } else {
-        console.log('Lab requests already exist. No seeding needed.');
     }
 }
 
@@ -44,6 +37,7 @@ export const useLabRequests = () => {
 
     useEffect(() => {
         const seedAndFetch = async () => {
+            // Seeding is now optional and controlled by the empty array above
             await seedLabRequests();
 
             const q = query(labRequestsCollectionRef, orderBy('requestedAt', 'desc'));
