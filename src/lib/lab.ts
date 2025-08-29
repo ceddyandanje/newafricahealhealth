@@ -71,3 +71,4 @@ export const updateLabRequestStatus = async (id: string, status: LabRequestStatu
     await updateDoc(requestDoc, updates);
 };
 
+
