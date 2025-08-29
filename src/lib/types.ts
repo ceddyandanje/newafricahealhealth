@@ -222,6 +222,9 @@ export type EmergencyUnit = {
 };
 
 export type LabRequestStatus = 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
+export type LabRequestType = 'Routine' | 'Urgent' | 'Pre-Op' | 'Follow-up';
+export type SampleType = 'Blood' | 'Urine' | 'Saliva' | 'Tissue' | 'Other';
+export type SampleStatus = 'Collected' | 'Not Collected' | 'In Transit';
 
 export type LabRequest = {
     id: string; // Firestore ID
@@ -232,4 +235,9 @@ export type LabRequest = {
     requestedAt: string; // ISO String
     completedAt?: string; // ISO String
     resultUrl?: string; // Link to the PDF/file in Firebase Storage
+    requestType: LabRequestType;
+    reason?: string;
+    sampleType: SampleType;
+    sampleStatus: SampleStatus;
+    requestedBy: string; // e.g., 'Dr. Smith' or 'Patient Request'
 };
