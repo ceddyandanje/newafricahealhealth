@@ -220,3 +220,16 @@ export type EmergencyUnit = {
     createdAt: string;
     updatedAt: string;
 };
+
+export type LabRequestStatus = 'Pending' | 'In Progress' | 'Completed' | 'Cancelled';
+
+export type LabRequest = {
+    id: string; // Firestore ID
+    patientId: string;
+    patientName: string;
+    testName: string;
+    status: LabRequestStatus;
+    requestedAt: string; // ISO String
+    completedAt?: string; // ISO String
+    resultUrl?: string; // Link to the PDF/file in Firebase Storage
+};

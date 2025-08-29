@@ -23,12 +23,9 @@ export default function LabSidebar() {
     const { user, logout } = useAuth();
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-20 flex flex-col items-center py-4 bg-background border-r z-50">
-            <Link href="/labs/dashboard" className="mb-6">
-                 <FlaskConical className="h-8 w-8 text-primary" />
-            </Link>
+        <aside className="fixed left-0 top-16 w-20 flex flex-col items-center py-4 bg-background border-r z-40" style={{ height: 'calc(100vh - 8rem)' }}>
             <TooltipProvider delayDuration={0}>
-                <nav className="flex flex-col items-center gap-2 flex-grow">
+                <nav className="flex flex-col items-center gap-2 flex-grow mt-4">
                     {navItems.map(item => (
                         <Tooltip key={item.label}>
                             <TooltipTrigger asChild>
@@ -36,7 +33,7 @@ export default function LabSidebar() {
                                     href={item.href}
                                     className={cn(
                                         'h-12 w-12 flex items-center justify-center rounded-lg transition-colors text-muted-foreground hover:bg-accent hover:text-foreground',
-                                        pathname === item.href && 'bg-primary/20 text-primary'
+                                        pathname.startsWith(item.href) && 'bg-primary/20 text-primary'
                                     )}
                                 >
                                     <item.icon className="h-6 w-6" />

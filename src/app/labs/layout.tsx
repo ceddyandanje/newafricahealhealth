@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useEffect } from 'react';
@@ -35,9 +36,9 @@ export default function LabLayout({
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="flex-grow flex">
+      <div className="flex-grow flex relative">
         <LabSidebar />
-        <main className="flex-1 pl-20 transition-all duration-300">
+        <main className="flex-1 pl-24 bg-muted/40">
             {children}
         </main>
       </div>
