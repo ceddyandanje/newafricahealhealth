@@ -8,12 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 
-const documents = [
-    { id: 'DOC0815', name: 'Complete Blood Count (CBC)', date: 'August 15, 2024', type: 'Lab Result', status: 'Reviewed' },
-    { id: 'DOC0814', name: 'Cardiology Consultation Notes', date: 'August 14, 2024', type: 'Consultation Note', status: 'New' },
-    { id: 'DOC0720', name: 'Follow-up Summary', date: 'July 20, 2024', type: 'Summary', status: 'Reviewed' },
-    { id: 'DOC0501', name: 'Initial Prescription', date: 'May 01, 2024', type: 'Prescription', status: 'Archived' },
-];
+// No longer using dummy data
+const documents: any[] = [];
 
 const statusVariant = {
     New: 'default',
@@ -55,19 +51,27 @@ export default function PatientDocumentsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {documents.map((doc) => (
-                                <TableRow key={doc.id}>
-                                    <TableCell className="font-medium">{doc.name}</TableCell>
-                                    <TableCell>{doc.date}</TableCell>
-                                    <TableCell>{doc.type}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={statusVariant[doc.status as keyof typeof statusVariant]}>{doc.status}</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/> Download</Button>
+                            {documents.length > 0 ? (
+                                documents.map((doc) => (
+                                    <TableRow key={doc.id}>
+                                        <TableCell className="font-medium">{doc.name}</TableCell>
+                                        <TableCell>{doc.date}</TableCell>
+                                        <TableCell>{doc.type}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={statusVariant[doc.status as keyof typeof statusVariant]}>{doc.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="ghost" size="sm"><Download className="mr-2 h-4 w-4"/> Download</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                             ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="h-24 text-center text-muted-foreground">
+                                        No documents found. Uploaded documents will appear here.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                             )}
                         </TableBody>
                     </Table>
                 </CardContent>

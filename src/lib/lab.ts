@@ -3,32 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, query, onSnapshot, orderBy, doc, updateDoc, getDocs, writeBatch, addDoc } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { type LabRequest, LabRequestStatus } from './types';
 import { addLog } from './logs';
 
 const labRequestsCollectionRef = collection(db, 'labRequests');
-
-// Sample data for seeding - REMOVED DUMMY DATA
-const sampleLabRequests: Omit<LabRequest, 'id'>[] = [];
-
-// Function to seed lab requests if the collection is empty
-const seedLabRequests = async () => {
-    const snapshot = await getDocs(labRequestsCollectionRef);
-
-    if (snapshot.empty && sampleLabRequests.length > 0) {
-        console.log("No lab requests found. Seeding sample requests.");
-        addLog('INFO', 'Lab requests collection is empty. Seeding initial data.');
-        const batch = writeBatch(db);
-        sampleLabRequests.forEach(requestData => {
-            const newRequestRef = doc(labRequestsCollectionRef);
-            batch.set(newRequestRef, requestData);
-        });
-        await batch.commit();
-        console.log('Sample lab requests seeded successfully.');
-    }
-}
-
 
 // Hook to fetch lab requests in real-time
 export const useLabRequests = () => {
@@ -36,23 +15,17 @@ export const useLabRequests = () => {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        const seedAndFetch = async () => {
-            // Seeding is now optional and controlled by the empty array above
-            await seedLabRequests();
+        const q = query(labRequestsCollectionRef, orderBy('requestedAt', 'desc'));
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            const requestsData: LabRequest[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LabRequest));
+            setRequests(requestsData);
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Error fetching lab requests:", error);
+            setIsLoading(false);
+        });
 
-            const q = query(labRequestsCollectionRef, orderBy('requestedAt', 'desc'));
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                const requestsData: LabRequest[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as LabRequest));
-                setRequests(requestsData);
-                setIsLoading(false);
-            }, (error) => {
-                console.error("Error fetching lab requests:", error);
-                setIsLoading(false);
-            });
-    
-            return () => unsubscribe();
-        }
-        seedAndFetch();
+        return () => unsubscribe();
     }, []);
 
     return { requests, isLoading };
@@ -70,5 +43,3 @@ export const updateLabRequestStatus = async (id: string, status: LabRequestStatu
     }
     await updateDoc(requestDoc, updates);
 };
-
-

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Calendar, ChevronDown, Filter, Plus } from 'lucide-react';
+import { Calendar, ChevronDown, Filter, Plus, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,22 +11,21 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import AppointmentDialog from '@/components/patient/appointment-dialog';
 import { useUsers } from '@/lib/users';
 import { useBookingStore } from '@/hooks/use-booking-store';
-
-const appointments = [
-    { id: 'APT2301', date: 'October 30, 2024', time: '11:00 AM', doctor: 'Dr. Chen', type: 'Virtual Consultation', status: 'Upcoming' },
-    { id: 'APT2289', date: 'August 15, 2024', time: '09:30 AM', doctor: 'Dr. Patel', type: 'Annual Check-up', status: 'Completed' },
-    { id: 'APT2254', date: 'July 20, 2024', time: '02:00 PM', doctor: 'Dr. Singh', type: 'Follow-up', status: 'Completed' },
-    { id: 'APT2198', date: 'May 05, 2024', time: '10:00 AM', doctor: 'Dr. Chen', type: 'Lab Results Review', status: 'Completed' },
-];
+import { useAppointments } from '@/lib/appointments';
+import { useAuth } from '@/hooks/use-auth';
 
 const statusVariant = {
     Upcoming: 'default',
     Completed: 'secondary',
     Cancelled: 'destructive',
+    Pending: 'outline',
+    Confirmed: 'default'
 } as const;
 
 export default function PatientAppointmentsPage() {
+    const { user } = useAuth();
     const { users } = useUsers();
+    const { appointments, isLoading } = useAppointments(false, user?.id);
     const doctors = users.filter(u => u.role === 'doctor');
     const { isDialogOpen, openDialog, closeDialog, specialty } = useBookingStore();
 
@@ -65,6 +64,11 @@ export default function PatientAppointmentsPage() {
                         <CardDescription>A log of your upcoming and past medical consultations.</CardDescription>
                     </CardHeader>
                     <CardContent>
+                        {isLoading ? (
+                            <div className="flex items-center justify-center h-48">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            </div>
+                        ) : (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -77,14 +81,14 @@ export default function PatientAppointmentsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {appointments.map((apt) => (
+                                {appointments.length > 0 ? appointments.map((apt) => (
                                     <TableRow key={apt.id}>
-                                        <TableCell className="font-medium">{apt.date}</TableCell>
-                                        <TableCell>{apt.time}</TableCell>
-                                        <TableCell>{apt.doctor}</TableCell>
+                                        <TableCell className="font-medium">{new Date(apt.appointmentDate).toLocaleDateString()}</TableCell>
+                                        <TableCell>{new Date(apt.appointmentDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</TableCell>
+                                        <TableCell>{apt.doctorName}</TableCell>
                                         <TableCell>{apt.type}</TableCell>
                                         <TableCell>
-                                            <Badge variant={statusVariant[apt.status as keyof typeof statusVariant]}>{apt.status}</Badge>
+                                            <Badge variant={statusVariant[apt.status]}>{apt.status}</Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
@@ -101,9 +105,16 @@ export default function PatientAppointmentsPage() {
                                             </DropdownMenu>
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                                            You have no appointments yet.
+                                        </TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
+                        )}
                     </CardContent>
                 </Card>
             </div>

@@ -26,12 +26,8 @@ type Prescription = {
     isRequesting?: boolean;
 };
 
-const initialPrescriptions: Prescription[] = [
-    { id: 'RX78901', name: 'Metformin 500mg', date: 'August 15, 2024', refillsLeft: 2, daysSupply: 30, daysLeft: 12, status: 'Active' },
-    { id: 'RX78902', name: 'Lisinopril 10mg', date: 'August 15, 2024', refillsLeft: 5, daysSupply: 90, daysLeft: 72, status: 'Active' },
-    { id: 'RX65432', name: 'Atorvastatin 20mg', date: 'May 10, 2024', refillsLeft: 0, daysSupply: 90, daysLeft: 0, status: 'Needs Refill' },
-    { id: 'RX12345', name: 'Amoxicillin 500mg', date: 'April 01, 2024', refillsLeft: 0, daysSupply: 10, daysLeft: 0, status: 'Expired' },
-];
+// Removing initial hardcoded data
+const initialPrescriptions: Prescription[] = [];
 
 const statusVariant = {
     Active: 'default',
@@ -122,36 +118,44 @@ export default function PatientPrescriptionsPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {prescriptions.map((rx) => (
-                                <TableRow key={rx.id}>
-                                    <TableCell className="font-medium">
-                                        <p>{rx.name}</p>
-                                        <p className="text-xs text-muted-foreground">Filled on {rx.date}</p>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Badge variant={statusVariant[rx.status]}>{rx.status}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            <Progress value={(rx.daysLeft / rx.daysSupply) * 100} className="w-24"/>
-                                            <span className="text-xs text-muted-foreground">{rx.daysLeft > 0 ? `${rx.daysLeft} days left` : '-'}</span>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button 
-                                            disabled={rx.status !== 'Needs Refill' || rx.isRequesting}
-                                            onClick={() => handleRequestRefill(rx.id)}
-                                        >
-                                            {rx.isRequesting ? (
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
-                                            ) : (
-                                                <RefreshCcw className="mr-2 h-4 w-4"/>
-                                            )}
-                                            {rx.status === 'Refill Requested' ? 'Requested' : 'Request Refill'}
-                                        </Button>
+                            {prescriptions.length > 0 ? (
+                                prescriptions.map((rx) => (
+                                    <TableRow key={rx.id}>
+                                        <TableCell className="font-medium">
+                                            <p>{rx.name}</p>
+                                            <p className="text-xs text-muted-foreground">Filled on {rx.date}</p>
+                                        </TableCell>
+                                        <TableCell>
+                                            <Badge variant={statusVariant[rx.status]}>{rx.status}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <Progress value={(rx.daysLeft / rx.daysSupply) * 100} className="w-24"/>
+                                                <span className="text-xs text-muted-foreground">{rx.daysLeft > 0 ? `${rx.daysLeft} days left` : '-'}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button 
+                                                disabled={rx.status !== 'Needs Refill' || rx.isRequesting}
+                                                onClick={() => handleRequestRefill(rx.id)}
+                                            >
+                                                {rx.isRequesting ? (
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin"/>
+                                                ) : (
+                                                    <RefreshCcw className="mr-2 h-4 w-4"/>
+                                                )}
+                                                {rx.status === 'Refill Requested' ? 'Requested' : 'Request Refill'}
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                        You have no prescriptions on file.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

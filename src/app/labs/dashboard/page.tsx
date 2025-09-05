@@ -3,9 +3,8 @@
 
 import { useMemo, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { FlaskConical, Beaker, FileCheck2, Clock, FileText, User } from "lucide-react";
+import { FlaskConical, Beaker, FileCheck2, Clock } from "lucide-react";
 import { useLabRequests } from '@/lib/lab';
-import { type LabRequest } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -52,7 +51,7 @@ export default function LabDashboardPage() {
                 </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <button onClick={() => setIsRequestsDialogOpen(true)} className="text-left">
+                    <button onClick={() => setIsRequestsDialogOpen(true)} className="text-left" disabled={newRequests.length === 0}>
                         <StatCard icon={Beaker} value={isLoading ? '...' : newRequests.length} label="New Requests" />
                     </button>
                     <StatCard icon={Clock} value={isLoading ? '...' : pendingResults} label="Pending Results" />
