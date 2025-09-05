@@ -96,10 +96,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
                 handleLoginChecks(userData);
-            } else {
-                setUser(null);
-                setFirebaseUser(null);
             }
+            // If the userDoc doesn't exist, we let the Google sign-in redirect handler create it.
         } else {
             setUser(null);
             setFirebaseUser(null);
@@ -107,8 +105,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
     });
 
+    // Check for Google Sign-in redirect result
+    getRedirectResult(auth).then(async (result) => {
+        if (result) {
+            setIsLoading(true);
+            const fbUser = result.user;
+            const userDocRef = doc(db, "users", fbUser.uid);
+            const userDoc = await getDoc(userDocRef);
+             if (!userDoc.exists()) {
+                 const newUser = await createUserInFirestore({
+                    name: fbUser.displayName,
+                    email: fbUser.email,
+                    avatarUrl: fbUser.photoURL
+                }, fbUser.uid);
+
+                 if (newUser) {
+                    setUser(newUser);
+                    toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+                    handleRedirect(newUser);
+                    handleLoginChecks(newUser);
+                }
+             }
+             setIsLoading(false);
+        }
+    }).catch(error => {
+        console.error("Error getting redirect result:", error);
+        toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
+        setIsLoading(false);
+    });
+
     return () => unsubscribe();
-  }, [handleLoginChecks]);
+  }, [handleLoginChecks, handleRedirect, toast]);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -342,3 +369,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
