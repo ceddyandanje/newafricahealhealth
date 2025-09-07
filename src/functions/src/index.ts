@@ -1,3 +1,4 @@
+
 /**
  * Import function triggers from their respective submodules:
  *
@@ -9,7 +10,6 @@
 
 import { setGlobalOptions } from "firebase-functions/v2";
 import { onDocumentCreated } from "firebase-functions/v2/firestore";
-import { onCall } from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import twilio from "twilio";
@@ -27,18 +27,17 @@ setGlobalOptions({ maxInstances: 10 });
 
 
 // Configure Twilio client
-// IMPORTANT: Replace placeholder values with your actual Twilio credentials.
-// It is highly recommended to store these as environment variables/secrets.
+// IMPORTANT: It is highly recommended to store these as environment variables/secrets.
 // https://firebase.google.com/docs/functions/config-env
 const twilioAccountSid = process.env.TWILIO_ACCOUNT_SID;
 const twilioAuthToken = process.env.TWILIO_AUTH_TOKEN;
 const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
 
 let twilioClient: twilio.Twilio | undefined;
-if (twilioAccountSid && twilioAuthToken) {
+if (twilioAccountSid && twilioAuthToken && twilioPhoneNumber) {
   twilioClient = twilio(twilioAccountSid, twilioAuthToken);
 } else {
-  logger.warn("Twilio credentials are not set. SMS notifications will be disabled.");
+  logger.warn("Twilio credentials are not fully set in environment variables. SMS notifications will be disabled.");
 }
 
 
@@ -92,12 +91,4 @@ export const sendEmergencySmsNotification = onDocumentCreated("emergencies/{emer
   });
 
   await Promise.all(notificationPromises);
-});
-
-
-// A simple callable function to test the environment
-export const helloWorld = onCall((request) => {
-  const name = request.data.name || "World";
-  logger.info(`Received helloWorld call with name: ${name}`);
-  return { message: `Hello, ${name}!` };
 });
