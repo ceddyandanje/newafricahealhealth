@@ -187,7 +187,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   const signInWithGoogle = async (): Promise<void> => {
     const provider = new GoogleAuthProvider();
-    setIsLoading(true);
     try {
       const result = await signInWithPopup(auth, provider);
       const fbUser = result.user;
@@ -209,10 +208,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         toast({ title: "Sign-In Successful", description: `Welcome back, ${userData.name.split(' ')[0]}!` });
       }
       
-      setUser(userData);
-      setFirebaseUser(fbUser);
+      // The onAuthStateChanged listener will handle setting user state,
+      // redirecting, and running login checks. We don't need to do it here.
       handleRedirect(userData);
-      handleLoginChecks(userData);
 
     } catch (error: any) {
       if (error.code === 'auth/popup-closed-by-user') {
@@ -225,8 +223,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             description: "Could not complete Google Sign-In. Please try again."
           });
       }
-    } finally {
-        setIsLoading(false);
     }
   };
 
@@ -341,5 +337,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    
