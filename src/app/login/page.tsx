@@ -19,6 +19,11 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { createUserInFirestore } from "@/lib/users";
+import { useRouter } from "next/navigation";
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -41,8 +46,10 @@ const signupSchema = z.object({
 
 
 function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { login, signInWithGoogle, isLoading } = useAuth();
+    const { login, isLoading } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { toast } = useToast();
+    const router = useRouter();
     
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -57,8 +64,41 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     
     async function handleGoogleSignIn() {
         setIsSubmitting(true);
-        await signInWithGoogle();
-        setIsSubmitting(false);
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const fbUser = result.user;
+            const userDocRef = doc(db, "users", fbUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            let userData;
+    
+            if (!userDoc.exists()) {
+                const newUser = await createUserInFirestore({
+                    name: fbUser.displayName,
+                    email: fbUser.email,
+                    avatarUrl: fbUser.photoURL
+                }, fbUser.uid);
+                if (!newUser) throw new Error("Failed to create user in Firestore.");
+                userData = newUser;
+                toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+            } else {
+                userData = { id: userDoc.id, ...userDoc.data() };
+                toast({ title: "Sign-In Successful", description: `Welcome back!` });
+            }
+            // The onAuthStateChanged listener in useAuth will handle the redirect.
+            // We don't need to call a specific redirect function here.
+        } catch (error: any) {
+            if (error.code !== 'auth/popup-closed-by-user') {
+                console.error("Google Sign-In Error:", error);
+                toast({
+                    variant: 'destructive',
+                    title: "Sign-In Failed",
+                    description: "Could not complete Google Sign-In. Please try again."
+                });
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (
@@ -107,8 +147,9 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 }
 
 function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { signup, signInWithGoogle, isLoading } = useAuth();
+    const { signup, isLoading } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { toast } = useToast();
 
     const form = useForm<z.infer<typeof signupSchema>>({
         resolver: zodResolver(signupSchema),
@@ -130,8 +171,39 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     
     async function handleGoogleSignIn() {
         setIsSubmitting(true);
-        await signInWithGoogle();
-        setIsSubmitting(false);
+        const provider = new GoogleAuthProvider();
+        try {
+            const result = await signInWithPopup(auth, provider);
+            const fbUser = result.user;
+            const userDocRef = doc(db, "users", fbUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            let userData;
+    
+            if (!userDoc.exists()) {
+                const newUser = await createUserInFirestore({
+                    name: fbUser.displayName,
+                    email: fbUser.email,
+                    avatarUrl: fbUser.photoURL
+                }, fbUser.uid);
+                if (!newUser) throw new Error("Failed to create user in Firestore.");
+                userData = newUser;
+                toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+            } else {
+                userData = { id: userDoc.id, ...userDoc.data() };
+                toast({ title: "Sign-In Successful", description: `Welcome back!` });
+            }
+        } catch (error: any) {
+             if (error.code !== 'auth/popup-closed-by-user') {
+                console.error("Google Sign-In Error:", error);
+                toast({
+                    variant: 'destructive',
+                    title: "Sign-In Failed",
+                    description: "Could not complete Google Sign-In. Please try again."
+                });
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     return (

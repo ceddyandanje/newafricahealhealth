@@ -12,8 +12,6 @@ import {
     updatePassword,
     EmailAuthProvider,
     reauthenticateWithCredential,
-    GoogleAuthProvider,
-    signInWithPopup,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -34,7 +32,6 @@ interface AuthContextType {
   login: (credentials: LoginCredentials) => Promise<boolean>;
   signup: (credentials: SignUpCredentials) => Promise<boolean>;
   logout: () => void;
-  signInWithGoogle: () => Promise<void>;
   reauthenticateAndChangePassword: (currentPass: string, newPass: string) => Promise<boolean>;
   isLoading: boolean;
 }
@@ -94,6 +91,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
                 handleLoginChecks(userData);
+                // We only redirect if the user is fully set up and on the login page
+                if (window.location.pathname === '/login' && userData.termsAccepted && isProfileComplete(userData)) {
+                    handleRedirect(userData);
+                }
             } else {
                 // This can happen if a user is in auth but not firestore.
                 // It's safer to treat them as logged out.
@@ -109,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     });
     
     return () => unsubscribe();
-  }, [handleLoginChecks]);
+  }, [handleLoginChecks, handleRedirect]);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -185,46 +186,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const signInWithGoogle = async (): Promise<void> => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      const fbUser = result.user;
-      const userDocRef = doc(db, "users", fbUser.uid);
-      const userDoc = await getDoc(userDocRef);
-      let userData: User;
-
-      if (!userDoc.exists()) {
-        const newUser = await createUserInFirestore({
-            name: fbUser.displayName,
-            email: fbUser.email,
-            avatarUrl: fbUser.photoURL
-        }, fbUser.uid);
-        if (!newUser) throw new Error("Failed to create user in Firestore.");
-        userData = newUser;
-        toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
-      } else {
-        userData = { id: userDoc.id, ...userDoc.data() } as User;
-        toast({ title: "Sign-In Successful", description: `Welcome back, ${userData.name.split(' ')[0]}!` });
-      }
-      
-      // The onAuthStateChanged listener will handle setting user state,
-      // redirecting, and running login checks. We don't need to do it here.
-      handleRedirect(userData);
-
-    } catch (error: any) {
-      if (error.code === 'auth/popup-closed-by-user') {
-          toast({ variant: 'destructive', title: "Sign-In Cancelled", description: "The sign-in window was closed before completion." });
-      } else {
-          console.error("Google Sign-In Error:", error);
-          toast({
-            variant: 'destructive',
-            title: "Sign-In Failed",
-            description: "Could not complete Google Sign-In. Please try again."
-          });
-      }
-    }
-  };
 
   const logout = useCallback(async () => {
     await signOut(auth);
@@ -309,7 +270,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, logout, signInWithGoogle, reauthenticateAndChangePassword, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, logout, reauthenticateAndChangePassword, isLoading }}>
       {children}
       {user && showOnboarding && (
         <OnboardingDialog 
