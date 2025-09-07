@@ -46,7 +46,7 @@ export default function OnboardingDialog({ user, isOpen, onSave, isSaving }: Onb
     <Dialog open={isOpen}>
       <DialogContent showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle className="text-2xl">Welcome to Africa Heal Health!</DialogTitle>
+          <DialogTitle className="text-2xl">Welcome, {user.name}!</DialogTitle>
           <DialogDescription>
             Let's complete your profile to get you started.
           </DialogDescription>
