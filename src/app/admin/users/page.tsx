@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Shield, PlusCircle, Search, Trash2, Loader2, DollarSign, Flag, ShoppingBag, CalendarIcon, BarChart } from "lucide-react";
+import { Shield, PlusCircle, Search, Trash2, Loader2, DollarSign, Flag, ShoppingBag, CalendarIcon, BarChart, AlertTriangle } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useUsers, createUserInFirestore, updateUserInFirestore, deleteUserInFirestore } from "@/lib/users";
@@ -25,6 +25,7 @@ import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogContent, AlertDialogFooter } from '@/components/ui/alert-dialog';
 
 
 const userSchema = z.object({
@@ -98,6 +99,7 @@ function StatCard({ icon: Icon, label, value }: { icon: React.ElementType, label
 function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange }: { user: User, currentUser: User | null, onUpdate: (id: string, data: Partial<User>) => void, onDelete: (id: string) => void, onOpenChange: (open: boolean) => void }) {
     const [role, setRole] = useState(user.role);
     const [status, setStatus] = useState(user.status);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
     const isEditingSelf = currentUser?.id === user.id;
     const isEditingAdmin = user.role === 'admin';
 
@@ -105,8 +107,15 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
         onUpdate(user.id, { role, status: isEditingAdmin ? 'active' : status });
         onOpenChange(false);
     }
+
+    const handleDelete = () => {
+        setIsDeleteConfirmOpen(false);
+        onDelete(user.id);
+        onOpenChange(false);
+    }
     
     return (
+       <>
         <DialogContent className="max-w-4xl">
            <div className="grid md:grid-cols-2 gap-8">
                 {/* Left Side */}
@@ -155,7 +164,7 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
                     </div>
 
                     <DialogFooter className="mt-8 grid grid-cols-2 gap-2">
-                        <Button variant="destructive" onClick={() => onDelete(user.id)} disabled={isEditingSelf}><Trash2 className="mr-2 h-4 w-4"/> Delete User</Button>
+                        <Button variant="destructive" onClick={() => setIsDeleteConfirmOpen(true)} disabled={isEditingSelf}><Trash2 className="mr-2 h-4 w-4"/> Delete User</Button>
                         <Button onClick={handleUpdate}>Save Changes</Button>
                     </DialogFooter>
                 </div>
@@ -182,6 +191,23 @@ function ManageUserDialog({ user, currentUser, onUpdate, onDelete, onOpenChange 
                 </div>
            </div>
         </DialogContent>
+         <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the user account for <span className="font-semibold">{user.name}</span> and all associated data from the system.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} className={buttonVariants({variant: "destructive"})}>
+                        Yes, delete user
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     )
 }
 
@@ -191,6 +217,8 @@ export default function UsersPage() {
     const { user: currentUser } = useAuth();
     const [isAddUserOpen, setIsAddUserOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
+    const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
+    const [resetConfirmationText, setResetConfirmationText] = useState("");
     const { toast } = useToast();
 
     const handleAddUser = async (userData: z.infer<typeof userSchema>) => {
@@ -227,16 +255,34 @@ export default function UsersPage() {
         const userToDelete = users.find(u => u.id === id);
         if (!userToDelete) return;
 
+        // Deleting the Firestore document will trigger the Cloud Function to delete the auth user
         const success = await deleteUserInFirestore(id);
         if (success) {
-            setUsers(prevUsers => prevUsers.filter(u => u.id !== id));
-            addLog('WARN', `User ${userToDelete.name} (${userToDelete.email}) was deleted.`);
-            addNotification({ type: 'system_update', title: 'User Deleted', description: `The account for ${userToDelete.name} has been removed.`});
-            toast({ title: "User Deleted", description: `Account for ${userToDelete.name} has been removed.`});
+            // The onSnapshot listener will automatically update the local state
+            addLog('WARN', `Admin initiated deletion for user ${userToDelete.name} (${userToDelete.email}).`);
+            toast({ title: "User Deleted", description: `Account deletion for ${userToDelete.name} has been initiated.`});
         } else {
              toast({ variant: 'destructive', title: "Deletion Failed", description: "Could not delete user." });
         }
         setSelectedUser(undefined);
+    };
+
+    const handleResetAllUsers = async () => {
+        if (!currentUser) return;
+        
+        toast({ title: 'Initiating Reset...', description: 'Please wait while user data is being cleared.' });
+        
+        const nonAdminUsers = users.filter(u => u.id !== currentUser.id);
+        
+        for (const userToDelete of nonAdminUsers) {
+            await deleteUserInFirestore(userToDelete.id);
+        }
+        
+        addLog('ERROR', `Admin ${currentUser.email} reset all non-admin user data.`);
+        toast({ variant: 'destructive', title: 'User Data Reset', description: `All ${nonAdminUsers.length} non-admin user accounts have been deleted.` });
+        
+        setIsResetConfirmOpen(false);
+        setResetConfirmationText("");
     };
 
     const formatDate = (dateString: string | undefined) => {
@@ -261,15 +307,18 @@ export default function UsersPage() {
                     <Shield className="w-8 h-8" />
                     Users Management
                 </h1>
-                <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
-                    <DialogTrigger asChild>
-                        <Button><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader><DialogTitle>Add New User</DialogTitle></DialogHeader>
-                        <AddUserForm onSave={handleAddUser} onOpenChange={setIsAddUserOpen} />
-                    </DialogContent>
-                </Dialog>
+                <div className="flex items-center gap-2">
+                    <Button variant="destructive" onClick={() => setIsResetConfirmOpen(true)}><Trash2 className="mr-2 h-4 w-4" /> Reset All Users</Button>
+                    <Dialog open={isAddUserOpen} onOpenChange={setIsAddUserOpen}>
+                        <DialogTrigger asChild>
+                            <Button><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader><DialogTitle>Add New User</DialogTitle></DialogHeader>
+                            <AddUserForm onSave={handleAddUser} onOpenChange={setIsAddUserOpen} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
             <Card>
                 <CardHeader>
@@ -332,6 +381,36 @@ export default function UsersPage() {
             <Dialog open={!!selectedUser} onOpenChange={(isOpen) => !isOpen && setSelectedUser(undefined)}>
                 {selectedUser && <ManageUserDialog user={selectedUser} currentUser={currentUser} onUpdate={handleUpdateUser} onDelete={handleDeleteUser} onOpenChange={(isOpen) => !isOpen && setSelectedUser(undefined)} />}
             </Dialog>
+
+            <AlertDialog open={isResetConfirmOpen} onOpenChange={setIsResetConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive"/> Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete ALL non-admin user accounts and their associated data from both authentication and the database.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className="py-2">
+                        <Label htmlFor="delete-confirm">Type <strong className="text-destructive">DELETE</strong> to confirm.</Label>
+                        <Input 
+                            id="delete-confirm" 
+                            value={resetConfirmationText}
+                            onChange={(e) => setResetConfirmationText(e.target.value)}
+                            className="mt-1"
+                        />
+                    </div>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                            disabled={resetConfirmationText !== 'DELETE'} 
+                            onClick={handleResetAllUsers}
+                            className={buttonVariants({variant: "destructive"})}
+                        >
+                            Reset All User Data
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Settings, User, Bell, Lock, Palette, UploadCloud, Loader2 } from 'lucide-react';
+import { Settings, User, Bell, Lock, Palette, UploadCloud, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useTheme } from 'next-themes';
 import { useAuth } from '@/hooks/use-auth';
-import { updateUserInFirestore } from '@/lib/users';
+import { updateUserInFirestore, forceResetPassword } from '@/lib/users';
 import { useToast } from '@/hooks/use-toast';
 import { addLog } from '@/lib/logs';
 import { storage } from '@/lib/firebase';
@@ -37,6 +37,12 @@ export default function AdminSettingsPage() {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isPasswordChangeDialogOpen, setIsPasswordChangeDialogOpen] = useState(false);
     const [isPasswordSubmitting, setIsPasswordSubmitting] = useState(false);
+    
+    // State for force password reset
+    const [newPasswordForce, setNewPasswordForce] = useState('');
+    const [confirmPasswordForce, setConfirmPasswordForce] = useState('');
+    const [isForceResetSubmitting, setIsForceResetSubmitting] = useState(false);
+
 
     useEffect(() => {
         if (user) {
@@ -78,6 +84,31 @@ export default function AdminSettingsPage() {
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
+        }
+    };
+
+    const handleForcePasswordReset = async () => {
+        if (!user) return;
+        if (newPasswordForce !== confirmPasswordForce) {
+            toast({ variant: 'destructive', title: "Password Mismatch", description: "The new passwords do not match." });
+            return;
+        }
+        if (newPasswordForce.length < 8) {
+            toast({ variant: 'destructive', title: "Password Too Short", description: "Password must be at least 8 characters long." });
+            return;
+        }
+
+        setIsForceResetSubmitting(true);
+        try {
+            await forceResetPassword(newPasswordForce);
+            addLog('WARN', `Admin ${user.email} force-reset their own password.`);
+            toast({ title: 'Password Reset Successful', description: 'Your password has been changed. Please use it for your next login.' });
+            setNewPasswordForce('');
+            setConfirmPasswordForce('');
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Reset Failed', description: error.message });
+        } finally {
+            setIsForceResetSubmitting(false);
         }
     };
 
@@ -167,6 +198,29 @@ export default function AdminSettingsPage() {
                         </CardHeader>
                         <CardContent>
                              <Button onClick={() => setIsPasswordChangeDialogOpen(true)}>Change Password</Button>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-destructive">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle /> Force Password Reset</CardTitle>
+                            <CardDescription>Use this only if you are locked out and cannot use the standard password change. This action does not require your old password.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <Label htmlFor="new-password-force">New Password</Label>
+                                    <Input id="new-password-force" type="password" value={newPasswordForce} onChange={(e) => setNewPasswordForce(e.target.value)} />
+                                </div>
+                                <div className="space-y-1">
+                                    <Label htmlFor="confirm-password-force">Confirm New Password</Label>
+                                    <Input id="confirm-password-force" type="password" value={confirmPasswordForce} onChange={(e) => setConfirmPasswordForce(e.target.value)} />
+                                </div>
+                            </div>
+                            <Button variant="destructive" onClick={handleForcePasswordReset} disabled={isForceResetSubmitting}>
+                                {isForceResetSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Force Reset Password
+                            </Button>
                         </CardContent>
                     </Card>
                 </div>

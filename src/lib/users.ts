@@ -1,12 +1,12 @@
 
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import { User, MedicalProfile } from './types';
 import type { SignUpCredentials } from './types';
-import { db } from './firebase';
+import { db, auth } from './firebase';
 import { collection, getDocs, doc, setDoc, updateDoc, deleteDoc, getDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { updatePassword as firebaseUpdatePassword } from 'firebase/auth';
 
 // Custom hook to manage users state. It fetches from Firestore on mount.
 export const useUsers = () => {
@@ -129,4 +129,11 @@ export const updateUserMedicalProfile = async (userId: string, data: Partial<Med
     }
 };
 
-    
+// Force password reset for the currently signed-in user (admin only)
+export const forceResetPassword = async (newPass: string) => {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error("No user is currently signed in to reset the password for.");
+    }
+    await firebaseUpdatePassword(user, newPass);
+};

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { 
     createUserWithEmailAndPassword, 
@@ -47,6 +47,8 @@ const isProfileComplete = (user: User) => {
     return !!user.phone && !!user.age && !!user.location;
 }
 
+const publicPaths = ['/login', '/signup', '/terms', '/privacy'];
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
@@ -56,9 +58,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isSaving, setIsSaving] = useState(false);
   
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
 
-  const handleLoginFlow = useCallback((userData: User) => {
+  const handleRedirect = useCallback((userData: User) => {
+    const roleMap: { [key: string]: string | undefined } = {
+        'admin': '/admin',
+        'doctor': '/doctor/dashboard',
+        'user': '/patient/dashboard',
+        'delivery-driver': '/delivery/dashboard',
+        'lab-technician': '/labs/dashboard',
+        'emergency-services': '/emergency/dashboard'
+    };
+    const destination = roleMap[userData.role];
+    const isPublicPath = publicPaths.includes(pathname);
+
+    if (destination && isPublicPath) {
+      router.push(destination);
+    }
+  }, [router, pathname]);
+
+
+  const handleUserCheck = useCallback((userData: User) => {
     if (!userData.termsAccepted) {
         setShowTerms(true);
     } else if (userData.role === 'user' && !isProfileComplete(userData)) {
@@ -66,20 +87,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else {
         setShowOnboarding(false);
         setShowTerms(false);
-        const roleMap: { [key: string]: string | undefined } = {
-            'admin': '/admin',
-            'doctor': '/doctor/dashboard',
-            'user': '/patient/dashboard',
-            'delivery-driver': '/delivery/dashboard',
-            'lab-technician': '/labs/dashboard',
-            'emergency-services': '/emergency/dashboard'
-        }
-        const destination = roleMap[userData.role];
-        if (destination && window.location.pathname !== destination && !window.location.pathname.startsWith(destination)) {
-          router.push(destination);
-        }
+        handleRedirect(userData);
     }
-  }, [router]);
+  }, [handleRedirect]);
 
 
   useEffect(() => {
@@ -93,7 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (userDoc.exists()) {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
-                handleLoginFlow(userData);
+                handleUserCheck(userData);
             } else {
                 const newUser = await createUserInFirestore({
                     name: fbUser.displayName,
@@ -102,7 +112,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }, fbUser.uid);
                  if(newUser) {
                     setUser(newUser);
-                    handleLoginFlow(newUser);
+                    handleUserCheck(newUser);
                  } else {
                     await signOut(auth);
                  }
@@ -116,12 +126,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setIsLoading(false);
     });
     return () => unsubscribe();
-  }, [handleLoginFlow]);
+  }, [handleUserCheck]);
 
 
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
         await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+        // onAuthStateChanged will handle the rest
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
@@ -169,29 +180,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const googleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-        await signInWithPopup(auth, provider);
-        // onAuthStateChanged will handle the rest
+      const result = await signInWithPopup(auth, provider);
+      // onAuthStateChanged will handle the rest
     } catch (error: any) {
-        let description = "An unknown error occurred during Google Sign-In.";
-        if (error.code === 'auth/popup-closed-by-user') {
-            description = "The sign-in window was closed before completion. Please try again.";
-        } else if (error.code === 'auth/cancelled-popup-request') {
-            // This can happen if the user clicks the button multiple times. It's safe to ignore.
-            return;
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        const email = error.customData.email;
+        if (email) {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (methods.includes(GoogleAuthProvider.PROVIDER_ID)) {
+             toast({ title: "Already Linked", description: "This Google account is already linked." });
+             return;
+          }
+          if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
+            try {
+              const googleCredential = GoogleAuthProvider.credentialFromError(error);
+              if (googleCredential) {
+                const userCredential = await signInWithEmailAndPassword(auth, email, ''); // This will fail, but we need to prompt
+              }
+            } catch (loginError: any) {
+               toast({ variant: 'destructive', title: "Link Failed", description: "Please sign in with your password first to link this Google account." });
+            }
+          }
         }
-        else if (error.code === 'auth/account-exists-with-different-credential') {
-            description = "An account already exists with this email address. Please sign in with your original method (e.g., password) to link your Google account.";
-        } else {
-            description = error.message;
-        }
-
+      } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
         toast({
             variant: "destructive",
             title: "Google Sign-In Failed",
-            description,
+            description: error.message || "An unknown error occurred.",
         });
+      }
     }
-  };
+};
 
   const logout = useCallback(async () => {
     await signOut(auth);
@@ -241,7 +260,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (success) {
         const updatedUser = { ...user, ...updates };
         setUser(updatedUser);
-        handleLoginFlow(updatedUser);
+        handleUserCheck(updatedUser);
         addLog("INFO", `User ${user.email} completed their profile onboarding.`);
         toast({ title: "Profile Complete!", description: "Thank you for completing your profile." });
     } else {
@@ -258,7 +277,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (success) {
         const updatedUser = { ...user, termsAccepted: true };
         setUser(updatedUser);
-        handleLoginFlow(updatedUser);
+        handleUserCheck(updatedUser);
         addLog("INFO", `User ${user.email} accepted the Terms of Service.`);
     } else {
         toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your preference. Please try again." });
