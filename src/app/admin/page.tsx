@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
     ];
     
     const { orderStatusDistribution, revenueTrend } = useMemo(() => {
-        const statusDistribution = Object.entries(
+        const orderStatusDistribution = Object.entries(
             orders.reduce((acc, order) => {
                 acc[order.status] = (acc[order.status] || 0) + 1;
                 return acc;
@@ -81,6 +81,7 @@ export default function AdminDashboardPage() {
             }
         });
 
+        const revenueTrend = last30Days;
         return { orderStatusDistribution, revenueTrend };
     }, [orders]);
   
