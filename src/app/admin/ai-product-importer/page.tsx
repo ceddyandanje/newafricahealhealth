@@ -16,8 +16,10 @@ import { addNotification } from '@/lib/notifications';
 import { enrichProductData, type EnrichedProductData } from '@/ai/flows/product-importer-flow';
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
-import { PDFDocument } from 'pdf-lib';
 import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import { createWorker } from 'tesseract.js';
 
 
 type ExtractedProduct = {
@@ -25,9 +27,12 @@ type ExtractedProduct = {
     price: number; // Stored in cents
 };
 
+
 function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct[]) => void }) {
     const [file, setFile] = useState<File | null>(null);
     const [isParsing, setIsParsing] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [progressText, setProgressText] = useState('');
     const { nextStep } = useStepper();
     const { toast } = useToast();
 
@@ -40,7 +45,7 @@ function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please select a valid PDF file.' });
         }
     };
-
+    
     const handleExtract = async () => {
         if (!file) {
             toast({ variant: 'destructive', title: 'No File Selected', description: 'Please upload a PDF file to extract from.' });
@@ -48,28 +53,43 @@ function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct
         }
 
         setIsParsing(true);
+        setProgress(0);
+        setProgressText('Initializing OCR...');
         
         try {
+            // Set worker path for pdfjs
+            GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/4.5.136/pdf.worker.min.mjs`;
+
             const arrayBuffer = await file.arrayBuffer();
-            // Note: pdf-lib does not have a built-in text extraction method.
-            // This is a common challenge with many PDF libraries as text can be complex (vectors, images).
-            // A true production app might use a server-side OCR service (like Cloud Vision AI) for this.
-            // For this project, we will add a placeholder that demonstrates the flow, acknowledging this limitation.
-            
-            toast({
-                title: 'Parsing Limitation',
-                description: 'Direct text extraction from PDF is complex. This step simulates reading text. Please copy/paste the content for now.',
-                duration: 7000
+            const pdf = await getDocument(arrayBuffer).promise;
+            const worker = await createWorker('eng', 1, {
+                logger: m => {
+                    if (m.status === 'recognizing text') {
+                        setProgress(Math.round(m.progress * 100));
+                    }
+                }
             });
-            
-            // --- SIMULATED EXTRACTION ---
-            // In a real scenario, you'd integrate a robust OCR or text extraction service here.
-            // For now, we'll ask the user to paste the text to keep the workflow moving.
-            // The following code is for demonstration of the flow but won't extract text.
-            const text = "Please paste your product list here:\nProduct One 100.00\nProduct Two 250.50";
-            // --- END SIMULATION ---
-            
-            const lines = text.trim().split('\n').slice(1); // Assuming first line is a header
+
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+                setProgressText(`Processing page ${i} of ${pdf.numPages}...`);
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 2 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                if (context) {
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    const { data: { text } } = await worker.recognize(canvas);
+                    fullText += text;
+                }
+            }
+            await worker.terminate();
+
+            setProgressText('Parsing extracted text...');
+            const lines = fullText.trim().split('\n');
             const products: ExtractedProduct[] = [];
             let extractionErrors = 0;
 
@@ -85,40 +105,42 @@ function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct
                         extractionErrors++;
                     }
                 } else {
-                    extractionErrors++;
+                     if (line.trim().length > 0) extractionErrors++;
                 }
             });
             
             if (extractionErrors > 0) {
-                 toast({ variant: 'destructive', title: 'Parsing Warning', description: `${extractionErrors} line(s) could not be parsed.` });
+                 toast({ variant: 'destructive', title: 'Parsing Warning', description: `${extractionErrors} line(s) could not be parsed and were skipped.` });
             }
 
             if (products.length > 0) {
+                toast({ title: 'Extraction Successful', description: `Successfully extracted ${products.length} products.`});
                 onExtracted(products);
                 nextStep();
             } else {
-                toast({ variant: 'destructive', title: 'Extraction Failed', description: 'No valid products could be extracted.' });
+                toast({ variant: 'destructive', title: 'Extraction Failed', description: 'No valid products could be extracted. Please check the PDF format.' });
             }
 
         } catch (error) {
-            console.error("Error parsing PDF:", error);
+            console.error("Error parsing PDF with OCR:", error);
             toast({ variant: 'destructive', title: 'Parsing Error', description: 'There was an issue processing the PDF file.' });
         } finally {
             setIsParsing(false);
         }
     };
 
+
     return (
         <div className="space-y-4">
             <p className="text-muted-foreground">
-                Upload your PDF file containing product names and prices. The system will attempt to extract the data.
+                Upload your PDF file containing product names and prices. The system will perform OCR to extract the data. For best results, ensure the PDF has a clear, two-column format.
             </p>
             <div className="flex items-center gap-4 p-4 border-2 border-dashed rounded-lg">
                 <UploadCloud className="h-12 w-12 text-muted-foreground" />
                 <div className="space-y-1">
                     <Label htmlFor="pdf-upload" className="font-semibold cursor-pointer text-primary hover:underline">Click to upload a file</Label>
                     <Input id="pdf-upload" type="file" accept=".pdf" onChange={handleFileChange} className="sr-only"/>
-                    <p className="text-xs text-muted-foreground">PDF (up to 5MB)</p>
+                    <p className="text-xs text-muted-foreground">PDF (up to 20MB)</p>
                      {file && <p className="text-sm font-medium">{file.name}</p>}
                 </div>
             </div>
@@ -127,9 +149,13 @@ function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct
                 {isParsing ? <Loader2 className="mr-2 animate-spin"/> : <Sparkles className="mr-2 h-4 w-4" />}
                 Extract Product Data
             </Button>
-             <div className="text-xs text-muted-foreground p-3 bg-muted/50 rounded-md">
-                <strong>Note:</strong> Direct text extraction from PDFs can be unreliable. For best results, please ensure your PDF has selectable text and a simple two-column format (Name | Price). If extraction fails, copy and paste the text into a plain text file. The simulation will continue with placeholder data.
-            </div>
+            
+            {isParsing && (
+                 <div className="space-y-2">
+                    <Label>{progressText}</Label>
+                    <Progress value={progress} />
+                </div>
+            )}
         </div>
     );
 }
