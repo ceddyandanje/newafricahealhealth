@@ -5,7 +5,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { Input } from "@/components/ui/input";
-import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut, Package, PenSquare, Database, ListChecks, ListOrdered } from "lucide-react";
+import { Home, Hospital, Menu, Search, Truck, Users, Calendar, HeartPulse, Shield, FileText, ShoppingBag, Settings2, LogOut, Package, PenSquare, Database, ListChecks, ListOrdered, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import Notifications from "@/components/admin/notifications";
@@ -20,6 +20,7 @@ const sidebarNavItems = [
     { href: "/admin/appointments", icon: Calendar, label: "Appointments" },
     { href: "/admin/orders", icon: ListOrdered, label: "Orders" },
     { href: "/admin/products", icon: Package, label: "Products" },
+    { href: "/admin/ai-product-importer", icon: Sparkles, label: "AI Product Importer"},
     { href: "/admin/patients", icon: Users, label: "Patients" },
     { href: "/admin/doctors", icon: HeartPulse, label: "Doctors" },
     { href: "/admin/users", icon: Shield, label: "Users" },
