@@ -272,14 +272,22 @@ export default function UsersPage() {
         
         toast({ title: 'Initiating Reset...', description: 'Please wait while user data is being cleared.' });
         
-        const nonAdminUsers = users.filter(u => u.id !== currentUser.id);
+        // Filter out ALL admin accounts to prevent any admin from being deleted
+        const usersToDelete = users.filter(u => u.role !== 'admin');
         
-        for (const userToDelete of nonAdminUsers) {
+        if (usersToDelete.length === 0) {
+            toast({ title: 'No Users to Reset', description: 'There are no non-admin users to delete.'});
+            setIsResetConfirmOpen(false);
+            setResetConfirmationText("");
+            return;
+        }
+
+        for (const userToDelete of usersToDelete) {
             await deleteUserInFirestore(userToDelete.id);
         }
         
         addLog('ERROR', `Admin ${currentUser.email} reset all non-admin user data.`);
-        toast({ variant: 'destructive', title: 'User Data Reset', description: `All ${nonAdminUsers.length} non-admin user accounts have been deleted.` });
+        toast({ variant: 'destructive', title: 'User Data Reset', description: `All ${usersToDelete.length} non-admin user accounts have been deleted.` });
         
         setIsResetConfirmOpen(false);
         setResetConfirmationText("");
@@ -414,5 +422,3 @@ export default function UsersPage() {
         </div>
     );
 }
-
-    
