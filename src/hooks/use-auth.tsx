@@ -14,8 +14,6 @@ import {
     reauthenticateWithCredential,
     GoogleAuthProvider,
     signInWithPopup,
-    signInWithRedirect,
-    getRedirectResult,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -86,79 +84,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    const processRedirect = async () => {
-        try {
-            const result = await getRedirectResult(auth);
-            if (result) {
-                const fbUser = result.user;
-                const userDocRef = doc(db, "users", fbUser.uid);
-                const userDoc = await getDoc(userDocRef);
-                let userData: User;
-
-                if (!userDoc.exists()) {
-                    const newUser = await createUserInFirestore({
-                        name: fbUser.displayName,
-                        email: fbUser.email,
-                        avatarUrl: fbUser.photoURL
-                    }, fbUser.uid);
-                    if (!newUser) throw new Error("Failed to create user in Firestore.");
-                    userData = newUser;
-                    toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
-                } else {
-                    userData = { id: userDoc.id, ...userDoc.data() } as User;
-                }
-                
-                setUser(userData); // Set user state immediately
-                setFirebaseUser(fbUser);
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+        setIsLoading(true);
+        if (fbUser) {
+            setFirebaseUser(fbUser);
+            const userDocRef = doc(db, "users", fbUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                setUser(userData);
                 handleLoginChecks(userData);
-            }
-        } catch (error) {
-            console.error("Error processing redirect result:", error);
-            toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
-        }
-
-        // AFTER processing the redirect, set up the normal auth state listener.
-        const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-            if (fbUser) {
-                // If user is already set from redirect, don't re-fetch
-                if (fbUser.uid === user?.id) {
-                    setIsLoading(false);
-                    return;
-                }
-                setFirebaseUser(fbUser);
-                const userDocRef = doc(db, "users", fbUser.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    const userData = { id: userDoc.id, ...userDoc.data() } as User;
-                    setUser(userData);
-                    handleLoginChecks(userData);
-                } else {
-                    // This case can happen if a user exists in Auth but not Firestore.
-                    // We can log them out or attempt to re-create their profile.
-                    // For now, we'll treat them as logged out to be safe.
-                    setUser(null);
-                }
             } else {
+                // This can happen if a user is in auth but not firestore.
+                // It's safer to treat them as logged out.
                 setUser(null);
                 setFirebaseUser(null);
+                signOut(auth);
             }
-            setIsLoading(false);
-        });
-        
-        return unsubscribe;
-    };
-
-    const unsubscribePromise = processRedirect();
-
-    return () => {
-        unsubscribePromise.then(unsubscribe => {
-            if (unsubscribe) {
-                unsubscribe();
-            }
-        });
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+        } else {
+            setUser(null);
+            setFirebaseUser(null);
+        }
+        setIsLoading(false);
+    });
+    
+    return () => unsubscribe();
+  }, [handleLoginChecks]);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -238,17 +189,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const provider = new GoogleAuthProvider();
     setIsLoading(true);
     try {
-      // Use signInWithRedirect for a more robust flow
-      await signInWithRedirect(auth, provider);
-      // The logic to handle the result is now in the useEffect
+      const result = await signInWithPopup(auth, provider);
+      const fbUser = result.user;
+      const userDocRef = doc(db, "users", fbUser.uid);
+      const userDoc = await getDoc(userDocRef);
+      let userData: User;
+
+      if (!userDoc.exists()) {
+        const newUser = await createUserInFirestore({
+            name: fbUser.displayName,
+            email: fbUser.email,
+            avatarUrl: fbUser.photoURL
+        }, fbUser.uid);
+        if (!newUser) throw new Error("Failed to create user in Firestore.");
+        userData = newUser;
+        toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+      } else {
+        userData = { id: userDoc.id, ...userDoc.data() } as User;
+        toast({ title: "Sign-In Successful", description: `Welcome back, ${userData.name.split(' ')[0]}!` });
+      }
+      
+      setUser(userData);
+      setFirebaseUser(fbUser);
+      handleRedirect(userData);
+      handleLoginChecks(userData);
+
     } catch (error: any) {
-      console.error("Google Sign-In Error:", error);
-      toast({
-        variant: 'destructive',
-        title: "Sign-In Failed",
-        description: "Could not initiate Google Sign-In. Please check your connection and try again."
-      });
-      setIsLoading(false);
+      if (error.code === 'auth/popup-closed-by-user') {
+          toast({ variant: 'destructive', title: "Sign-In Cancelled", description: "The sign-in window was closed before completion." });
+      } else {
+          console.error("Google Sign-In Error:", error);
+          toast({
+            variant: 'destructive',
+            title: "Sign-In Failed",
+            description: "Could not complete Google Sign-In. Please try again."
+          });
+      }
+    } finally {
+        setIsLoading(false);
     }
   };
 
@@ -363,3 +341,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
