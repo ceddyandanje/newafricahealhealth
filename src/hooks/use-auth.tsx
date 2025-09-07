@@ -122,49 +122,48 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setIsLoading(true);
-      signInWithEmailAndPassword(auth, credentials.email, credentials.password)
-        .then(() => {
-          // The onAuthStateChanged listener will handle the user state update and redirect.
-          // We just need to wait for it to complete.
-          const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-            if (fbUser) {
-              // This function will be called when the user object is available.
-              // Now we wait for the Firestore user data to be loaded.
-              const checkUser = setInterval(async () => {
-                 if(user && user.id === fbUser.uid){ // Check against the state `user`
-                    clearInterval(checkUser);
-                    unsubscribe();
-                    setIsLoading(false);
-                    resolve(true);
-                 }
-              }, 100);
-            }
-          });
-        })
-        .catch(error => {
-          let description = "An unknown error occurred. Please try again.";
-          switch (error.code) {
-              case 'auth/user-not-found':
-                  description = "No account found with this email address. Please check your email or sign up.";
-                  break;
-              case 'auth/invalid-credential':
-                   description = "The email or password you entered is incorrect. Please try again.";
-                   break;
-              case 'auth/too-many-requests':
-                  description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
-                  break;
-              default:
-                  description = error.message;
-          }
-          toast({ variant: 'destructive', title: "Login Failed", description });
-          setIsLoading(false);
-          resolve(false);
-        });
-    });
-  };
+    setIsLoading(true);
+    try {
+        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+        const fbUser = userCredential.user;
 
+        // Wait for the onAuthStateChanged listener to update the user state
+        await new Promise<void>(resolve => {
+            const checkUserInterval = setInterval(() => {
+                // Access the latest state using the functional form of setUser
+                setUser(currentUser => {
+                    if (currentUser && currentUser.id === fbUser.uid) {
+                        clearInterval(checkUserInterval);
+                        resolve();
+                    }
+                    return currentUser;
+                });
+            }, 100);
+        });
+
+        setIsLoading(false);
+        return true;
+    } catch (error: any) {
+        let description = "An unknown error occurred. Please try again.";
+        switch (error.code) {
+            case 'auth/user-not-found':
+                description = "No account found with this email address. Please check your email or sign up.";
+                break;
+            case 'auth/invalid-credential':
+                 description = "The email or password you entered is incorrect. Please try again.";
+                 break;
+            case 'auth/too-many-requests':
+                description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
+                break;
+            default:
+                description = error.message;
+        }
+        toast({ variant: 'destructive', title: "Login Failed", description });
+        setIsLoading(false);
+        return false;
+    }
+  };
+  
   const signup = async (credentials: SignUpCredentials): Promise<boolean> => {
     setIsLoading(true);
     try {
@@ -311,5 +310,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    
