@@ -55,10 +55,10 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
         setIsSubmitting(false);
     }
     
-    const handleGoogleSignIn = () => {
+    const handleGoogleSignIn = async () => {
         setIsSubmitting(true);
         googleLogin();
-        // The useAuth hook will handle the result and loading states.
+        // useAuth's onAuthStateChanged will handle the result
     }
 
     return (
@@ -229,14 +229,14 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("login");
-  const { isLoading } = useAuth();
+  const { isLoading, user } = useAuth();
 
   return (
     <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-grow">
             <div className="container mx-auto px-4 py-12 flex items-center justify-center min-h-[calc(100vh-128px)]">
-                {isLoading ? (
+                {isLoading && !user ? (
                     <Loader2 className="h-16 w-16 animate-spin text-primary" />
                 ) : (
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-lg">
@@ -258,3 +258,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    

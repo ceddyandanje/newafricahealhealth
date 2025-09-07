@@ -16,6 +16,7 @@ import {
     signInWithRedirect,
     GoogleAuthProvider,
     linkWithCredential,
+    fetchSignInMethodsForEmail,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -58,7 +59,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLoginChecks = useCallback((userData: User) => {
+  const handleLoginFlow = useCallback((userData: User) => {
     if (!userData.termsAccepted) {
         setShowTerms(true);
     } else if (userData.role === 'user' && !isProfileComplete(userData)) {
@@ -66,67 +67,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else {
         setShowOnboarding(false);
         setShowTerms(false);
-    }
-  }, []);
-
-  const handleRedirect = useCallback((loggedInUser: User) => {
-    const roleMap: { [key: string]: string | undefined } = {
-        'admin': '/admin',
-        'doctor': '/doctor/dashboard',
-        'user': '/patient/dashboard',
-        'delivery-driver': '/delivery/dashboard',
-        'lab-technician': '/labs/dashboard',
-        'emergency-services': '/emergency/dashboard'
-    }
-    const destination = roleMap[loggedInUser.role];
-    if (destination && window.location.pathname !== destination && !window.location.pathname.startsWith(destination)) {
-      router.push(destination);
+        const roleMap: { [key: string]: string | undefined } = {
+            'admin': '/admin',
+            'doctor': '/doctor/dashboard',
+            'user': '/patient/dashboard',
+            'delivery-driver': '/delivery/dashboard',
+            'lab-technician': '/labs/dashboard',
+            'emergency-services': '/emergency/dashboard'
+        }
+        const destination = roleMap[userData.role];
+        if (destination && window.location.pathname !== destination && !window.location.pathname.startsWith(destination)) {
+          router.push(destination);
+        }
     }
   }, [router]);
 
 
   useEffect(() => {
-    const processRedirectResult = async () => {
-        try {
-            const result = await getRedirectResult(auth);
-            if (result) {
-                // This will trigger onAuthStateChanged
-                console.log("Redirect result processed.");
-            }
-        } catch (error: any) {
-            if (error.code === 'auth/account-exists-with-different-credential') {
-                const pendingCred = error.credential;
-                const email = error.customData.email;
-                const methods = await fetchSignInMethodsForEmail(auth, email);
-                
-                if (methods[0] === 'password' && auth.currentUser) {
-                    await linkWithCredential(auth.currentUser, pendingCred);
-                } else {
-                     toast({ variant: "destructive", title: "Account Linking Failed", description: "Could not link Google account to your existing email account." });
-                }
-            } else {
-                console.error("Google sign in error", error);
-            }
-        } finally {
-            // Now that redirect is handled (or not), set up the main listener.
-            setupAuthListener();
-        }
-    }
-    
-    const setupAuthListener = onAuthStateChanged(auth, async (fbUser) => {
+    // This is the single source of truth for auth state
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
         setIsLoading(true);
         if (fbUser) {
             setFirebaseUser(fbUser);
             const userDocRef = doc(db, "users", fbUser.uid);
             const userDoc = await getDoc(userDocRef);
+            
             if (userDoc.exists()) {
                 const userData = { id: userDoc.id, ...userDoc.data() } as User;
                 setUser(userData);
-                handleLoginChecks(userData);
-                if (userData.termsAccepted && (isProfileComplete(userData) || userData.role !== 'user')) {
-                    handleRedirect(userData);
-                }
+                handleLoginFlow(userData);
             } else {
+                // This case handles initial user creation via Google Sign-In
                 const newUser = await createUserInFirestore({
                     name: fbUser.displayName,
                     email: fbUser.email,
@@ -134,28 +105,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 }, fbUser.uid);
                  if(newUser) {
                     setUser(newUser);
-                    handleLoginChecks(newUser);
+                    handleLoginFlow(newUser);
                  } else {
+                    // If DB creation fails, log them out to prevent inconsistent state
                     await signOut(auth);
                  }
             }
         } else {
+            // No user is logged in
             setUser(null);
             setFirebaseUser(null);
+            setShowOnboarding(false);
+            setShowTerms(false);
         }
         setIsLoading(false);
     });
 
-    processRedirectResult();
+    // Handle Google redirect result on initial load
+    getRedirectResult(auth).catch((error) => {
+        console.error("Error processing redirect result:", error);
+    });
 
-    return () => setupAuthListener();
-  }, [handleLoginChecks, handleRedirect, toast]);
+    return () => unsubscribe();
+  }, [handleLoginFlow]);
 
 
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
         await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
-        // onAuthStateChanged will handle the rest.
+        // onAuthStateChanged will handle the rest automatically.
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
@@ -180,25 +158,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, password);
         const fbUser = userCredential.user;
         
-        const firestoreCredentials = { ...credentials };
-        
-        const newUser = await createUserInFirestore({
-            ...firestoreCredentials, 
+        await createUserInFirestore({
+            name: credentials.name,
+            email: credentials.email,
+            phone: credentials.phone,
+            age: credentials.age,
+            location: credentials.location,
             avatarUrl: fbUser.photoURL
         }, fbUser.uid);
         
-        if (newUser) {
-          toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
-          addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
-          addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-        } else {
-          throw new Error("Could not create user document in Firestore.");
-        }
+        // onAuthStateChanged will handle the rest automatically.
+        addLog("INFO", `New user signed up: ${credentials.name} (${credentials.email}).`);
+        addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${credentials.name} has been created.`});
 
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         if (error.code === 'auth/email-already-in-use') {
-            description = "This email address is already in use by another account. Try logging in with Google if you've used it before.";
+            description = "This email address is already in use by another account. Try logging in or use a different email.";
         } else {
             description = error.message;
         }
@@ -213,12 +189,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const logout = useCallback(async () => {
     await signOut(auth);
-    setUser(null);
-    setFirebaseUser(null);
-    setShowOnboarding(false);
-    setShowTerms(false);
-    toast({ title: "Logged Out", description: "You have been successfully logged out." });
     router.push("/login");
+    toast({ title: "Logged Out", description: "You have been successfully logged out." });
   }, [router, toast]);
 
   const reauthenticateAndChangePassword = async (currentPass: string, newPass: string) => {
@@ -263,8 +235,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (success) {
         const updatedUser = { ...user, ...updates };
         setUser(updatedUser);
-        setShowOnboarding(false);
-        handleRedirect(updatedUser);
+        handleLoginFlow(updatedUser); // Re-run checks and redirect
         addLog("INFO", `User ${user.email} completed their profile onboarding.`);
         toast({ title: "Profile Complete!", description: "Thank you for completing your profile." });
     } else {
@@ -281,8 +252,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (success) {
         const updatedUser = { ...user, termsAccepted: true };
         setUser(updatedUser);
-        setShowTerms(false);
-        handleLoginChecks(updatedUser);
+        handleLoginFlow(updatedUser); // Re-run checks and redirect
         addLog("INFO", `User ${user.email} accepted the Terms of Service.`);
     } else {
         toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your preference. Please try again." });
@@ -321,3 +291,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
