@@ -15,53 +15,73 @@ import { addLog } from '@/lib/logs';
 import { addNotification } from '@/lib/notifications';
 import { enrichProductData, type EnrichedProductData } from '@/ai/flows/product-importer-flow';
 import Image from 'next/image';
+import { Textarea } from '@/components/ui/textarea';
 
 type ExtractedProduct = {
     name: string;
-    price: number;
+    price: number; // Stored in cents
 };
-
-// PDF parsing function (will require a library like pdf-lib or pdf.js)
-// For now, we will simulate it with a text area for pasting content.
 
 function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct[]) => void }) {
     const [text, setText] = useState('');
     const { nextStep } = useStepper();
+    const { toast } = useToast();
 
     const handleExtract = () => {
         const lines = text.trim().split('\n');
         const products: ExtractedProduct[] = [];
+        let extractionErrors = 0;
+
         lines.forEach(line => {
-            // Attempt to split by a common delimiter like tab, multiple spaces, or a specific character
-            const parts = line.split(/\s{2,}|[\t,;]+/);
-            if (parts.length >= 2) {
-                const name = parts[0].trim();
-                const priceMatch = parts.slice(1).join(' ').match(/(\d[\d,.]*)/);
-                if (name && priceMatch) {
-                    const price = parseFloat(priceMatch[1].replace(/,/g, ''));
-                    if (!isNaN(price)) {
-                        products.push({ name, price: Math.round(price * 100) }); // Convert to cents
-                    }
+            // Flexible regex to capture product name and price
+            const match = line.match(/(.*?)\s+([\d,]+(?:\.\d{1,2})?)$/);
+            if (match) {
+                const name = match[1].trim();
+                const priceString = match[2].replace(/,/g, '');
+                const price = parseFloat(priceString);
+                if (name && !isNaN(price)) {
+                    products.push({ name, price: Math.round(price * 100) });
+                } else {
+                    extractionErrors++;
                 }
+            } else {
+                extractionErrors++;
             }
         });
-        onExtracted(products);
-        nextStep();
+        
+        if (extractionErrors > 0) {
+            toast({
+                variant: 'destructive',
+                title: 'Extraction Warning',
+                description: `${extractionErrors} line(s) could not be parsed. Please check the format.`
+            });
+        }
+
+        if (products.length > 0) {
+            onExtracted(products);
+            nextStep();
+        } else {
+             toast({
+                variant: 'destructive',
+                title: 'Extraction Failed',
+                description: `No products could be extracted. Please ensure your text is formatted correctly.`
+            });
+        }
     };
 
     return (
         <div className="space-y-4">
             <p className="text-muted-foreground">
-                Since we can't directly read a PDF, please copy the content from your PDF and paste it into the text area below. Ensure each product name and price is on its own line.
+                Copy the product list from your PDF or text file and paste it into the text area below. Ensure each product name and its price is on a single line.
             </p>
             <Textarea 
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Paste your product list here. e.g.&#10;Paracetamol 500mg      550.00&#10;Aspirin 75mg           300.50"
+                placeholder="Example format:&#10;Paracetamol 500mg      550.00&#10;Aspirin 75mg           300.50"
                 className="h-48 font-mono"
             />
             <Button onClick={handleExtract} disabled={!text.trim()}>
-                <Sparkles className="mr-2 h-4 w-4" /> Extract Products
+                <Sparkles className="mr-2 h-4 w-4" /> Extract Product Data
             </Button>
         </div>
     );
@@ -76,14 +96,15 @@ function Step2ReviewAndEnrich({ extracted, onEnriched }: { extracted: ExtractedP
     const handleEnrich = async () => {
         setIsLoading(true);
         try {
-            const rawData = extracted.map(p => `${p.name} - ${p.price / 100}`).join('\n');
+            // Convert price from cents back to a decimal string for the AI
+            const rawData = extracted.map(p => `${p.name} - ${(p.price / 100).toFixed(2)}`).join('\n');
             const result = await enrichProductData({ rawProductData: rawData });
             onEnriched(result.products);
             toast({ title: "Enrichment Complete", description: "Product data has been enhanced by AI." });
             nextStep();
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: "Enrichment Failed", description: "The AI could not process the product data." });
+            toast({ variant: 'destructive', title: "Enrichment Failed", description: "The AI could not process the product data. Please check your server logs." });
         } finally {
             setIsLoading(false);
         }
@@ -99,14 +120,14 @@ function Step2ReviewAndEnrich({ extracted, onEnriched }: { extracted: ExtractedP
                     <TableHeader>
                         <TableRow>
                             <TableHead>Product Name</TableHead>
-                            <TableHead>Price (KES)</TableHead>
+                            <TableHead className="text-right">Price (KES)</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {extracted.map((p, i) => (
                             <TableRow key={i}>
                                 <TableCell>{p.name}</TableCell>
-                                <TableCell>Ksh {(p.price / 100).toFixed(2)}</TableCell>
+                                <TableCell className="text-right">{(p.price / 100).toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -128,14 +149,17 @@ function Step3Import({ enriched, onUpdate }: { enriched: EnrichedProductData[], 
     const handleImport = async () => {
         setIsImporting(true);
         try {
-            for (const product of enriched) {
-                // @ts-ignore
-                await addProduct(product);
-            }
-             addLog('INFO', `${enriched.length} products were imported via the AI Product Importer.`);
+            const batch = enriched.map(product => addProduct(product));
+            await Promise.all(batch);
+            
+            addLog('INFO', `${enriched.length} products were imported via the AI Product Importer.`);
             addNotification({ recipientId: 'admin_role', type: 'product_update', title: 'Bulk Import Successful', description: `${enriched.length} new products have been added to the inventory.` });
             toast({ title: "Import Successful", description: `${enriched.length} products have been added to your inventory.` });
-            goToStep(0); // Reset after successful import
+            
+            // To allow another import, we should reset the flow
+            goToStep(0);
+            onUpdate([]); // Clear the enriched data
+
         } catch (error) {
             console.error(error);
             toast({ variant: "destructive", title: "Import Failed", description: "Something went wrong while saving the products." });
@@ -154,7 +178,7 @@ function Step3Import({ enriched, onUpdate }: { enriched: EnrichedProductData[], 
     return (
         <div className="space-y-4">
              <p className="text-muted-foreground">
-                The AI has enriched your product data. Review, edit if needed, and then import to your Firestore database.
+                The AI has enriched your product data. Review, edit if needed, and then import to your Firestore database. The data will be reflected site-wide instantly.
             </p>
             <div className="h-[50vh] overflow-y-auto border rounded-md">
                 <Table>
@@ -198,7 +222,7 @@ export default function AIProductImporterPage() {
     const [enrichedProducts, setEnrichedProducts] = useState<EnrichedProductData[]>([]);
 
     const steps = [
-        { label: 'Upload & Extract', icon: UploadCloud, component: <Step1Upload onExtracted={setExtractedProducts} /> },
+        { label: 'Paste & Extract', icon: UploadCloud, component: <Step1Upload onExtracted={setExtractedProducts} /> },
         { label: 'AI Data Enrichment', icon: Sparkles, component: <Step2ReviewAndEnrich extracted={extractedProducts} onEnriched={setEnrichedProducts} /> },
         { label: 'Review & Import', icon: CheckCircle, component: <Step3Import enriched={enrichedProducts} onUpdate={setEnrichedProducts} /> },
     ];
@@ -211,7 +235,7 @@ export default function AIProductImporterPage() {
                     AI Product Importer
                 </h1>
                 <p className="text-muted-foreground">
-                    Bulk-import products from a PDF file using AI to enrich the data.
+                    Bulk-import products from a text list using AI to automatically enrich the data.
                 </p>
             </header>
 
@@ -220,7 +244,7 @@ export default function AIProductImporterPage() {
                     <Stepper initialStep={0} steps={steps} className="mb-8">
                         {steps.map((stepProps, index) => (
                             <Step key={stepProps.label} {...stepProps}>
-                                <div className="p-4 mt-4 border bg-muted/50 rounded-lg">
+                                <div className="p-4 mt-4 border bg-muted/50 rounded-lg min-h-[300px]">
                                     {stepProps.component}
                                 </div>
                             </Step>
@@ -229,15 +253,5 @@ export default function AIProductImporterPage() {
                 </CardContent>
             </Card>
         </div>
-    );
-}
-
-// Minimalistic Textarea for the product import page
-function Textarea({ className, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
-    return (
-        <textarea
-            className={`flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
-            {...props}
-        />
     );
 }
