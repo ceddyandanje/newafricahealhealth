@@ -86,68 +86,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    const handleAuth = async () => {
+    const processRedirect = async () => {
         try {
             const result = await getRedirectResult(auth);
             if (result) {
-                // User signed in via redirect.
                 const fbUser = result.user;
-                setFirebaseUser(fbUser);
                 const userDocRef = doc(db, "users", fbUser.uid);
                 const userDoc = await getDoc(userDocRef);
+                let userData: User;
 
                 if (!userDoc.exists()) {
-                    // Create a new user if they don't exist in Firestore
                     const newUser = await createUserInFirestore({
                         name: fbUser.displayName,
                         email: fbUser.email,
                         avatarUrl: fbUser.photoURL
                     }, fbUser.uid);
-                    if (newUser) {
-                        setUser(newUser);
-                        toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
-                        handleLoginChecks(newUser);
-                    }
+                    if (!newUser) throw new Error("Failed to create user in Firestore.");
+                    userData = newUser;
+                    toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
                 } else {
-                    // User already exists, just set their data
+                    userData = { id: userDoc.id, ...userDoc.data() } as User;
+                }
+                
+                setUser(userData); // Set user state immediately
+                setFirebaseUser(fbUser);
+                handleLoginChecks(userData);
+            }
+        } catch (error) {
+            console.error("Error processing redirect result:", error);
+            toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
+        }
+
+        // AFTER processing the redirect, set up the normal auth state listener.
+        const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+            if (fbUser) {
+                // If user is already set from redirect, don't re-fetch
+                if (fbUser.uid === user?.id) {
+                    setIsLoading(false);
+                    return;
+                }
+                setFirebaseUser(fbUser);
+                const userDocRef = doc(db, "users", fbUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
                     const userData = { id: userDoc.id, ...userDoc.data() } as User;
                     setUser(userData);
                     handleLoginChecks(userData);
-                }
-                 // Don't redirect here, let onAuthStateChanged handle it to avoid race conditions
-            }
-        } catch (error) {
-            console.error("Error getting redirect result:", error);
-            toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
-        } finally {
-            // This needs to be inside the async function to run correctly.
-            // Now, set up the onAuthStateChanged listener *after* checking the redirect.
-             const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-                if (fbUser) {
-                    if (fbUser.uid !== firebaseUser?.uid) { // Check if it's a new login
-                        setFirebaseUser(fbUser);
-                        const userDocRef = doc(db, "users", fbUser.uid);
-                        const userDoc = await getDoc(userDocRef);
-
-                        if (userDoc.exists()) {
-                            const userData = { id: userDoc.id, ...userDoc.data() } as User;
-                            if (user?.id !== userData.id) { // Prevent re-setting state for same user
-                                setUser(userData);
-                                handleLoginChecks(userData);
-                            }
-                        }
-                    }
                 } else {
+                    // This case can happen if a user exists in Auth but not Firestore.
+                    // We can log them out or attempt to re-create their profile.
+                    // For now, we'll treat them as logged out to be safe.
                     setUser(null);
-                    setFirebaseUser(null);
                 }
-                setIsLoading(false);
-            });
-            return unsubscribe;
-        }
+            } else {
+                setUser(null);
+                setFirebaseUser(null);
+            }
+            setIsLoading(false);
+        });
+        
+        return unsubscribe;
     };
 
-    const unsubscribePromise = handleAuth();
+    const unsubscribePromise = processRedirect();
 
     return () => {
         unsubscribePromise.then(unsubscribe => {
@@ -156,7 +157,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
         });
     };
-}, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -238,7 +240,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       // Use signInWithRedirect for a more robust flow
       await signInWithRedirect(auth, provider);
-      // The logic to handle the result is now in the useEffect with getRedirectResult
+      // The logic to handle the result is now in the useEffect
     } catch (error: any) {
       console.error("Google Sign-In Error:", error);
       toast({
