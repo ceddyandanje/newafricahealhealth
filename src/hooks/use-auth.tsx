@@ -12,11 +12,10 @@ import {
     updatePassword,
     EmailAuthProvider,
     reauthenticateWithCredential,
-    getRedirectResult,
-    signInWithRedirect,
+    signInWithPopup,
     GoogleAuthProvider,
-    linkWithCredential,
     fetchSignInMethodsForEmail,
+    linkWithCredential,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -84,7 +83,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    // This is the single source of truth for auth state
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
         setIsLoading(true);
         if (fbUser) {
@@ -97,7 +95,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 setUser(userData);
                 handleLoginFlow(userData);
             } else {
-                // This case handles initial user creation via Google Sign-In
                 const newUser = await createUserInFirestore({
                     name: fbUser.displayName,
                     email: fbUser.email,
@@ -107,12 +104,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setUser(newUser);
                     handleLoginFlow(newUser);
                  } else {
-                    // If DB creation fails, log them out to prevent inconsistent state
                     await signOut(auth);
                  }
             }
         } else {
-            // No user is logged in
             setUser(null);
             setFirebaseUser(null);
             setShowOnboarding(false);
@@ -120,12 +115,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         setIsLoading(false);
     });
-
-    // Handle Google redirect result on initial load
-    getRedirectResult(auth).catch((error) => {
-        console.error("Error processing redirect result:", error);
-    });
-
     return () => unsubscribe();
   }, [handleLoginFlow]);
 
@@ -133,13 +122,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
         await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
-        // onAuthStateChanged will handle the rest automatically.
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
-            case 'auth/user-not-found':
-                description = "No account found with this email address. Please check your email or sign up.";
-                break;
             case 'auth/invalid-credential':
                  description = "The email or password you entered is incorrect. Please try again.";
                  break;
@@ -167,7 +152,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             avatarUrl: fbUser.photoURL
         }, fbUser.uid);
         
-        // onAuthStateChanged will handle the rest automatically.
         addLog("INFO", `New user signed up: ${credentials.name} (${credentials.email}).`);
         addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${credentials.name} has been created.`});
 
@@ -182,9 +166,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
   
-  const googleLogin = () => {
+  const googleLogin = async () => {
     const provider = new GoogleAuthProvider();
-    signInWithRedirect(auth, provider);
+    try {
+        await signInWithPopup(auth, provider);
+        // onAuthStateChanged will handle the rest
+    } catch (error: any) {
+        let description = "An unknown error occurred during Google Sign-In.";
+        if (error.code === 'auth/popup-closed-by-user') {
+            description = "The sign-in window was closed before completion. Please try again.";
+        } else if (error.code === 'auth/cancelled-popup-request') {
+            // This can happen if the user clicks the button multiple times. It's safe to ignore.
+            return;
+        }
+        else if (error.code === 'auth/account-exists-with-different-credential') {
+            description = "An account already exists with this email address. Please sign in with your original method (e.g., password) to link your Google account.";
+        } else {
+            description = error.message;
+        }
+
+        toast({
+            variant: "destructive",
+            title: "Google Sign-In Failed",
+            description,
+        });
+    }
   };
 
   const logout = useCallback(async () => {
@@ -235,7 +241,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (success) {
         const updatedUser = { ...user, ...updates };
         setUser(updatedUser);
-        handleLoginFlow(updatedUser); // Re-run checks and redirect
+        handleLoginFlow(updatedUser);
         addLog("INFO", `User ${user.email} completed their profile onboarding.`);
         toast({ title: "Profile Complete!", description: "Thank you for completing your profile." });
     } else {
@@ -252,7 +258,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (success) {
         const updatedUser = { ...user, termsAccepted: true };
         setUser(updatedUser);
-        handleLoginFlow(updatedUser); // Re-run checks and redirect
+        handleLoginFlow(updatedUser);
         addLog("INFO", `User ${user.email} accepted the Terms of Service.`);
     } else {
         toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your preference. Please try again." });

@@ -57,8 +57,8 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
     
     const handleGoogleSignIn = async () => {
         setIsSubmitting(true);
-        googleLogin();
-        // useAuth's onAuthStateChanged will handle the result
+        await googleLogin();
+        setIsSubmitting(false);
     }
 
     return (
@@ -99,7 +99,7 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                     Sign in with Google
                 </Button>
                 <p className="text-center text-sm text-muted-foreground mt-4">
-                    Don't have an account? <Button variant="link" className="p-0 h-auto" onClick={onSwitchTab}>Sign up</Button>
+                    Don\'t have an account? <Button variant="link" className="p-0 h-auto" onClick={onSwitchTab}>Sign up</Button>
                 </p>
             </CardContent>
         </Card>
@@ -127,9 +127,10 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
         setIsSubmitting(false);
     }
     
-    const handleGoogleSignIn = () => {
+    const handleGoogleSignIn = async () => {
         setIsSubmitting(true);
-        googleLogin();
+        await googleLogin();
+        setIsSubmitting(false);
     };
 
     return (
