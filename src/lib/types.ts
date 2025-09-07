@@ -45,7 +45,7 @@ export type LoginCredentials = {
     email: string;
     password; string;
 }
-export type SignUpCredentials = Pick<User, 'name' | 'email' | 'location' | 'age' | 'phone'> & { password: string };
+export type SignUpCredentials = Pick<User, 'name' | 'email' | 'location' | 'age' | 'phone'>;
 
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
@@ -243,3 +243,5 @@ export type LabRequest = {
     sampleStatus: SampleStatus;
     requestedBy: string; // e.g., 'Dr. Smith' or 'Patient Request'
 };
+
+    

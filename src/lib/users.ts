@@ -52,7 +52,7 @@ export const getAllUsersFromFirestore = async (): Promise<User[]> => {
 };
 
 // Creates a user in Firestore (typically after successful Firebase Auth creation).
-export const createUserInFirestore = async (details: Partial<Omit<SignUpCredentials, 'password'> & { avatarUrl?: string | null }>, uid?: string): Promise<User | null> => {
+export const createUserInFirestore = async (details: Partial<Omit<SignUpCredentials, 'password'> & { avatarUrl?: string | null }>, uid: string): Promise<User | null> => {
     if (!uid || !details.email) return null;
     try {
         const newUser: User = {
@@ -128,3 +128,5 @@ export const updateUserMedicalProfile = async (userId: string, data: Partial<Med
         return false;
     }
 };
+
+    

@@ -12,10 +12,10 @@ import {
     updatePassword,
     EmailAuthProvider,
     reauthenticateWithCredential,
-    getRedirectResult,
-    signInWithRedirect,
     signInWithPopup,
     GoogleAuthProvider,
+    fetchSignInMethodsForEmail,
+    linkWithCredential,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         'emergency-services': '/emergency/dashboard'
     }
     const destination = roleMap[loggedInUser.role];
-    if (destination && window.location.pathname !== destination) {
+    if (destination && window.location.pathname !== destination && !window.location.pathname.startsWith(destination)) {
       router.push(destination);
     }
   }, [router]);
@@ -86,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+        setIsLoading(true);
         if (fbUser) {
             setFirebaseUser(fbUser);
             const userDocRef = doc(db, "users", fbUser.uid);
@@ -98,9 +99,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     handleRedirect(userData);
                 }
             } else {
-                // This case handles a user authenticated in Firebase Auth but without a DB record.
-                // This can happen if a user signs in with Google but doesn't complete onboarding.
-                // We'll create the user doc here.
                 const newUser = await createUserInFirestore({
                     name: fbUser.displayName,
                     email: fbUser.email,
@@ -124,22 +122,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    setIsLoading(true);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
+      setIsLoading(true);
       signInWithEmailAndPassword(auth, credentials.email, credentials.password)
-        .then(userCredential => {
-          // The onAuthStateChanged listener will handle the rest,
-          // but we wait for the user state to be set before resolving.
+        .then(() => {
+          // The onAuthStateChanged listener will handle the user state update and redirect.
+          // We just need to wait for it to complete.
           const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
-            if (fbUser && fbUser.uid === userCredential.user.uid) {
-              // Wait for the user data to be loaded from Firestore
+            if (fbUser) {
+              // This function will be called when the user object is available.
+              // Now we wait for the Firestore user data to be loaded.
               const checkUser = setInterval(async () => {
-                const userDoc = await getDoc(doc(db, "users", fbUser.uid));
-                if (userDoc.exists()) {
-                  clearInterval(checkUser);
-                  unsubscribe();
-                  resolve(true);
-                }
+                 if(user && user.id === fbUser.uid){ // Check against the state `user`
+                    clearInterval(checkUser);
+                    unsubscribe();
+                    setIsLoading(false);
+                    resolve(true);
+                 }
               }, 100);
             }
           });
@@ -161,7 +160,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
           toast({ variant: 'destructive', title: "Login Failed", description });
           setIsLoading(false);
-          reject(error);
           resolve(false);
         });
     });
@@ -173,9 +171,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
         const fbUser = userCredential.user;
         
-        // Exclude password from the data to be saved to Firestore
-        const { password, ...firestoreCredentials } = credentials;
-
+        const firestoreCredentials = { ...credentials };
+        
         const newUser = await createUserInFirestore({
             ...firestoreCredentials, 
             avatarUrl: fbUser.photoURL
@@ -185,7 +182,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-          // Let onAuthStateChanged handle setting user state
           return true;
         } else {
           throw new Error("Could not create user document in Firestore.");
@@ -194,7 +190,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         if (error.code === 'auth/email-already-in-use') {
-            description = "This email address is already in use by another account.";
+            description = "This email address is already in use by another account. Try logging in with Google if you've used it before.";
         } else {
             description = error.message;
         }
@@ -315,3 +311,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
