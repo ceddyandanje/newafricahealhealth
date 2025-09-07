@@ -45,7 +45,7 @@ export type LoginCredentials = {
     email: string;
     password; string;
 }
-export type SignUpCredentials = Pick<User, 'name' | 'email' | 'location' | 'age' | 'phone'> & { password; string };
+export type SignUpCredentials = Pick<User, 'name' | 'email' | 'location' | 'age' | 'phone'> & { password: string };
 
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';

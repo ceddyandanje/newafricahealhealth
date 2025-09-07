@@ -14,6 +14,7 @@ import {
     reauthenticateWithCredential,
     getRedirectResult,
     signInWithRedirect,
+    signInWithPopup,
     GoogleAuthProvider,
     type User as FirebaseUser
 } from "firebase/auth";
@@ -84,61 +85,42 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    const processRedirect = async () => {
-        setIsLoading(true);
-        try {
-            const result = await getRedirectResult(auth);
-            if (result) {
-                const fbUser = result.user;
-                const userDocRef = doc(db, "users", fbUser.uid);
-                const userDoc = await getDoc(userDocRef);
-
-                if (!userDoc.exists()) {
-                    await createUserInFirestore({
-                        name: fbUser.displayName,
-                        email: fbUser.email,
-                        avatarUrl: fbUser.photoURL
-                    }, fbUser.uid);
-                    toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+        if (fbUser) {
+            setFirebaseUser(fbUser);
+            const userDocRef = doc(db, "users", fbUser.uid);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+                const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                setUser(userData);
+                handleLoginChecks(userData);
+                if (userData.termsAccepted && (isProfileComplete(userData) || userData.role !== 'user')) {
+                    handleRedirect(userData);
                 }
+            } else {
+                // This case handles a user authenticated in Firebase Auth but without a DB record.
+                // This can happen if a user signs in with Google but doesn't complete onboarding.
+                // We'll create the user doc here.
+                const newUser = await createUserInFirestore({
+                    name: fbUser.displayName,
+                    email: fbUser.email,
+                    avatarUrl: fbUser.photoURL
+                }, fbUser.uid);
+                 if(newUser) {
+                    setUser(newUser);
+                    handleLoginChecks(newUser);
+                 } else {
+                    await signOut(auth);
+                 }
             }
-        } catch (error) {
-            console.error("Error processing redirect result:", error);
-            toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
-        } finally {
-             // Now that redirect is processed, set up the main auth listener.
-            const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-                if (fbUser) {
-                    setFirebaseUser(fbUser);
-                    const userDocRef = doc(db, "users", fbUser.uid);
-                    const userDoc = await getDoc(userDocRef);
-                    if (userDoc.exists()) {
-                        const userData = { id: userDoc.id, ...userDoc.data() } as User;
-                        setUser(userData);
-                        handleLoginChecks(userData);
-                        if (userData.termsAccepted && (isProfileComplete(userData) || userData.role !== 'user')) {
-                            handleRedirect(userData);
-                        }
-                    } else {
-                        // This case handles a user authenticated in Firebase Auth but without a DB record.
-                        // It's a cleanup measure.
-                        setUser(null);
-                        setFirebaseUser(null);
-                        await signOut(auth);
-                    }
-                } else {
-                    setUser(null);
-                    setFirebaseUser(null);
-                }
-                setIsLoading(false);
-            });
-            return () => unsubscribe();
+        } else {
+            setUser(null);
+            setFirebaseUser(null);
         }
-    };
-    
-    processRedirect();
-
-  }, [handleLoginChecks, handleRedirect, toast]);
+        setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, [handleLoginChecks, handleRedirect]);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -151,7 +133,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
             case 'auth/user-not-found':
-            case 'auth/invalid-email':
                 description = "No account found with this email address. Please check your email or sign up.";
                 break;
             case 'auth/invalid-credential':
@@ -175,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
         const fbUser = userCredential.user;
         
-        // Exclude password before saving to Firestore
+        // Exclude password from the data to be saved to Firestore
         const { password, ...firestoreCredentials } = credentials;
 
         const newUser = await createUserInFirestore({
@@ -187,7 +168,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-          // Let onAuthStateChanged handle setting user and redirecting
+          // Let onAuthStateChanged handle setting user state
           return true;
         } else {
           throw new Error("Could not create user document in Firestore.");

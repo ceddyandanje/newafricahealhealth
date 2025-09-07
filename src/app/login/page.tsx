@@ -19,8 +19,12 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { GoogleAuthProvider, signInWithRedirect } from "firebase/auth";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { addLog } from "@/lib/logs";
+import { addNotification } from "@/lib/notifications";
+
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -43,7 +47,7 @@ const signupSchema = z.object({
 
 
 function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { login, isLoading } = useAuth();
+    const { login } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const form = useForm<z.infer<typeof loginSchema>>({
@@ -57,13 +61,19 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
         setIsSubmitting(false);
     }
     
-    async function handleGoogleSignIn() {
+    const signInWithGoogle = async () => {
         setIsSubmitting(true);
         const provider = new GoogleAuthProvider();
-        // Use signInWithRedirect for a more robust flow
-        await signInWithRedirect(auth, provider);
-        // The result is handled by the useAuth hook when the page reloads
-    }
+        try {
+            await signInWithPopup(auth, provider);
+            // The onAuthStateChanged listener in useAuth will handle the rest
+        } catch (error) {
+            console.error("Google sign in error", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
     return (
         <Card className="glassmorphic">
@@ -80,8 +90,8 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                         <FormField name="password" control={form.control} render={({ field }) => (
                             <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
-                        <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
-                            {(isLoading || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Login
                         </Button>
                     </form>
@@ -94,8 +104,8 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                         <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
                     </div>
                 </div>
-                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isLoading || isSubmitting}>
-                    {(isLoading || isSubmitting) ? (
+                 <Button variant="outline" className="w-full" onClick={signInWithGoogle} disabled={isSubmitting}>
+                    {isSubmitting ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
                         <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
@@ -111,7 +121,7 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 }
 
 function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { signup, isLoading } = useAuth();
+    const { signup } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<z.infer<typeof signupSchema>>({
@@ -132,11 +142,19 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
         setIsSubmitting(false);
     }
     
-    async function handleGoogleSignIn() {
+     const signInWithGoogle = async () => {
         setIsSubmitting(true);
         const provider = new GoogleAuthProvider();
-        await signInWithRedirect(auth, provider);
-    }
+        try {
+            await signInWithPopup(auth, provider);
+            // The onAuthStateChanged listener in useAuth will handle the rest
+        } catch (error) {
+            console.error("Google sign in error", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
     return (
          <Card className="glassmorphic">
@@ -202,8 +220,8 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                             </FormItem>
                         )} />
 
-                        <Button type="submit" className="w-full" size="lg" disabled={isLoading || isSubmitting}>
-                            {(isLoading || isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create an account
                         </Button>
                          <div className="relative my-2">
@@ -214,8 +232,8 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                                 <span className="bg-card px-2 text-muted-foreground">Or</span>
                             </div>
                         </div>
-                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={handleGoogleSignIn} disabled={isLoading || isSubmitting}>
-                             {(isLoading || isSubmitting) ? (
+                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={signInWithGoogle} disabled={isSubmitting}>
+                             {isSubmitting ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                              ) : (
                                 <Image src="https://www.google.com/favicon.ico" alt="Google" width={16} height={16} className="mr-2"/>
