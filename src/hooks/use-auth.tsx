@@ -125,29 +125,46 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     setIsLoading(true);
-    try {
-        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
-        // The onAuthStateChanged listener will handle the rest
-        return true;
-    } catch (error: any) {
-        let description = "An unknown error occurred. Please try again.";
-        switch (error.code) {
-            case 'auth/user-not-found':
-                description = "No account found with this email address. Please check your email or sign up.";
-                break;
-            case 'auth/invalid-credential':
-                 description = "The email or password you entered is incorrect. Please try again.";
-                 break;
-            case 'auth/too-many-requests':
-                description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
-                break;
-            default:
-                description = error.message;
-        }
-        toast({ variant: 'destructive', title: "Login Failed", description });
-        setIsLoading(false);
-        return false;
-    }
+    return new Promise((resolve, reject) => {
+      signInWithEmailAndPassword(auth, credentials.email, credentials.password)
+        .then(userCredential => {
+          // The onAuthStateChanged listener will handle the rest,
+          // but we wait for the user state to be set before resolving.
+          const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+            if (fbUser && fbUser.uid === userCredential.user.uid) {
+              // Wait for the user data to be loaded from Firestore
+              const checkUser = setInterval(async () => {
+                const userDoc = await getDoc(doc(db, "users", fbUser.uid));
+                if (userDoc.exists()) {
+                  clearInterval(checkUser);
+                  unsubscribe();
+                  resolve(true);
+                }
+              }, 100);
+            }
+          });
+        })
+        .catch(error => {
+          let description = "An unknown error occurred. Please try again.";
+          switch (error.code) {
+              case 'auth/user-not-found':
+                  description = "No account found with this email address. Please check your email or sign up.";
+                  break;
+              case 'auth/invalid-credential':
+                   description = "The email or password you entered is incorrect. Please try again.";
+                   break;
+              case 'auth/too-many-requests':
+                  description = "Access to this account has been temporarily disabled due to many failed login attempts. You can reset your password or try again later.";
+                  break;
+              default:
+                  description = error.message;
+          }
+          toast({ variant: 'destructive', title: "Login Failed", description });
+          setIsLoading(false);
+          reject(error);
+          resolve(false);
+        });
+    });
   };
 
   const signup = async (credentials: SignUpCredentials): Promise<boolean> => {
