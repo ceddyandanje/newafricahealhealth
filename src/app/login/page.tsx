@@ -99,7 +99,7 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                     Sign in with Google
                 </Button>
                 <p className="text-center text-sm text-muted-foreground mt-4">
-                    Don\'t have an account? <Button variant="link" className="p-0 h-auto" onClick={onSwitchTab}>Sign up</Button>
+                    Don't have an account? <Button variant="link" className="p-0 h-auto" onClick={onSwitchTab}>Sign up</Button>
                 </p>
             </CardContent>
         </Card>
