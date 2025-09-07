@@ -86,57 +86,77 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-        setIsLoading(true);
-        if (fbUser) {
-            setFirebaseUser(fbUser);
-            const userDocRef = doc(db, "users", fbUser.uid);
-            const userDoc = await getDoc(userDocRef);
+    const handleAuth = async () => {
+        try {
+            const result = await getRedirectResult(auth);
+            if (result) {
+                // User signed in via redirect.
+                const fbUser = result.user;
+                setFirebaseUser(fbUser);
+                const userDocRef = doc(db, "users", fbUser.uid);
+                const userDoc = await getDoc(userDocRef);
 
-            if (userDoc.exists()) {
-                const userData = { id: userDoc.id, ...userDoc.data() } as User;
-                setUser(userData);
-                handleLoginChecks(userData);
-            }
-            // If the userDoc doesn't exist, we let the Google sign-in redirect handler create it.
-        } else {
-            setUser(null);
-            setFirebaseUser(null);
-        }
-        setIsLoading(false);
-    });
-
-    // Check for Google Sign-in redirect result
-    getRedirectResult(auth).then(async (result) => {
-        if (result) {
-            setIsLoading(true);
-            const fbUser = result.user;
-            const userDocRef = doc(db, "users", fbUser.uid);
-            const userDoc = await getDoc(userDocRef);
-             if (!userDoc.exists()) {
-                 const newUser = await createUserInFirestore({
-                    name: fbUser.displayName,
-                    email: fbUser.email,
-                    avatarUrl: fbUser.photoURL
-                }, fbUser.uid);
-
-                 if (newUser) {
-                    setUser(newUser);
-                    toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
-                    handleRedirect(newUser);
-                    handleLoginChecks(newUser);
+                if (!userDoc.exists()) {
+                    // Create a new user if they don't exist in Firestore
+                    const newUser = await createUserInFirestore({
+                        name: fbUser.displayName,
+                        email: fbUser.email,
+                        avatarUrl: fbUser.photoURL
+                    }, fbUser.uid);
+                    if (newUser) {
+                        setUser(newUser);
+                        toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+                        handleLoginChecks(newUser);
+                    }
+                } else {
+                    // User already exists, just set their data
+                    const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                    setUser(userData);
+                    handleLoginChecks(userData);
                 }
-             }
-             setIsLoading(false);
-        }
-    }).catch(error => {
-        console.error("Error getting redirect result:", error);
-        toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
-        setIsLoading(false);
-    });
+                 // Don't redirect here, let onAuthStateChanged handle it to avoid race conditions
+            }
+        } catch (error) {
+            console.error("Error getting redirect result:", error);
+            toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
+        } finally {
+            // This needs to be inside the async function to run correctly.
+            // Now, set up the onAuthStateChanged listener *after* checking the redirect.
+             const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+                if (fbUser) {
+                    if (fbUser.uid !== firebaseUser?.uid) { // Check if it's a new login
+                        setFirebaseUser(fbUser);
+                        const userDocRef = doc(db, "users", fbUser.uid);
+                        const userDoc = await getDoc(userDocRef);
 
-    return () => unsubscribe();
-  }, [handleLoginChecks, handleRedirect, toast]);
+                        if (userDoc.exists()) {
+                            const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                            if (user?.id !== userData.id) { // Prevent re-setting state for same user
+                                setUser(userData);
+                                handleLoginChecks(userData);
+                            }
+                        }
+                    }
+                } else {
+                    setUser(null);
+                    setFirebaseUser(null);
+                }
+                setIsLoading(false);
+            });
+            return unsubscribe;
+        }
+    };
+
+    const unsubscribePromise = handleAuth();
+
+    return () => {
+        unsubscribePromise.then(unsubscribe => {
+            if (unsubscribe) {
+                unsubscribe();
+            }
+        });
+    };
+}, []);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -341,5 +361,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    
