@@ -12,9 +12,9 @@ import {
     updatePassword,
     EmailAuthProvider,
     reauthenticateWithCredential,
-    signInWithPopup,
+    getRedirectResult,
+    signInWithRedirect,
     GoogleAuthProvider,
-    fetchSignInMethodsForEmail,
     linkWithCredential,
     type User as FirebaseUser
 } from "firebase/auth";
@@ -33,8 +33,9 @@ interface AuthContextType {
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   firebaseUser: FirebaseUser | null;
   isAdmin: boolean;
-  login: (credentials: LoginCredentials) => Promise<boolean>;
-  signup: (credentials: SignUpCredentials) => Promise<boolean>;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  signup: (credentials: SignUpCredentials, password:string) => Promise<void>;
+  googleLogin: () => void;
   logout: () => void;
   reauthenticateAndChangePassword: (currentPass: string, newPass: string) => Promise<boolean>;
   isLoading: boolean;
@@ -85,7 +86,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+    const processRedirectResult = async () => {
+        try {
+            const result = await getRedirectResult(auth);
+            if (result) {
+                // This will trigger onAuthStateChanged
+                console.log("Redirect result processed.");
+            }
+        } catch (error: any) {
+            if (error.code === 'auth/account-exists-with-different-credential') {
+                const pendingCred = error.credential;
+                const email = error.customData.email;
+                const methods = await fetchSignInMethodsForEmail(auth, email);
+                
+                if (methods[0] === 'password' && auth.currentUser) {
+                    await linkWithCredential(auth.currentUser, pendingCred);
+                } else {
+                     toast({ variant: "destructive", title: "Account Linking Failed", description: "Could not link Google account to your existing email account." });
+                }
+            } else {
+                console.error("Google sign in error", error);
+            }
+        } finally {
+            // Now that redirect is handled (or not), set up the main listener.
+            setupAuthListener();
+        }
+    }
+    
+    const setupAuthListener = onAuthStateChanged(auth, async (fbUser) => {
         setIsLoading(true);
         if (fbUser) {
             setFirebaseUser(fbUser);
@@ -117,32 +145,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
         setIsLoading(false);
     });
-    return () => unsubscribe();
-  }, [handleLoginChecks, handleRedirect]);
+
+    processRedirectResult();
+
+    return () => setupAuthListener();
+  }, [handleLoginChecks, handleRedirect, toast]);
 
 
-  const login = async (credentials: LoginCredentials): Promise<boolean> => {
-    setIsLoading(true);
+  const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
-        const fbUser = userCredential.user;
-
-        // Wait for the onAuthStateChanged listener to update the user state
-        await new Promise<void>(resolve => {
-            const checkUserInterval = setInterval(() => {
-                // Access the latest state using the functional form of setUser
-                setUser(currentUser => {
-                    if (currentUser && currentUser.id === fbUser.uid) {
-                        clearInterval(checkUserInterval);
-                        resolve();
-                    }
-                    return currentUser;
-                });
-            }, 100);
-        });
-
-        setIsLoading(false);
-        return true;
+        await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+        // onAuthStateChanged will handle the rest.
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
@@ -159,15 +172,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 description = error.message;
         }
         toast({ variant: 'destructive', title: "Login Failed", description });
-        setIsLoading(false);
-        return false;
     }
   };
   
-  const signup = async (credentials: SignUpCredentials): Promise<boolean> => {
-    setIsLoading(true);
+  const signup = async (credentials: SignUpCredentials, password: string): Promise<void> => {
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
+        const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, password);
         const fbUser = userCredential.user;
         
         const firestoreCredentials = { ...credentials };
@@ -181,7 +191,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-          return true;
         } else {
           throw new Error("Could not create user document in Firestore.");
         }
@@ -194,11 +203,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             description = error.message;
         }
          toast({ variant: 'destructive', title: "Signup Failed", description });
-         setIsLoading(false);
-        return false;
     }
   };
   
+  const googleLogin = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithRedirect(auth, provider);
+  };
 
   const logout = useCallback(async () => {
     await signOut(auth);
@@ -282,7 +293,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, logout, reauthenticateAndChangePassword, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, googleLogin, logout, reauthenticateAndChangePassword, isLoading }}>
       {children}
       {user && showOnboarding && (
         <OnboardingDialog 

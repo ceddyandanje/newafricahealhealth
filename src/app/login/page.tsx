@@ -19,12 +19,6 @@ import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/header";
 import Footer from "@/components/layout/footer";
-import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, fetchSignInMethodsForEmail, linkWithCredential } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import { addLog } from "@/lib/logs";
-import { addNotification } from "@/lib/notifications";
-
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -47,9 +41,8 @@ const signupSchema = z.object({
 
 
 function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { login } = useAuth();
+    const { login, googleLogin } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { toast } = useToast();
     
     const form = useForm<z.infer<typeof loginSchema>>({
         resolver: zodResolver(loginSchema),
@@ -62,46 +55,11 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
         setIsSubmitting(false);
     }
     
-    const signInWithGoogle = async () => {
+    const handleGoogleSignIn = () => {
         setIsSubmitting(true);
-        const provider = new GoogleAuthProvider();
-        try {
-            const result = await signInWithPopup(auth, provider);
-            // The onAuthStateChanged listener in useAuth will handle the rest
-        } catch (error: any) {
-            console.error("Google sign in error", error);
-            // This is the core of the account linking flow
-            if (error.code === 'auth/account-exists-with-different-credential') {
-                const email = error.customData.email;
-                if (email) {
-                    const methods = await fetchSignInMethodsForEmail(auth, email);
-                    if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
-                        try {
-                            const result = await signInWithEmailAndPassword(auth, email, ''); // This will fail, but we need the user object
-                            if (auth.currentUser) {
-                                await linkWithCredential(auth.currentUser, error.credential);
-                            }
-                        } catch (linkError) {
-                            toast({
-                                variant: "destructive",
-                                title: "Account Linking Failed",
-                                description: "Could not link Google account. Please try signing in with your password first."
-                            });
-                        }
-                    }
-                }
-            } else {
-                toast({
-                    variant: "destructive",
-                    title: "Sign-In Error",
-                    description: "An unexpected error occurred during Google sign-in. Please try again."
-                });
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
+        googleLogin();
+        // The useAuth hook will handle the result and loading states.
+    }
 
     return (
         <Card className="glassmorphic">
@@ -132,7 +90,7 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                         <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
                     </div>
                 </div>
-                 <Button variant="outline" className="w-full" onClick={signInWithGoogle} disabled={isSubmitting}>
+                 <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isSubmitting}>
                     {isSubmitting ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     ) : (
@@ -149,9 +107,8 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 }
 
 function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { signup } = useAuth();
+    const { signup, googleLogin } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
-     const { toast } = useToast();
 
      const form = useForm<z.infer<typeof signupSchema>>({
         resolver: zodResolver(signupSchema),
@@ -166,29 +123,14 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
             phone: values.phone,
             age: values.ageRange,
             location: values.location,
-        });
+        }, values.password);
         setIsSubmitting(false);
     }
     
-     const signInWithGoogle = async () => {
+    const handleGoogleSignIn = () => {
         setIsSubmitting(true);
-        const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-        } catch (error: any) {
-             console.error("Google sign up error", error);
-             if (error.code !== 'auth/popup-closed-by-user') {
-                toast({
-                    variant: "destructive",
-                    title: "Sign-Up Error",
-                    description: "An unexpected error occurred. Please try again."
-                });
-             }
-        } finally {
-            setIsSubmitting(false);
-        }
+        googleLogin();
     };
-
 
     return (
          <Card className="glassmorphic">
@@ -266,7 +208,7 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                                 <span className="bg-card px-2 text-muted-foreground">Or</span>
                             </div>
                         </div>
-                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={signInWithGoogle} disabled={isSubmitting}>
+                         <Button variant="outline" className="w-full" size="lg" type="button" onClick={handleGoogleSignIn} disabled={isSubmitting}>
                              {isSubmitting ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                              ) : (
@@ -287,15 +229,7 @@ function SignUpForm({ onSwitchTab }: { onSwitchTab: () => void }) {
 
 export default function LoginPage() {
   const [activeTab, setActiveTab] = useState("login");
-  const { isLoading, user } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && user) {
-        // This effect will run when the user state is confirmed.
-        // The redirect logic is now centralized in the useAuth hook.
-    }
-  }, [user, isLoading, router]);
+  const { isLoading } = useAuth();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -324,7 +258,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
-    
-
-    
