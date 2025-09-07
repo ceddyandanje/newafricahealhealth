@@ -14,6 +14,7 @@ import {
     reauthenticateWithCredential,
     GoogleAuthProvider,
     signInWithPopup,
+    signInWithRedirect,
     getRedirectResult,
     type User as FirebaseUser
 } from "firebase/auth";
@@ -215,46 +216,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const provider = new GoogleAuthProvider();
     setIsLoading(true);
     try {
-        const result = await signInWithPopup(auth, provider);
-        const fbUser = result.user;
-        
-        const userDocRef = doc(db, "users", fbUser.uid);
-        const userDoc = await getDoc(userDocRef);
-
-        if (userDoc.exists()) {
-            const userData = { id: userDoc.id, ...userDoc.data() } as User;
-            setUser(userData);
-            toast({ title: `Welcome back, ${userData.name.split(' ')[0]}!` });
-            handleRedirect(userData); // Redirect on successful login
-            handleLoginChecks(userData);
-        } else {
-            const newUser = await createUserInFirestore({
-                name: fbUser.displayName,
-                email: fbUser.email,
-                avatarUrl: fbUser.photoURL
-            }, fbUser.uid);
-
-            if (newUser) {
-                setUser(newUser);
-                toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
-                addLog("INFO", `New user signed up with Google: ${newUser.name} (${newUser.email}).`);
-                addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User (Google)', description: `An account for ${newUser.name} has been created.`});
-                handleRedirect(newUser); // Redirect on new user creation
-                handleLoginChecks(newUser);
-            } else {
-                 throw new Error("Failed to create user document after Google sign-in.");
-            }
-        }
+      // Use signInWithRedirect for a more robust flow
+      await signInWithRedirect(auth, provider);
+      // The logic to handle the result is now in the useEffect with getRedirectResult
     } catch (error: any) {
-        let description = "An unknown error occurred during Google Sign-In.";
-        if (error.code === 'auth/popup-closed-by-user') {
-            description = "The sign-in window was closed before completing. Please try again.";
-        } else if (error.code === 'auth/account-exists-with-different-credential') {
-            description = "An account with this email already exists but was created with a different method (e.g., password). Please log in using your original method.";
-        }
-        toast({ variant: 'destructive', title: "Sign-In Failed", description });
-    } finally {
-        setIsLoading(false);
+      console.error("Google Sign-In Error:", error);
+      toast({
+        variant: 'destructive',
+        title: "Sign-In Failed",
+        description: "Could not initiate Google Sign-In. Please check your connection and try again."
+      });
+      setIsLoading(false);
     }
   };
 
