@@ -144,7 +144,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
     setIsLoading(true);
     try {
-        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
+        const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
         // The onAuthStateChanged listener will handle the rest
         return true;
     } catch (error: any) {
@@ -172,10 +172,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signup = async (credentials: SignUpCredentials): Promise<boolean> => {
     setIsLoading(true);
     try {
-        const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password!);
+        const userCredential = await createUserWithEmailAndPassword(auth, credentials.email, credentials.password);
         const fbUser = userCredential.user;
+        
+        // Exclude password before saving to Firestore
+        const { password, ...firestoreCredentials } = credentials;
+
         const newUser = await createUserInFirestore({
-            ...credentials, 
+            ...firestoreCredentials, 
             avatarUrl: fbUser.photoURL
         }, fbUser.uid);
         
@@ -313,7 +317,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    
-
-    

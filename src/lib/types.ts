@@ -25,7 +25,6 @@ export type User = {
     id: string;
     name: string;
     email: string;
-    password?: string; // It's optional as we might not always send it to the client
     role: UserRole;
     status: UserStatus;
     createdAt: string;
@@ -42,8 +41,11 @@ export type User = {
     smsAlertsEnabled?: boolean;
 };
 
-export type LoginCredentials = Pick<User, 'email' | 'password'>;
-export type SignUpCredentials = Pick<User, 'name' | 'email' | 'password' | 'location' | 'age' | 'phone'>;
+export type LoginCredentials = {
+    email: string;
+    password; string;
+}
+export type SignUpCredentials = Pick<User, 'name' | 'email' | 'location' | 'age' | 'phone'> & { password; string };
 
 
 export type LogLevel = 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
