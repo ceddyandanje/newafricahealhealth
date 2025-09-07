@@ -13,6 +13,8 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential,
     getRedirectResult,
+    signInWithRedirect,
+    GoogleAuthProvider,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -75,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         'emergency-services': '/emergency/dashboard'
     }
     const destination = roleMap[loggedInUser.role];
-    if (destination) {
+    if (destination && window.location.pathname !== destination) {
       router.push(destination);
     }
   }, [router]);
@@ -83,63 +85,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const processRedirect = async () => {
+        setIsLoading(true);
         try {
             const result = await getRedirectResult(auth);
             if (result) {
-                // This means the user just signed in via redirect.
                 const fbUser = result.user;
                 const userDocRef = doc(db, "users", fbUser.uid);
                 const userDoc = await getDoc(userDocRef);
 
                 if (!userDoc.exists()) {
-                    // Create a new user profile if it's their first time.
                     await createUserInFirestore({
                         name: fbUser.displayName,
                         email: fbUser.email,
                         avatarUrl: fbUser.photoURL
                     }, fbUser.uid);
                     toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
-                } else {
-                    toast({ title: "Sign-In Successful", description: `Welcome back!` });
                 }
-                // The onAuthStateChanged listener will handle setting the user state.
             }
         } catch (error) {
             console.error("Error processing redirect result:", error);
             toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
-        }
-    };
-    
-    // Process redirect first, then set up the main auth listener.
-    processRedirect().then(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-            setIsLoading(true);
-            if (fbUser) {
-                setFirebaseUser(fbUser);
-                const userDocRef = doc(db, "users", fbUser.uid);
-                const userDoc = await getDoc(userDocRef);
-                if (userDoc.exists()) {
-                    const userData = { id: userDoc.id, ...userDoc.data() } as User;
-                    setUser(userData);
-                    handleLoginChecks(userData);
-                    // Redirect only if the user is fully set up and on the login page.
-                    if (window.location.pathname === '/login' && userData.termsAccepted && isProfileComplete(userData)) {
-                        handleRedirect(userData);
+        } finally {
+             // Now that redirect is processed, set up the main auth listener.
+            const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+                if (fbUser) {
+                    setFirebaseUser(fbUser);
+                    const userDocRef = doc(db, "users", fbUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+                    if (userDoc.exists()) {
+                        const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                        setUser(userData);
+                        handleLoginChecks(userData);
+                        if (userData.termsAccepted && (isProfileComplete(userData) || userData.role !== 'user')) {
+                            handleRedirect(userData);
+                        }
+                    } else {
+                        // This case handles a user authenticated in Firebase Auth but without a DB record.
+                        // It's a cleanup measure.
+                        setUser(null);
+                        setFirebaseUser(null);
+                        await signOut(auth);
                     }
                 } else {
                     setUser(null);
                     setFirebaseUser(null);
-                    signOut(auth);
                 }
-            } else {
-                setUser(null);
-                setFirebaseUser(null);
-            }
-            setIsLoading(false);
-        });
-        
-        return () => unsubscribe();
-    });
+                setIsLoading(false);
+            });
+            return () => unsubscribe();
+        }
+    };
+    
+    processRedirect();
+
   }, [handleLoginChecks, handleRedirect, toast]);
 
 
@@ -147,17 +145,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
         const userCredential = await signInWithEmailAndPassword(auth, credentials.email, credentials.password!);
-        const fbUser = userCredential.user;
-        const userDoc = await getDoc(doc(db, "users", fbUser.uid));
-        if (userDoc.exists()) {
-            const userData = { id: userDoc.id, ...userDoc.data() } as User;
-            setUser(userData);
-            toast({ title: "Login Successful", description: `Welcome back, ${userData.name.split(' ')[0]}!` });
-            handleRedirect(userData);
-            handleLoginChecks(userData);
-            return true;
-        }
-        return false;
+        // The onAuthStateChanged listener will handle the rest
+        return true;
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
@@ -165,7 +154,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             case 'auth/invalid-email':
                 description = "No account found with this email address. Please check your email or sign up.";
                 break;
-            case 'auth/wrong-password':
             case 'auth/invalid-credential':
                  description = "The email or password you entered is incorrect. Please try again.";
                  break;
@@ -195,9 +183,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           toast({ title: "Signup Successful", description: `Welcome, ${credentials.name}!` });
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
-          setUser(newUser);
-          handleRedirect(newUser);
-          handleLoginChecks(newUser);
+          // Let onAuthStateChanged handle setting user and redirecting
           return true;
         } else {
           throw new Error("Could not create user document in Firestore.");
@@ -245,7 +231,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (error: any) {
       let description = "An unknown error occurred.";
       switch (error.code) {
-        case 'auth/wrong-password':
         case 'auth/invalid-credential':
           description = "The current password you entered is incorrect.";
           break;
@@ -328,5 +313,7 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
 
     
