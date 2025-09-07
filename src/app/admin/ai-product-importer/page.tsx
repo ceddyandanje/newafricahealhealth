@@ -17,6 +17,7 @@ import { enrichProductData, type EnrichedProductData } from '@/ai/flows/product-
 import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
 import { PDFDocument } from 'pdf-lib';
+import { Label } from '@/components/ui/label';
 
 
 type ExtractedProduct = {
