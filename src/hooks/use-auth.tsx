@@ -2,7 +2,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { auth, db } from "@/lib/firebase";
 import { 
     createUserWithEmailAndPassword, 
@@ -12,6 +12,7 @@ import {
     updatePassword,
     EmailAuthProvider,
     reauthenticateWithCredential,
+    getRedirectResult,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -81,36 +82,65 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-        setIsLoading(true);
-        if (fbUser) {
-            setFirebaseUser(fbUser);
-            const userDocRef = doc(db, "users", fbUser.uid);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-                const userData = { id: userDoc.id, ...userDoc.data() } as User;
-                setUser(userData);
-                handleLoginChecks(userData);
-                // We only redirect if the user is fully set up and on the login page
-                if (window.location.pathname === '/login' && userData.termsAccepted && isProfileComplete(userData)) {
-                    handleRedirect(userData);
+    const processRedirect = async () => {
+        try {
+            const result = await getRedirectResult(auth);
+            if (result) {
+                // This means the user just signed in via redirect.
+                const fbUser = result.user;
+                const userDocRef = doc(db, "users", fbUser.uid);
+                const userDoc = await getDoc(userDocRef);
+
+                if (!userDoc.exists()) {
+                    // Create a new user profile if it's their first time.
+                    await createUserInFirestore({
+                        name: fbUser.displayName,
+                        email: fbUser.email,
+                        avatarUrl: fbUser.photoURL
+                    }, fbUser.uid);
+                    toast({ title: "Account Created", description: "Welcome to Africa Heal Health!" });
+                } else {
+                    toast({ title: "Sign-In Successful", description: `Welcome back!` });
+                }
+                // The onAuthStateChanged listener will handle setting the user state.
+            }
+        } catch (error) {
+            console.error("Error processing redirect result:", error);
+            toast({ variant: 'destructive', title: "Sign-In Failed", description: "Could not complete Google Sign-In." });
+        }
+    };
+    
+    // Process redirect first, then set up the main auth listener.
+    processRedirect().then(() => {
+        const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+            setIsLoading(true);
+            if (fbUser) {
+                setFirebaseUser(fbUser);
+                const userDocRef = doc(db, "users", fbUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                if (userDoc.exists()) {
+                    const userData = { id: userDoc.id, ...userDoc.data() } as User;
+                    setUser(userData);
+                    handleLoginChecks(userData);
+                    // Redirect only if the user is fully set up and on the login page.
+                    if (window.location.pathname === '/login' && userData.termsAccepted && isProfileComplete(userData)) {
+                        handleRedirect(userData);
+                    }
+                } else {
+                    setUser(null);
+                    setFirebaseUser(null);
+                    signOut(auth);
                 }
             } else {
-                // This can happen if a user is in auth but not firestore.
-                // It's safer to treat them as logged out.
                 setUser(null);
                 setFirebaseUser(null);
-                signOut(auth);
             }
-        } else {
-            setUser(null);
-            setFirebaseUser(null);
-        }
-        setIsLoading(false);
+            setIsLoading(false);
+        });
+        
+        return () => unsubscribe();
     });
-    
-    return () => unsubscribe();
-  }, [handleLoginChecks, handleRedirect]);
+  }, [handleLoginChecks, handleRedirect, toast]);
 
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -123,7 +153,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const userData = { id: userDoc.id, ...userDoc.data() } as User;
             setUser(userData);
             toast({ title: "Login Successful", description: `Welcome back, ${userData.name.split(' ')[0]}!` });
-            handleRedirect(userData); // Redirect only on successful login
+            handleRedirect(userData);
             handleLoginChecks(userData);
             return true;
         }
@@ -166,7 +196,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           addLog("INFO", `New user signed up: ${newUser.name} (${newUser.email}).`);
           addNotification({ recipientId: 'admin_role', type: 'system_update', title: 'New User Created', description: `An account for ${newUser.name} has been created.`});
           setUser(newUser);
-          handleRedirect(newUser); // Redirect only on successful signup
+          handleRedirect(newUser);
           handleLoginChecks(newUser);
           return true;
         } else {
@@ -259,7 +289,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const updatedUser = { ...user, termsAccepted: true };
         setUser(updatedUser);
         setShowTerms(false);
-        handleLoginChecks(updatedUser); // Re-run checks to see if onboarding is next
+        handleLoginChecks(updatedUser);
         addLog("INFO", `User ${user.email} accepted the Terms of Service.`);
     } else {
         toast({ variant: 'destructive', title: "Update Failed", description: "Could not save your preference. Please try again." });
@@ -298,3 +328,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
