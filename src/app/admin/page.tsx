@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ClipboardList, BarChart3, LineChart as LineChartIcon, CheckCircle, Package, ListOrdered, Users } from "lucide-react";
 import Link from "next/link";
@@ -20,17 +20,8 @@ import InventoryStatusDialog from "@/components/admin/inventory-status-dialog";
 import { useOrdersForAdmin as useOrders, OrderStatus } from "@/lib/orders";
 import { useRouter } from "next/navigation";
 import OrdersOverviewDialog from "@/components/admin/orders-overview-dialog";
+import { subDays, format, startOfDay } from 'date-fns';
 
-
-const revenueChartData = [
-    { name: '10 May', income: 80, expense: 40 },
-    { name: '11 May', value: 300, income: 90, expense: 55 },
-    { name: '12 May', value: 200, income: 75, expense: 60 },
-    { name: '13 May', value: 278, income: 100, expense: 50 },
-    { name: '14 May', value: 189, income: 85, expense: 62 },
-    { name: '15 May', value: 239, income: 110, expense: 45 },
-    { name: '16 May', value: 349, income: 90, expense: 65 },
-];
 
 const statusColors: { [key in OrderStatus]: string } = {
     'Pending Verification': 'hsl(var(--chart-5))',
@@ -68,12 +59,30 @@ export default function AdminDashboardPage() {
         { title: "Total Orders", value: orders.length.toString(), icon: ListOrdered, color: "text-blue-500", bgColor: "bg-blue-100 dark:bg-blue-900/50", clickable: true },
     ];
     
-    const orderStatusDistribution = Object.entries(
-        orders.reduce((acc, order) => {
-            acc[order.status] = (acc[order.status] || 0) + 1;
-            return acc;
-        }, {} as Record<OrderStatus, number>)
-    ).map(([name, value]) => ({ name, value, fill: statusColors[name as OrderStatus] }));
+    const { orderStatusDistribution, revenueTrend } = useMemo(() => {
+        const statusDistribution = Object.entries(
+            orders.reduce((acc, order) => {
+                acc[order.status] = (acc[order.status] || 0) + 1;
+                return acc;
+            }, {} as Record<OrderStatus, number>)
+        ).map(([name, value]) => ({ name, value, fill: statusColors[name as OrderStatus] }));
+
+        const last30Days = Array.from({ length: 30 }, (_, i) => {
+            const date = subDays(new Date(), 29 - i);
+            return { date: format(date, 'MMM d'), revenue: 0 };
+        });
+
+        const completedOrders = orders.filter(o => o.status === 'Delivered');
+        completedOrders.forEach(order => {
+            const orderDateStr = format(new Date(order.createdAt), 'MMM d');
+            const dayData = last30Days.find(d => d.date === orderDateStr);
+            if (dayData) {
+                dayData.revenue += order.totalPrice; // Keep in cents
+            }
+        });
+
+        return { orderStatusDistribution, revenueTrend };
+    }, [orders]);
   
     useEffect(() => {
         setIsClient(true)
@@ -121,6 +130,8 @@ export default function AdminDashboardPage() {
         );
     }
 
+    const totalRevenue = revenueTrend.reduce((acc, day) => acc + day.revenue, 0);
+
     return (
         <div className="p-4 md:p-6 space-y-6">
             {/* Top Row: Summary Cards */}
@@ -138,13 +149,7 @@ export default function AdminDashboardPage() {
                     <CardContent className="flex-grow flex flex-col items-center justify-center relative">
                         {!isClient ? <Skeleton className="w-[200px] h-[200px] rounded-full" /> :
                         <>
-                            <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4 text-center rounded-lg">
-                                <h3 className="font-bold text-lg mb-2 text-foreground">Live Order Funnel</h3>
-                                <p className="text-sm text-muted-foreground max-w-sm">
-                                    This chart will provide a live breakdown of all orders by status (e.g., Pending, Processing, Shipped) to give you an at-a-glance view of your operations.
-                                </p>
-                            </div>
-                            <ChartContainer config={{}} className="h-[200px] w-full blur-sm">
+                            <ChartContainer config={{}} className="h-[200px] w-full">
                                 <PieChartComponent>
                                     <ChartTooltip content={<ChartTooltipContent nameKey="name" />} />
                                     <Pie data={orderStatusDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={80} startAngle={90} endAngle={450}>
@@ -154,7 +159,7 @@ export default function AdminDashboardPage() {
                                     </Pie>
                                 </PieChartComponent>
                             </ChartContainer>
-                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm blur-sm">
+                            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 mt-4 text-sm">
                                 {orderStatusDistribution.map(item => (
                                      <div key={item.name} className="flex items-center gap-2">
                                         <span className="h-3 w-3 rounded-full" style={{backgroundColor: item.fill}}></span>
@@ -183,51 +188,38 @@ export default function AdminDashboardPage() {
                     </CardHeader>
                     <CardContent className="flex-grow">
                          <div className="flex justify-end items-center gap-2 mb-4">
-                            <p className="text-2xl font-bold text-blue-500">$32,485</p>
-                            <p className="text-sm text-muted-foreground line-through">$12,458</p>
+                            <p className="text-2xl font-bold text-blue-500">KES {(totalRevenue / 100).toLocaleString()}</p>
+                            <p className="text-sm text-muted-foreground">Total Revenue</p>
                         </div>
                         {!isClient ? <Skeleton className="h-[250px] w-full" /> :
                         <div key={chartType} className="relative">
-                             <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-10 flex flex-col items-center justify-center p-4 text-center rounded-lg">
-                                <h3 className="font-bold text-lg mb-2 text-foreground">Coming Soon: Live Revenue Tracking</h3>
-                                <p className="text-sm text-muted-foreground max-w-sm">
-                                    This chart will display live data from your orders, including daily income vs. expenses, to give you a clear view of your financial performance.
-                                </p>
-                            </div>
-                            <ChartContainer config={{}} className="h-[250px] w-full blur-sm">
+                            <ChartContainer config={{}} className="h-[250px] w-full">
                                {chartType === 'bar' ? (
-                                    <BarChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                    <BarChartComponent data={revenueTrend} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                        <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" />} />
-                                        <Bar key="income-bar" dataKey="income" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
-                                        <Bar key="expense-bar" dataKey="expense" fill="hsl(var(--secondary-foreground))" radius={[4, 4, 0, 0]} barSize={10} />
+                                        <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                        <YAxis tickFormatter={(value) => `${(value / 100)}`} tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                        <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dot" formatter={(value) => `KES ${(Number(value) / 100).toLocaleString()}`}/>} />
+                                        <Bar key="revenue-bar" dataKey="revenue" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={10} />
                                     </BarChartComponent>
                                 ) : (
-                                    <LineChartComponent data={revenueChartData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
+                                    <LineChartComponent data={revenueTrend} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                                          <defs>
-                                            <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
                                                 <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                                             </linearGradient>
-                                            <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="5%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0.3}/>
-                                                <stop offset="95%" stopColor="hsl(var(--secondary-foreground))" stopOpacity={0}/>
-                                            </linearGradient>
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                        <XAxis dataKey="name" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
-                                        <YAxis tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
-                                        <ChartTooltip cursor={true} content={<ChartTooltipContent />} />
-                                        <Area type="monotone" dataKey="income" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorIncome)" />
-                                        <Area type="monotone" dataKey="expense" stroke="hsl(var(--secondary-foreground))" strokeWidth={2} fillOpacity={1} fill="url(#colorExpense)" />
+                                        <XAxis dataKey="date" tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false} />
+                                        <YAxis tickFormatter={(value) => `${(value / 100)}`} tick={{ fill: 'hsl(var(--muted-foreground))' }} axisLine={false} tickLine={false}/>
+                                        <ChartTooltip cursor={true} content={<ChartTooltipContent formatter={(value) => `KES ${(Number(value) / 100).toLocaleString()}`}/>} />
+                                        <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorRevenue)" />
                                     </LineChartComponent>
                                 )}
                             </ChartContainer>
-                            <div className="flex justify-center items-center gap-6 mt-4 text-sm blur-sm">
-                                <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Income</div>
-                                <div className="flex items-center gap-2"><span className="h-3 w-3" style={{backgroundColor: 'hsl(var(--secondary-foreground))'}}></span>Expense</div>
+                            <div className="flex justify-center items-center gap-6 mt-4 text-sm">
+                                <div className="flex items-center gap-2"><span className="h-3 w-3 bg-primary"></span>Revenue</div>
                             </div>
                         </div>
                         }

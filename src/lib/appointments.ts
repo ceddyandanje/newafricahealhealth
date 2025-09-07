@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from './firebase';
-import { collection, query, onSnapshot, orderBy, where } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, where, addDoc } from 'firebase/firestore';
 import { type Appointment } from './types';
 
 const appointmentsCollectionRef = collection(db, 'appointments');
@@ -19,6 +19,7 @@ export const useAppointments = (forAdmin = false, userId?: string) => {
     useEffect(() => {
         if (!forAdmin && !userId) {
             setIsLoading(false);
+            setAppointments([]); // Clear appointments if no user
             return;
         }
 
@@ -26,9 +27,9 @@ export const useAppointments = (forAdmin = false, userId?: string) => {
         if (forAdmin) {
             q = query(appointmentsCollectionRef, orderBy('appointmentDate', 'desc'));
         } else {
-            // This query now works for both patients and doctors based on the passed userId
-            const userRole = userId?.startsWith('doc-') ? 'doctorId' : 'patientId';
-            q = query(appointmentsCollectionRef, where(userRole, '==', userId), orderBy('appointmentDate', 'desc'));
+            // Determine if the user is a patient or a doctor to query the correct field
+            const userRoleField = userId && userId.startsWith('doc-') ? 'doctorId' : 'patientId';
+            q = query(appointmentsCollectionRef, where(userRoleField, '==', userId), orderBy('appointmentDate', 'desc'));
         }
         
         const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -44,4 +45,14 @@ export const useAppointments = (forAdmin = false, userId?: string) => {
     }, [forAdmin, userId]);
 
     return { appointments, isLoading };
+};
+
+// Function to add a new appointment
+export const addAppointment = async (appointmentData: Omit<Appointment, 'id'>) => {
+    try {
+        await addDoc(appointmentsCollectionRef, appointmentData);
+    } catch (error) {
+        console.error("Error adding appointment:", error);
+        throw error;
+    }
 };

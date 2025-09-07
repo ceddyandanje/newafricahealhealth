@@ -9,11 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, ArrowRight } from 'lucide-react';
-import { type User } from '@/lib/types';
+import { type User, AppointmentStatus, type Appointment } from '@/lib/types';
 import { type Availability, getDoctorAvailability } from '@/lib/availability';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { type ServiceCategory } from '@/lib/serviceCategories';
+import { addAppointment } from '@/lib/orders';
+import { useAuth } from '@/hooks/use-auth';
+import { addLog } from '@/lib/logs';
+import { addNotification } from '@/lib/notifications';
+
 
 interface AppointmentDialogProps {
   isOpen: boolean;
@@ -23,11 +28,13 @@ interface AppointmentDialogProps {
 }
 
 export default function AppointmentDialog({ isOpen, onOpenChange, doctors, initialSpecialty }: AppointmentDialogProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -44,7 +51,6 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors, initi
       setAvailability(null);
       setSelectedTime(null);
     } else {
-        // If an initial specialty is provided, start at step 2 if there's only one doctor
         if (initialSpecialty && filteredDoctors.length === 1) {
             setSelectedDoctorId(filteredDoctors[0].id);
             setStep(2);
@@ -71,18 +77,56 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors, initi
   }, [selectedDoctorId, selectedDate]);
 
 
-  const handleSubmit = () => {
-    // In a real app, this would create the appointment in Firestore
-    console.log({
-      doctorId: selectedDoctorId,
-      date: selectedDate,
-      time: selectedTime,
-    });
-    toast({
-      title: 'Appointment Booked!',
-      description: 'Your appointment has been successfully scheduled.',
-    });
-    onOpenChange(false);
+  const handleSubmit = async () => {
+    if (!user || !selectedDoctorId || !selectedDate || !selectedTime) {
+      toast({ variant: 'destructive', title: 'Missing Information', description: 'Please complete all steps.' });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    const doctor = doctors.find(d => d.id === selectedDoctorId);
+    if (!doctor) {
+        setIsSubmitting(false);
+        return;
+    };
+
+    const appointmentDateTime = new Date(selectedDate);
+    const [hours, minutes] = selectedTime.split(':');
+    appointmentDateTime.setHours(Number(hours), Number(minutes));
+
+    const newAppointment: Omit<Appointment, 'id'> = {
+        appointmentId: `APT-${Date.now().toString().slice(-6)}`,
+        patientId: user.id,
+        patientName: user.name,
+        patientAvatar: user.avatarUrl || '',
+        doctorId: selectedDoctorId,
+        doctorName: doctor.name,
+        appointmentDate: appointmentDateTime.toISOString(),
+        type: 'Virtual Consultation',
+        status: 'Pending' as AppointmentStatus,
+        notes: '',
+    };
+    
+    try {
+        await addAppointment(newAppointment);
+        addLog('INFO', `New appointment booked by ${user.name} with ${doctor.name}.`);
+        addNotification({
+            recipientId: 'admin_role',
+            type: 'new_appointment',
+            title: 'New Booking',
+            description: `${user.name} booked a session with ${doctor.name}.`
+        });
+        toast({
+            title: 'Appointment Booked!',
+            description: 'Your appointment has been successfully scheduled and is pending confirmation.',
+        });
+        onOpenChange(false);
+    } catch (error) {
+        addLog('ERROR', `Failed to book appointment for ${user.name}. Error: ${error}`);
+        toast({ variant: 'destructive', title: 'Booking Failed', description: 'Could not schedule your appointment. Please try again.' });
+    } finally {
+        setIsSubmitting(false);
+    }
   };
 
   const doctorName = doctors.find(d => d.id === selectedDoctorId)?.name;
@@ -109,7 +153,7 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors, initi
                         </SelectTrigger>
                         <SelectContent>
                         {filteredDoctors.map(doctor => (
-                            <SelectItem key={doctor.id} value={doctor.id}>{doctor.name}</SelectItem>
+                            <SelectItem key={doctor.id} value={doctor.id}>{doctor.name} - {doctor.specialty}</SelectItem>
                         ))}
                         </SelectContent>
                     </Select>
@@ -160,7 +204,10 @@ export default function AppointmentDialog({ isOpen, onOpenChange, doctors, initi
         <DialogFooter>
           {step === 1 && <Button onClick={() => setStep(2)} disabled={!selectedDoctorId || filteredDoctors.length === 0}>Next <ArrowRight className="ml-2"/></Button>}
           {step === 2 && (filteredDoctors.length > 1 || !initialSpecialty) && <Button onClick={() => setStep(1)} variant="outline">Back</Button>}
-          {step === 2 && <Button onClick={handleSubmit} disabled={!selectedTime || !selectedDate}>Confirm Appointment</Button>}
+          {step === 2 && <Button onClick={handleSubmit} disabled={!selectedTime || !selectedDate || isSubmitting}>
+             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin"/>}
+             Confirm Appointment
+          </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
