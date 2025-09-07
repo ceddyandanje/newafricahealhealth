@@ -308,7 +308,7 @@ export default function AIProductImporterPage() {
                     AI Product Importer
                 </h1>
                 <p className="text-muted-foreground">
-                    Bulk-import products from a text list using AI to automatically enrich the data.
+                    Bulk-import products from a PDF file using AI to automatically enrich the data.
                 </p>
             </header>
 
