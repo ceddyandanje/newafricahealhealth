@@ -41,7 +41,7 @@ const signupSchema = z.object({
 
 
 function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
-    const { login, googleLogin } = useAuth();
+    const { login, googleLogin, sendPasswordReset } = useAuth();
     const [isSubmitting, setIsSubmitting] = useState(false);
     
     const form = useForm<z.infer<typeof loginSchema>>({
@@ -53,6 +53,11 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
         setIsSubmitting(true);
         await login(values);
         setIsSubmitting(false);
+    }
+
+    const handleForgotPassword = () => {
+        const email = form.getValues("email");
+        sendPasswordReset(email);
     }
     
     const handleGoogleSignIn = async () => {
@@ -74,7 +79,14 @@ function LoginForm({ onSwitchTab }: { onSwitchTab: () => void }) {
                             <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField name="password" control={form.control} render={({ field }) => (
-                            <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
+                            <FormItem>
+                                <div className="flex justify-between items-center">
+                                <FormLabel>Password</FormLabel>
+                                <Button type="button" variant="link" className="p-0 h-auto text-xs" onClick={handleForgotPassword}>Forgot Password?</Button>
+                                </div>
+                                <FormControl><Input type="password" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
                         )} />
                         <Button type="submit" className="w-full" disabled={isSubmitting}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

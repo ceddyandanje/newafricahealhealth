@@ -16,6 +16,7 @@ import {
     GoogleAuthProvider,
     fetchSignInMethodsForEmail,
     linkWithCredential,
+    sendPasswordResetEmail,
     type User as FirebaseUser
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
@@ -37,6 +38,7 @@ interface AuthContextType {
   signup: (credentials: SignUpCredentials, password:string) => Promise<void>;
   googleLogin: () => void;
   logout: () => void;
+  sendPasswordReset: (email: string) => Promise<void>;
   reauthenticateAndChangePassword: (currentPass: string, newPass: string) => Promise<boolean>;
   isLoading: boolean;
 }
@@ -192,13 +194,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
              return;
           }
           if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
+            // The user has a password account. We need to link the Google account.
+            // Firebase requires re-authentication to link credentials for security reasons.
+            // Since we don't have the user's password here, we can't automatically link.
+            // The simplest flow is to inform the user to sign in with their password and link from settings.
+            // For now, we'll just show a message.
             try {
               const googleCredential = GoogleAuthProvider.credentialFromError(error);
-              if (googleCredential) {
-                const userCredential = await signInWithEmailAndPassword(auth, email, ''); // This will fail, but we need to prompt
+              if (googleCredential && auth.currentUser) {
+                  await linkWithCredential(auth.currentUser, googleCredential);
+                  toast({ title: "Account Linked", description: "Your Google account has been linked." });
+              } else {
+                  // This case is tricky. The user is not signed in, but an account exists.
+                  // We can't link. We can ask them to sign in with password first.
+                  toast({
+                      title: "Account Exists",
+                      description: "An account with this email already exists. Please sign in with your password to link your Google account.",
+                      duration: 5000,
+                  });
               }
-            } catch (loginError: any) {
-               toast({ variant: 'destructive', title: "Link Failed", description: "Please sign in with your password first to link this Google account." });
+            } catch (linkError) {
+                console.error("Error linking credential:", linkError);
+                toast({ variant: 'destructive', title: "Link Failed", description: "Could not link your Google account. Please try again." });
             }
           }
         }
@@ -217,6 +234,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.push("/login");
     toast({ title: "Logged Out", description: "You have been successfully logged out." });
   }, [router, toast]);
+  
+  const sendPasswordReset = async (email: string) => {
+    if (!email) {
+      toast({ variant: 'destructive', title: 'Email Required', description: 'Please enter your email address.' });
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({ title: 'Password Reset Email Sent', description: 'Please check your inbox for instructions to reset your password.' });
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Reset Failed', description: error.message });
+    }
+  };
 
   const reauthenticateAndChangePassword = async (currentPass: string, newPass: string) => {
     if (!firebaseUser || !firebaseUser.email) {
@@ -288,7 +318,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, googleLogin, logout, reauthenticateAndChangePassword, isLoading }}>
+    <AuthContext.Provider value={{ user, setUser, firebaseUser, isAdmin, login, signup, googleLogin, logout, sendPasswordReset, reauthenticateAndChangePassword, isLoading }}>
       {children}
       {user && showOnboarding && (
         <OnboardingDialog 
