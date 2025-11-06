@@ -18,9 +18,7 @@ import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
-import { createWorker } from 'tesseract.js';
-
+import { getDocument, GlobalWorkerOptions, TextItem } from 'pdfjs-dist';
 
 type ExtractedProduct = {
     name: string;
@@ -54,7 +52,7 @@ function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct
 
         setIsParsing(true);
         setProgress(0);
-        setProgressText('Initializing OCR...');
+        setProgressText('Initializing...');
         
         try {
             // Set worker path for pdfjs
@@ -62,31 +60,16 @@ function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct
 
             const arrayBuffer = await file.arrayBuffer();
             const pdf = await getDocument(arrayBuffer).promise;
-            const worker = await createWorker('eng', 1, {
-                logger: m => {
-                    if (m.status === 'recognizing text') {
-                        setProgress(Math.round(m.progress * 100));
-                    }
-                }
-            });
-
+            
             let fullText = '';
             for (let i = 1; i <= pdf.numPages; i++) {
                 setProgressText(`Processing page ${i} of ${pdf.numPages}...`);
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 2 });
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                if (context) {
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    const { data: { text } } = await worker.recognize(canvas);
-                    fullText += text;
-                }
+                const textContent = await page.getTextContent();
+                const text = textContent.items.map(item => (item as TextItem).str).join(' ');
+                fullText += text + '\n';
+                setProgress(Math.round((i / pdf.numPages) * 100));
             }
-            await worker.terminate();
 
             setProgressText('Parsing extracted text...');
             const lines = fullText.trim().split('\n');
@@ -122,7 +105,7 @@ function Step1Upload({ onExtracted }: { onExtracted: (products: ExtractedProduct
             }
 
         } catch (error) {
-            console.error("Error parsing PDF with OCR:", error);
+            console.error("Error parsing PDF:", error);
             toast({ variant: 'destructive', title: 'Parsing Error', description: 'There was an issue processing the PDF file.' });
         } finally {
             setIsParsing(false);
@@ -328,3 +311,5 @@ export default function AIProductImporterPage() {
         </div>
     );
 }
+
+    
