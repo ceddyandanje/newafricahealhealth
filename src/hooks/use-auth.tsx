@@ -36,7 +36,7 @@ interface AuthContextType {
   isAdmin: boolean;
   login: (credentials: LoginCredentials) => Promise<void>;
   signup: (credentials: SignUpCredentials, password:string) => Promise<void>;
-  googleLogin: () => void;
+  googleLogin: () => Promise<void>;
   logout: () => void;
   sendPasswordReset: (email: string) => Promise<void>;
   reauthenticateAndChangePassword: (currentPass: string, newPass: string) => Promise<boolean>;
@@ -134,7 +134,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
         await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
-        // onAuthStateChanged will handle the rest
+        // onAuthStateChanged will handle redirect and state updates
     } catch (error: any) {
         let description = "An unknown error occurred. Please try again.";
         switch (error.code) {
@@ -182,52 +182,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const googleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
-      // onAuthStateChanged will handle the rest
+        await signInWithPopup(auth, provider);
+        // onAuthStateChanged will handle the rest
     } catch (error: any) {
-      if (error.code === 'auth/account-exists-with-different-credential') {
-        const email = error.customData.email;
-        if (email) {
-          const methods = await fetchSignInMethodsForEmail(auth, email);
-          if (methods.includes(GoogleAuthProvider.PROVIDER_ID)) {
-             toast({ title: "Already Linked", description: "This Google account is already linked." });
-             return;
-          }
-          if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
-            // The user has a password account. We need to link the Google account.
-            // Firebase requires re-authentication to link credentials for security reasons.
-            // Since we don't have the user's password here, we can't automatically link.
-            // The simplest flow is to inform the user to sign in with their password and link from settings.
-            // For now, we'll just show a message.
-            try {
-              const googleCredential = GoogleAuthProvider.credentialFromError(error);
-              if (googleCredential && auth.currentUser) {
-                  await linkWithCredential(auth.currentUser, googleCredential);
-                  toast({ title: "Account Linked", description: "Your Google account has been linked." });
-              } else {
-                  // This case is tricky. The user is not signed in, but an account exists.
-                  // We can't link. We can ask them to sign in with password first.
-                  toast({
-                      title: "Account Exists",
-                      description: "An account with this email already exists. Please sign in with your password to link your Google account.",
-                      duration: 5000,
-                  });
-              }
-            } catch (linkError) {
-                console.error("Error linking credential:", linkError);
-                toast({ variant: 'destructive', title: "Link Failed", description: "Could not link your Google account. Please try again." });
+        if (error.code === 'auth/account-exists-with-different-credential') {
+            const email = error.customData.email;
+            if (!email || !auth.currentUser) {
+                toast({
+                    title: "Link Failed",
+                    description: "Could not link accounts. Please sign in with your password and link your Google account from settings.",
+                    duration: 7000
+                });
+                return;
             }
-          }
+            const methods = await fetchSignInMethodsForEmail(auth, email);
+            if (methods.includes(GoogleAuthProvider.PROVIDER_ID)) {
+                toast({ title: "Already Linked", description: "This Google account is already linked." });
+                return;
+            }
+            if (methods.includes(EmailAuthProvider.PROVIDER_ID)) {
+                try {
+                    const googleCredential = GoogleAuthProvider.credentialFromError(error);
+                    if (googleCredential) {
+                        await linkWithCredential(auth.currentUser, googleCredential);
+                        toast({ title: "Account Linked!", description: "Your Google account has been successfully linked." });
+                    }
+                } catch (linkError) {
+                    console.error("Error linking credential:", linkError);
+                    toast({ variant: 'destructive', title: "Link Failed", description: "Could not link your Google account. Please try again later." });
+                }
+            }
+        } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+            toast({
+                variant: "destructive",
+                title: "Google Sign-In Failed",
+                description: error.message || "An unknown error occurred.",
+            });
         }
-      } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-        toast({
-            variant: "destructive",
-            title: "Google Sign-In Failed",
-            description: error.message || "An unknown error occurred.",
-        });
-      }
     }
-};
+  };
 
   const logout = useCallback(async () => {
     await signOut(auth);
@@ -272,11 +265,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         case 'auth/too-many-requests':
             description = "Too many failed attempts. Please try again later.";
             break;
+        case 'auth/requires-recent-login':
+          description = "For your security, please log out and log back in before changing your password.";
+          break;
         default:
           description = "Failed to re-authenticate. Please try logging out and in again.";
       }
       addLog("WARN", `Failed password change attempt for user ${firebaseUser.email}. Reason: ${error.code}`);
-      toast({ variant: 'destructive', title: "Password Change Failed", description });
+      toast({ variant: 'destructive', title: "Password Change Failed", description, duration: 6000 });
       return false;
     }
   };
