@@ -10,10 +10,10 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const ProductImportInputSchema = z.object({
-  rawProductData: z.string().describe('A string containing product names and their prices, with each product on a new line.'),
+  rawProductData: z.string().describe('A raw block of text extracted from a PDF containing product names and prices.'),
 });
 export type ProductImportInput = z.infer<typeof ProductImportInputSchema>;
 
@@ -46,9 +46,11 @@ const prompt = ai.definePrompt({
   input: { schema: ProductImportInputSchema },
   output: { schema: ProductImportOutputSchema },
   prompt: `You are an expert catalog manager for a medical supply e-commerce store.
-You will be given a raw text list of products and their prices.
-For each product in the list, you must perform the following tasks:
-1.  **Extract** the product name and price. The prices are in a local currency, convert them to cents by multiplying by 100.
+You will be given a raw block of text extracted from a PDF. This text contains a list of products and their prices.
+Your task is to intelligently parse this raw text to identify each individual product and its price, even if the formatting is inconsistent.
+
+For each product you identify, you must perform the following tasks:
+1.  **Extract Name and Price**: Identify the full product name and its price from the text. Convert the price to cents by multiplying by 100.
 2.  **Generate a Product Description**: Write a clear, concise, and professional description for the product.
 3.  **Determine a Category**: Assign a logical category (e.g., "Cardiovascular", "Diabetes Care", "Surgical Equipment", "Pain Relief").
 4.  **Determine a Brand**: Infer the brand name. If it's not obvious, use "Generic".
@@ -58,9 +60,9 @@ For each product in the list, you must perform the following tasks:
     - Create a 'dataAiHint' with one or two keywords from the product name.
     - Create a 'tags' array and ALWAYS include the string 'new' in it.
 
-Your final output must be a single JSON object with a "products" key, which contains an array of the structured product data.
+Your final output must be a single JSON object with a "products" key, which contains an array of the structured product data you have generated.
 
-Here is the raw product data:
+Here is the raw text from the PDF:
 {{{rawProductData}}}
 `,
 });
