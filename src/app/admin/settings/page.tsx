@@ -101,8 +101,8 @@ export default function AdminSettingsPage() {
         setIsForceResetSubmitting(true);
         try {
             await forceResetPassword(newPasswordForce);
-            addLog('WARN', `Admin ${user.email} force-reset their own password.`);
-            toast({ title: 'Password Reset Successful', description: 'Your password has been changed. Please use it for your next login.' });
+            addLog('WARN', `Admin ${user.email} set or reset their own password.`);
+            toast({ title: 'Password Set Successfully', description: 'Your password has been changed. You can now log in using your email and new password.' });
             setNewPasswordForce('');
             setConfirmPasswordForce('');
         } catch (error: any) {
@@ -193,18 +193,18 @@ export default function AdminSettingsPage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Lock /> Security</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><Lock /> Account Security</CardTitle>
                             <CardDescription>Manage your password and account security.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                             <Button onClick={() => setIsPasswordChangeDialogOpen(true)}>Change Password</Button>
+                             <Button onClick={() => setIsPasswordChangeDialogOpen(true)}>Change Password...</Button>
                         </CardContent>
                     </Card>
 
-                    <Card className="border-destructive">
+                    <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-destructive"><AlertTriangle /> Force Password Reset</CardTitle>
-                            <CardDescription>Use this only if you are locked out and cannot use the standard password change. This action does not require your old password.</CardDescription>
+                            <CardTitle className="flex items-center gap-2"><Lock className="text-primary"/> Set or Reset Account Password</CardTitle>
+                            <CardDescription>Use this to set a password if you signed up with Google, or to reset a forgotten password without needing the old one.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -217,9 +217,9 @@ export default function AdminSettingsPage() {
                                     <Input id="confirm-password-force" type="password" value={confirmPasswordForce} onChange={(e) => setConfirmPasswordForce(e.target.value)} />
                                 </div>
                             </div>
-                            <Button variant="destructive" onClick={handleForcePasswordReset} disabled={isForceResetSubmitting}>
+                            <Button variant="secondary" onClick={handleForcePasswordReset} disabled={isForceResetSubmitting}>
                                 {isForceResetSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Force Reset Password
+                                Save New Password
                             </Button>
                         </CardContent>
                     </Card>
@@ -273,7 +273,7 @@ export default function AdminSettingsPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Change Your Password</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Enter your current password, followed by a new password.
+                            Enter your current password, followed by a new password. This only works if you have an existing password.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="space-y-4 py-2">
