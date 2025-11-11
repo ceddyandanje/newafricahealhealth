@@ -5,13 +5,13 @@ import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  projectId: "africa-heal-health-x8xrn",
-  appId: "1:1045454466664:web:6670104342f19a293915dd",
-  storageBucket: "africa-heal-health-x8xrn.appspot.com",
-  apiKey: "AIzaSyBneaW2qiPeFUuUzK6MpsSEQS3JGc3dAYA",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "africa-heal-health-x8xrn.firebaseapp.com",
-  measurementId: "",
-  messagingSenderId: "1045454466664"
+  projectId: "africa-heal-health-x8xrn",
+  storageBucket: "africa-heal-health-x8xrn.appspot.com",
+  messagingSenderId: "1045454466664",
+  appId: "1:1045454466664:web:6670104342f19a293915dd",
+  measurementId: "G-0S27909J1G"
 };
 
 
