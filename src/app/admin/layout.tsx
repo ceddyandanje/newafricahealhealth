@@ -1,21 +1,15 @@
 
-
 'use client';
 
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { Loader2 } from "lucide-react";
-import Header from "@/components/layout/header";
-import Footer from "@/components/layout/footer";
-import AdminSidebar from "@/components/admin/sidebar";
-import { useRouter } from "next/navigation";
+import { useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import AdminSidebar from '@/components/admin/sidebar';
+import Header from '@/components/layout/header';
+import Footer from '@/components/layout/footer';
 
-
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+function AdminAuthGuard({ children }: { children: React.ReactNode }) {
     const { user, isAdmin, isLoading } = useAuth();
     const router = useRouter();
 
@@ -33,16 +27,28 @@ export default function AdminLayout({
         );
     }
 
+    return <>{children}</>;
+}
+
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+
   return (
-     <div className="flex flex-col min-h-screen">
-        <Header />
-        <div className="flex-grow flex items-start">
-            <AdminSidebar />
-            <main className="flex-grow bg-muted/40">
-                {children}
-            </main>
+     <AdminAuthGuard>
+        <div className="flex flex-col min-h-screen">
+            <Header />
+            <div className="flex-grow flex items-start">
+                <AdminSidebar />
+                <main className="flex-grow bg-muted/40">
+                    {children}
+                </main>
+            </div>
+            <Footer />
         </div>
-        <Footer />
-    </div>
+    </AdminAuthGuard>
   )
 }
