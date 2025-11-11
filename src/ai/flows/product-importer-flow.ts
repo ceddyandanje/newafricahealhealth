@@ -46,10 +46,14 @@ const prompt = ai.definePrompt({
   input: { schema: ProductImportInputSchema },
   output: { schema: ProductImportOutputSchema },
   prompt: `You are an expert catalog manager for a medical supply e-commerce store.
-You will be given a raw block of text extracted from a PDF. This text contains a list of products and their prices.
-Your task is to intelligently parse this raw text to identify each individual product and its price, even if the formatting is inconsistent.
+You will be given a raw block of text extracted from a PDF. This text contains a list of products and their prices, and may also include irrelevant headers, footers, titles, addresses, and page numbers. The main product list might be formatted in a multi-column, tabular layout.
 
-For each product you identify, you must perform the following tasks:
+Your primary task is to act like an intelligent data entry clerk:
+1.  **Analyze the Entire Text**: First, read the whole text to understand its structure.
+2.  **Identify and Isolate Product Data**: Intelligently identify the main list of products and prices. **You must ignore all non-product information**, such as the document title, company headings, addresses, footers, and page numbers. Focus only on the medication/product list.
+3.  **Parse the Product List**: Correctly extract each product name and its corresponding price, even if they are in different columns.
+
+For each product you successfully extract, perform the following enrichment tasks:
 1.  **Extract Name and Price**: Identify the full product name and its price from the text. Convert the price to cents by multiplying by 100.
 2.  **Generate a Product Description**: Write a clear, concise, and professional description for the product.
 3.  **Determine a Category**: Assign a logical category (e.g., "Cardiovascular", "Diabetes Care", "Surgical Equipment", "Pain Relief").
@@ -60,7 +64,7 @@ For each product you identify, you must perform the following tasks:
     - Create a 'dataAiHint' with one or two keywords from the product name.
     - Create a 'tags' array and ALWAYS include the string 'new' in it.
 
-Your final output must be a single JSON object with a "products" key, which contains an array of the structured product data you have generated.
+Your final output must be a single JSON object with a "products" key, which contains an array of the structured product data you have generated. Only include products you were able to identify.
 
 Here is the raw text from the PDF:
 {{{rawProductData}}}
