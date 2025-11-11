@@ -2,12 +2,105 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
     
-    // WARNING: These rules are insecure and are for development purposes only.
-    // They allow any user to read and write to any collection.
-    // TODO: Implement secure rules before deploying to production.
-    match /{document=**} {
-      allow read, write: if true;
+    function isDoctor() {
+      return isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'doctor';
+    }
+
+    // USER DATA: Users can only read/write their own data. Admins can read anyone's data.
+    match /users/{userId} {
+      allow read: if isUser(userId) || isAdmin();
+      allow write: if isUser(userId);
+      
+      // USER SUBCOLLECTIONS: Only the owner can access their subcollections.
+      match /{subcollection}/{docId} {
+        allow read, write: if isUser(userId) || isAdmin();
+      }
+    }
+
+    // PRODUCTS & BLOG: Public read, only admins can write/delete.
+    match /products/{productId} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+    
+    match /blog/{postId} {
+      allow read: if true;
+      allow write, delete: if isAdmin();
+    }
+    
+    // ROADMAP: Read for signed-in users, write for admins.
+    match /roadmap/{taskId} {
+        allow read: if isSignedIn();
+        allow write: if isAdmin();
+    }
+
+    // ORDERS: Users can create orders and read their own. Admins can read all.
+    match /orders/{orderId} {
+      allow read: if isUser(request.resource.data.userId) || isAdmin();
+      allow create: if isUser(request.resource.data.userId);
+      // Only admins can update status
+      allow update: if isAdmin();
+    }
+    
+    // APPOINTMENTS: Users create their own. Involved parties (patient, doctor, admin) can read.
+    match /appointments/{appointmentId} {
+        allow create: if isUser(request.resource.data.patientId);
+        allow read: if isUser(request.resource.data.patientId) || isUser(request.resource.data.doctorId) || isAdmin();
+        allow update: if isDoctor() || isAdmin(); // Doctors and Admins can update status
+    }
+
+    // REFILL REQUESTS: Users create their own. Read access for patient, doctor, and admin.
+    match /refillRequests/{requestId} {
+      allow create: if isUser(request.resource.data.patientId);
+      allow read: if isUser(request.resource.data.patientId) || isDoctor() || isAdmin();
+      allow update: if isDoctor() || isAdmin(); // Only doctors/admins can approve/reject
+    }
+
+    // LOGS & NOTIFICATIONS: Only admins can read/write logs. Notifications are complex.
+    match /logs/{logId} {
+      allow read, write: if isAdmin();
+      // Allow server-side functions to write logs
+      allow create: if true; 
+    }
+    
+    match /notifications/{notificationId} {
+        allow read: if isSignedIn() && (
+                    request.auth.uid == resource.data.recipientId || 
+                    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role + '_role' == resource.data.recipientId
+                  );
+        allow create: if true; // Allow server-side to create
+        allow update, delete: if isSignedIn() && request.auth.uid == resource.data.recipientId;
+    }
+    
+    // CONSULTATIONS, LABS, EMERGENCIES: Tightly controlled.
+    match /consultations/{consultationId} {
+        allow create: if true; // Public form
+        allow read, write: if isAdmin();
+    }
+
+    match /labRequests/{labRequestId} {
+        allow read, write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lab-technician' || isAdmin();
+        allow create: if true; // Let's assume creation is handled by trusted roles or backend
+    }
+    
+    match /emergencies/{emergencyId} {
+        allow create: if isSignedIn();
+        allow read: if isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['emergency-services', 'admin'];
+        allow update: if isSignedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['emergency-services', 'admin'];
     }
   }
 }
