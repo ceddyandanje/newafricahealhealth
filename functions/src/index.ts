@@ -9,7 +9,7 @@
  */
 
 import { setGlobalOptions } from "firebase-functions/v2";
-import { onDocumentCreated } from "firebase-functions/v2/firestore";
+import { onDocumentCreated, onDocumentDeleted } from "firebase-functions/v2/firestore";
 import * as logger from "firebase-functions/logger";
 import * as admin from "firebase-admin";
 import twilio from "twilio";
@@ -91,4 +91,20 @@ export const sendEmergencySmsNotification = onDocumentCreated("emergencies/{emer
   });
 
   await Promise.all(notificationPromises);
+});
+
+
+// New function to delete Firebase Auth user when Firestore user document is deleted
+export const onUserDeleted = onDocumentDeleted("users/{userId}", async (event) => {
+    const userId = event.params.userId;
+    logger.info(`User document deleted: ${userId}. Deleting from Firebase Authentication.`);
+    
+    try {
+        await admin.auth().deleteUser(userId);
+        logger.info(`Successfully deleted user ${userId} from Firebase Authentication.`);
+    } catch (error) {
+        logger.error(`Error deleting user ${userId} from Firebase Authentication:`, error);
+        // This could happen if the auth user was already deleted, which is fine.
+        // Or if there are permission issues.
+    }
 });
