@@ -17,7 +17,9 @@ import Image from 'next/image';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { getDocument, GlobalWorkerOptions, TextItem } from 'pdfjs-dist';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import type { TextItem } from 'pdfjs-dist/types/src/display/api';
+
 
 function Step1UploadAndEnrich({ onEnriched }: { onEnriched: (products: EnrichedProductData[]) => void }) {
     const [file, setFile] = useState<File | null>(null);
@@ -58,7 +60,8 @@ function Step1UploadAndEnrich({ onEnriched }: { onEnriched: (products: EnrichedP
             for (let i = 1; i <= pdf.numPages; i++) {
                 const page = await pdf.getPage(i);
                 const textContent = await page.getTextContent();
-                const text = textContent.items.map(item => (item as TextItem).str).join(' ');
+                // We assert the type of items to be TextItem[] to access .str property
+                const text = (textContent.items as TextItem[]).map(item => item.str).join(' ');
                 fullText += text + '\n';
                 setProgress(Math.round((i / pdf.numPages) * 50)); // Extraction is 50% of the process
             }
@@ -76,9 +79,13 @@ function Step1UploadAndEnrich({ onEnriched }: { onEnriched: (products: EnrichedP
                 toast({ variant: 'destructive', title: "Enrichment Failed", description: "The AI could not identify any products from the document. Please check the PDF content and try again." });
             }
 
-        } catch (error) {
+        } catch (error: any) {
             console.error("Error during AI import process:", error);
-            toast({ variant: 'destructive', title: 'Processing Error', description: 'An unexpected error occurred. Please check the console for details.' });
+            toast({ 
+                variant: 'destructive', 
+                title: 'Processing Error', 
+                description: error.message || 'An unexpected error occurred. Please check the console for details.' 
+            });
         } finally {
             setIsProcessing(false);
         }

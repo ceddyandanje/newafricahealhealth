@@ -80,7 +80,7 @@ const productImporterFlow = ai.defineFlow(
   async input => {
     const { output } = await prompt(input);
     if (!output) {
-      throw new Error("The AI failed to generate an output.");
+      throw new Error("The AI failed to generate an output. This could be due to a network issue or if the model could not process the request. Please try again.");
     }
     return output;
   }
