@@ -60,7 +60,25 @@ const healthAssistantFlow = ai.defineFlow(
     outputSchema: HealthAssistantOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+        const {output} = await prompt(input);
+        if (!output) {
+            throw new Error("AI failed to generate an output.");
+        }
+        return output;
+    } catch (error: any) {
+        console.error("Error in healthAssistantFlow:", error);
+        // Check for rate limit error and provide a user-friendly message
+        if (error.message && error.message.includes('429')) {
+             return {
+                answer: "I'm experiencing high traffic right now. Please try again in a moment.",
+                suggestedProducts: [],
+                estimatedCost: "",
+                procedure: ""
+            };
+        }
+        // For other errors, provide a generic error message
+        throw new Error("I'm sorry, but I was unable to process your request at this time. Please try again later.");
+    }
   }
 );
