@@ -260,8 +260,8 @@ This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) f
 
 | Name          | Role                          | GitHub Profile                     |
 |---------------|-------------------------------|------------------------------------|
-| [Your Name]   | Project Lead & Developer      | [@your-username](https://github.com/your-username) |
-| [Contributor] | AI Workflows & GenKit Setup    | [@contributor](https://github.com/contributor) |
+| CEDRICK MSILA   | Project Lead & Developer      | [@dev](https://github.com/ceddyandanje) |
+| CEDRICK | AI Workflows & GenKit Setup    | [@contributor](https://github.com/ceddyandanje) |
 
 ### **Acknowledgments**
 - **Firebase** for backend services and real-time database.
